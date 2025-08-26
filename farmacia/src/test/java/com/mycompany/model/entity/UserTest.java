@@ -4,6 +4,9 @@
  */
 package com.mycompany.model.entity;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,15 +26,80 @@ public class UserTest {
     
     @Test
     @DisplayName("Must be able to create a User instance")
-    public void mustCreateUserInstance() {
-        // ARRANGE (Prepare)
-        // We don't need to prepare anything special.
-        
-        // ACT (Act)
+    public void TestCreateEmptyUserInstance() {  
         User user = new User();
         
-        // ASSERT (Verify)
         assertNotNull(user);
     }
+    
+    @Test
+    @DisplayName("User class must have all required fields with correct types")
+    void testUserClassHasRequiredFields() throws NoSuchFieldException {
+        Class<?> userClass = User.class;
+        
+        Field idField = userClass.getDeclaredField("id");
+        assertEquals(String.class, idField.getType());
+        
+        Field nameField = userClass.getDeclaredField("name");
+        assertEquals(String.class, nameField.getType());
+        
+        Field phoneField = userClass.getDeclaredField("phoneNumber");
+        assertEquals(String.class, phoneField.getType());
+        
+        Field emailField = userClass.getDeclaredField("email");
+        assertEquals(String.class, emailField.getType());
+        
+        Field passwordField = userClass.getDeclaredField("password");
+        assertEquals(String.class, passwordField.getType());
+        
+        Field roleField = userClass.getDeclaredField("role");
+        assertEquals(String.class, roleField.getType());
+    }  
+    
+    @Test
+    @DisplayName("Parameterized constructor must have all required parameters")
+    void testParameterizedConstructorHasAllParameters() throws NoSuchMethodException {
+        Class<?> userClass = User.class;
+        
+        Constructor<?> constructor = userClass.getDeclaredConstructor(
+            String.class,  // id
+            String.class,  // name
+            String.class,  // phoneNumber
+            String.class,  // email
+            String.class,  // password
+            String.class   // role
+        );
+        
+        assertNotNull(constructor);
+        
+        assertEquals(6, constructor.getParameterCount());
+    }
+
+    @Test
+    @DisplayName("User class must have all basic methods (getters, setters, equals, hashCode, toString)")
+    void testAllBasicMethodsExist() throws NoSuchMethodException {
+        Class<?> userClass = User.class;
+        
+        // Getters
+        assertNotNull(userClass.getMethod("getId"));
+        assertNotNull(userClass.getMethod("getName"));
+        assertNotNull(userClass.getMethod("getPhoneNumber"));
+        assertNotNull(userClass.getMethod("getEmail"));
+        assertNotNull(userClass.getMethod("getPassword"));
+        assertNotNull(userClass.getMethod("getRole"));
+        
+        // Setters
+        assertNotNull(userClass.getMethod("setId", String.class));
+        assertNotNull(userClass.getMethod("setName", String.class));
+        assertNotNull(userClass.getMethod("setPhoneNumber", String.class));
+        assertNotNull(userClass.getMethod("setEmail", String.class));
+        assertNotNull(userClass.getMethod("setPassword", String.class));
+        assertNotNull(userClass.getMethod("setRole", String.class));
+        
+        // equals, hashCode, toString
+        assertNotNull(userClass.getMethod("equals", Object.class));
+        assertNotNull(userClass.getMethod("hashCode"));
+        assertNotNull(userClass.getMethod("toString"));
+    }    
     
 }
