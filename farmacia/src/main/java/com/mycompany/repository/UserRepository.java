@@ -4,10 +4,25 @@
  */
 package com.mycompany.repository;
 
+import com.mycompany.model.entity.User;
+import com.mycompany.repository.persistence.PharmacyRepository;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+
 /**
  *
  * @author ramir
  */
-public class UserRepository {
-    
+@Stateless
+public class UserRepository extends PharmacyRepository<User>{
+
+    public UserRepository() {
+        super(User.class);
+    }
+
+    @Override
+    protected EntityManager getEntityManager() {
+        return em;
+    }
+        
 }
