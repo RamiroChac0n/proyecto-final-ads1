@@ -8,6 +8,7 @@ import com.mycompany.model.entity.User;
 import jakarta.ejb.Local;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
@@ -139,5 +140,48 @@ public class IUserServiceTest {
         assertEquals("IUserService", serviceInterface.getSimpleName(),
             "The interface must be named IUserService");
     }   
-    
+    @Test
+    @DisplayName("All method names must be unique")
+    void testMethodNamesUnique() {
+        Method[] methods = serviceInterface.getDeclaredMethods();
+        long uniqueCount = Arrays.stream(methods)
+            .map(Method::getName)
+            .distinct()
+            .count();
+        assertEquals(methods.length, uniqueCount,
+            "All method names in IUserService must be unique");
+    }
+
+    @Test
+    @DisplayName("Interface must not declare any fields")
+    void testNoDeclaredFields() {
+        assertEquals(0, serviceInterface.getDeclaredFields().length,
+            "IUserService must not declare any fields");
+    }
+
+    @Test
+    @DisplayName("Interface must not declare default or static methods")
+    void testNoDefaultOrStaticMethods() {
+        Method[] methods = serviceInterface.getDeclaredMethods();
+        for (Method method : methods) {
+            assertFalse(method.isDefault(),
+                "Method " + method.getName() + " must not be default");
+            assertFalse(Modifier.isStatic(method.getModifiers()),
+                "Method " + method.getName() + " must not be static");
+        }
+    }
+
+    @Test
+    @DisplayName("Methods must not throw checked exceptions")
+    void testNoCheckedExceptions() {
+        Method[] methods = serviceInterface.getDeclaredMethods();
+        for (Method method : methods) {
+            for (Class<?> exType : method.getExceptionTypes()) {
+                boolean isChecked = Exception.class.isAssignableFrom(exType)
+                    && !RuntimeException.class.isAssignableFrom(exType);
+                assertFalse(isChecked,
+                    "Method " + method.getName() + " must not throw checked exceptions");
+            }
+        }
+    }
 }
