@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+
+        <div class="layout-wrapper">
+            <div class="layout-content">
+                <div class="m-4">
+                    <div class="flex justify-content-center flex-wrap">
+                        <h1 class="flex align-items-center justify-content-center font-bold m-2">
+                            CRUD
+                        </h1>
+                    </div>
+
+
+
+                    <div class="grid">
+                        <div class="col-12">
+                            <h:form id="form">
+                                <p:growl id="messages" showDetail="true" />
+                                <p:toolbar>
+                                    <p:toolbarGroup>
+                                        <p:commandButton value="New" 
+                                                         icon="pi pi-plus" 
+                                                         actionListener="#{userMB.createNew()}"
+                                                         update=":dialogs:panel-content" 
+                                                         oncomplete="PF('dlgUserRegister').show()"
+                                                         styleClass="ui-button-success" 
+                                                         style="margin-right: .5rem">
+                                            <p:resetInput target=":dialogs:panel-content" />
+                                        </p:commandButton>
+                                    </p:toolbarGroup>
+                                </p:toolbar>   
+
+                                <p:dataTable id="dt-users" 
+                                             widgetVar="dtUsers" 
+                                             var="user" 
+                                             value="#{userMB.users}"
+                                             reflow="true" 
+                                             styleClass="products-table" 
+                                             paginator="true" 
+                                             rows="5" 
+                                             paginatorPosition="bottom">
+                                    <f:facet name="header">
+                                        <div class="products-table-header">
+                                            <span style="font-weight: bold">Users</span>
+                                            <span class="filter-container ui-input-icon-left"> <i class="pi pi-search"></i>
+                                                <p:inputText id="globalFilter" onkeyup="PrimeFaces.debounce(() => PF('dtUsers').filter())" placeholder="Search" />
+                                            </span>
+                                        </div>
+                                    </f:facet>
+
+                                    <p:column headerText="ID" sortBy="#{user.id}" filterBy="#{user.id}">
+                                        <h:outputText value="#{user.id}" />
+                                    </p:column>                                    
+
+                                    <p:column headerText="Name" sortBy="#{user.name}" filterBy="#{user.name}">
+                                        <h:outputText value="#{user.name}" />
+                                    </p:column>
+                                    <p:column headerText="Phone Number" sortBy="#{user.phoneNumber}" filterBy="#{user.phoneNumber}">
+                                        <h:outputText value="#{user.phoneNumber}" />                                   
+                                    </p:column>
+                                    <p:column headerText="Email" sortBy="#{user.email}" filterBy="#{user.email}">
+                                        <h:outputText value="#{user.email}" />                                   
+                                    </p:column>   
+                                    <p:column headerText="Role" sortBy="#{user.role}" filterBy="#{user.role}">
+                                        <h:outputText value="#{user.role}" />                                   
+                                    </p:column>                                      
+                                    <p:column ariaHeaderText="Acciones">
+                                        <p:commandButton icon="pi pi-pencil" update=":dialogs:panel-content"
+                                                         oncomplete="PF('dlgUserRegister').show()"
+                                                         styleClass="edit-button rounded-button ui-button-success" process="@this">
+                                            <f:setPropertyActionListener value="#{user}" target="#{userMB.user}" />
+                                            <p:resetInput target="dialogs:panel-content" />
+                                        </p:commandButton>
+
+                                        <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                                         process="@this"
+                                                         oncomplete="PF('dlgDeleteUser').show()">
+                                            <f:setPropertyActionListener value="#{user}" target="#{userMB.user}" />
+                                        </p:commandButton>                                        
+
+                                    </p:column>
+
+                                </p:dataTable>                                
+
+                            </h:form>
+
+
+                            <h:form id="dialogs">
+                                <p:dialog header="User" 
+                                          showEffect="fade" 
+                                          modal="true" 
+                                          widgetVar="dlgUserRegister"
+                                          responsive="true">
+                                    <p:outputPanel id="panel-content" class="ui-fluid">
+                                        <p:outputPanel rendered="#{not empty userMB.user}">     
+                                            <div class="field">
+                                                <p:outputLabel for="id">ID</p:outputLabel>
+                                                <p:inputText id="id" value="#{userMB.user.id}" required="true" maxlength="13"/>
+                                            </div>                                              
+                                            <div class="field">
+                                                <p:outputLabel for="name">Name</p:outputLabel>
+                                                <p:inputText id="name" value="#{userMB.user.name}" required="true" />
+                                            </div>                                            
+                                            <div class="field">
+                                                <p:outputLabel for="phone-number">Phone Number</p:outputLabel>
+                                                <p:inputText id="phone-number" value="#{userMB.user.phoneNumber}"/>
+                                            </div>
+                                            <div class="field">
+                                                <p:outputLabel for="email">Email</p:outputLabel>
+                                                <p:inputText id="email" value="#{userMB.user.email}" required="true" />
+                                            </div>     
+                                            <div class="field">
+                                                <p:outputLabel for="password">Password</p:outputLabel>
+                                                <p:password id="password" value="#{userMB.user.password}" required="true" feedback="true"/>
+                                            </div>   
+                                            <div class="field">
+                                                <p:outputLabel for="role">Role</p:outputLabel>
+                                                <p:selectOneMenu id="role" value="#{userMB.user.role}" required="true">
+                                                    <f:selectItem itemLabel="Select One" itemValue=""/>
+                                                    <f:selectItem itemLabel="CASHIER" itemValue="CASHIER"/>
+                                                    <f:selectItem itemLabel="STOREKEEPER" itemValue="STOREKEEPER"/>
+                                                    <f:selectItem itemLabel="ADMIN" itemValue="ADMIN"/>
+                                                </p:selectOneMenu>                                              
+                                            </div>                                              
+
+                                        </p:outputPanel>
+                                    </p:outputPanel>
+
+                                    <f:facet name="footer">
+                                        <p:commandButton value="Save" icon="pi pi-check" 
+                                                         actionListener="#{userMB.save()}"
+                                                         update="panel-content" 
+                                                         process="panel-content @this" />
+                                        <p:commandButton value="Cancel" icon="pi pi-times" 
+                                                         onclick="PF('dlgUserRegister').hide()"
+                                                         class="ui-button-secondary" 
+                                                         type="button" />
+                                    </f:facet>
+                                </p:dialog>
+                                <p:confirmDialog widgetVar="dlgDeleteUser" showEffect="fade" width="300"
+                                                 message="Eliminar a la user?" header="Confirm" severity="warn">
+                                    <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{userMB.delete()}"
+                                                     process="@this"
+                                                     oncomplete="PF('dlgDeleteUser').hide()" />
+                                    <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                                     onclick="PF('dlgDeleteUser').hide()" />
+                                </p:confirmDialog>                                
+                            </h:form>
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+        </div>        
+
+    </h:body>
+</html>
