@@ -28,6 +28,7 @@ import lombok.*;
 public class User {
     
     @Id
+    @Size(min = 13)
     @Column(name = "id", length = 13)
     private String id;
     
