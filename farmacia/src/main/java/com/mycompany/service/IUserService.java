@@ -4,10 +4,18 @@
  */
 package com.mycompany.service;
 
+import com.mycompany.model.entity.User;
+import jakarta.ejb.Local;
+import java.util.List;
+
 /**
  *
  * @author ramir
  */
+@Local
 public interface IUserService {
-    
+    User save(User user);
+    User edit(User user);
+    void delete(User user);
+    List<User> list();    
 }
