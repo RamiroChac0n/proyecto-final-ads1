@@ -6,6 +6,7 @@ package com.mycompany.service.impl;
 
 import com.mycompany.model.entity.User;
 import com.mycompany.repository.UserRepository;
+import com.mycompany.util.PasswordUtils;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
@@ -38,15 +40,46 @@ public class UserServiceImplTest {
     @Test
     void testSave() {
         User user = new User();
-        Mockito.when(userRepository.save(user)).thenReturn(user);
-        assertEquals(user, service.save(user));
+        user.setPassword("plainPassword");
+        
+        service.save(user);
+        
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        Mockito.verify(userRepository).save(userCaptor.capture());
+        
+        User capturedUser = userCaptor.getValue();
+        assertNotEquals("plainPassword", capturedUser.getPassword());
+        assertTrue(PasswordUtils.checkPassword("plainPassword", capturedUser.getPassword()));
     }
 
     @Test
-    void testEdit() {
+    void testEditWithPasswordChange() {
         User user = new User();
-        Mockito.when(userRepository.update(user)).thenReturn(user);
-        assertEquals(user, service.edit(user));
+        user.setPassword("newPassword");
+        
+        service.edit(user);
+        
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        Mockito.verify(userRepository).update(userCaptor.capture());
+        
+        User capturedUser = userCaptor.getValue();
+        assertNotEquals("newPassword", capturedUser.getPassword());
+        assertTrue(PasswordUtils.checkPassword("newPassword", capturedUser.getPassword()));
+    }
+    
+    @Test
+    void testEditWithoutPasswordChange() {
+        User user = new User();
+        String hashedPassword = PasswordUtils.hashPassword("anypassword");
+        user.setPassword(hashedPassword);
+        
+        service.edit(user);
+        
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        Mockito.verify(userRepository).update(userCaptor.capture());
+        
+        User capturedUser = userCaptor.getValue();
+        assertEquals(hashedPassword, capturedUser.getPassword());
     }
 
     @Test
