@@ -41,8 +41,14 @@ public class UserTest {
         Field idField = userClass.getDeclaredField("id");
         assertEquals(String.class, idField.getType());
         
-        Field nameField = userClass.getDeclaredField("name");
-        assertEquals(String.class, nameField.getType());
+        Field firstNameField = userClass.getDeclaredField("firstName");
+        assertEquals(String.class, firstNameField.getType());
+        
+        Field lastNameField = userClass.getDeclaredField("lastName");
+        assertEquals(String.class, lastNameField.getType());
+        
+        Field userNameField = userClass.getDeclaredField("userName");
+        assertEquals(String.class, userNameField.getType());
         
         Field phoneField = userClass.getDeclaredField("phoneNumber");
         assertEquals(String.class, phoneField.getType());
@@ -64,7 +70,9 @@ public class UserTest {
         
         Constructor<?> constructor = userClass.getDeclaredConstructor(
             String.class,  // id
-            String.class,  // name
+            String.class,  // firstName
+            String.class,  // lastName
+            String.class,  // userName
             String.class,  // phoneNumber
             String.class,  // email
             String.class,  // password
@@ -73,7 +81,7 @@ public class UserTest {
         
         assertNotNull(constructor);
         
-        assertEquals(6, constructor.getParameterCount());
+        assertEquals(8, constructor.getParameterCount()); // Updated parameter count
     }
 
     @Test
@@ -83,7 +91,9 @@ public class UserTest {
         
         // Getters
         assertNotNull(userClass.getMethod("getId"));
-        assertNotNull(userClass.getMethod("getName"));
+        assertNotNull(userClass.getMethod("getFirstName"));
+        assertNotNull(userClass.getMethod("getLastName"));
+        assertNotNull(userClass.getMethod("getUserName"));
         assertNotNull(userClass.getMethod("getPhoneNumber"));
         assertNotNull(userClass.getMethod("getEmail"));
         assertNotNull(userClass.getMethod("getPassword"));
@@ -91,7 +101,9 @@ public class UserTest {
         
         // Setters
         assertNotNull(userClass.getMethod("setId", String.class));
-        assertNotNull(userClass.getMethod("setName", String.class));
+        assertNotNull(userClass.getMethod("setFirstName", String.class));
+        assertNotNull(userClass.getMethod("setLastName", String.class));
+        assertNotNull(userClass.getMethod("setUserName", String.class));
         assertNotNull(userClass.getMethod("setPhoneNumber", String.class));
         assertNotNull(userClass.getMethod("setEmail", String.class));
         assertNotNull(userClass.getMethod("setPassword", String.class));

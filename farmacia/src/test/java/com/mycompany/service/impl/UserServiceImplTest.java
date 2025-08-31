@@ -40,7 +40,12 @@ public class UserServiceImplTest {
     @Test
     void testSave() {
         User user = new User();
+        user.setFirstName("John");
+        user.setLastName("Doe");
         user.setPassword("plainPassword");
+        
+        // Mock findByUserName to return null, indicating the userName does not exist
+        Mockito.when(userRepository.findByUserName(Mockito.anyString())).thenReturn(null);
         
         service.save(user);
         
@@ -50,18 +55,49 @@ public class UserServiceImplTest {
         User capturedUser = userCaptor.getValue();
         assertNotEquals("plainPassword", capturedUser.getPassword());
         assertTrue(PasswordUtils.checkPassword("plainPassword", capturedUser.getPassword()));
+        assertEquals("john.doe", capturedUser.getUserName()); // Corrected: Verify generated userName
+    }
+
+    @Test
+    void testSaveWithExistingUserName() {
+        User user = new User();
+        user.setFirstName("Jane");
+        user.setLastName("Doe");
+        user.setPassword("plainPassword");
+
+        // Mock findByUserName to simulate existing userNames
+        Mockito.when(userRepository.findByUserName("jane.doe")).thenReturn(new User()); // First attempt exists
+        Mockito.when(userRepository.findByUserName("jane.doe1")).thenReturn(new User()); // Second attempt exists
+        Mockito.when(userRepository.findByUserName("jane.doe2")).thenReturn(null); // Third attempt is unique
+        
+        service.save(user);
+        
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        Mockito.verify(userRepository).save(userCaptor.capture());
+        
+        User capturedUser = userCaptor.getValue();
+        assertEquals("jane.doe2", capturedUser.getUserName()); // Corrected: Verify generated unique userName
     }
 
     @Test
     void testEditWithPasswordChange() {
         User user = new User();
+        user.setId("1");
+        user.setFirstName("John");
+        user.setLastName("Doe");
         user.setPassword("newPassword");
-        
+
+        User existingUser = new User();
+        existingUser.setFirstName("John");
+        existingUser.setLastName("Doe");
+
+        Mockito.when(userRepository.findById("1")).thenReturn(existingUser);
+
         service.edit(user);
-        
+
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.verify(userRepository).update(userCaptor.capture());
-        
+
         User capturedUser = userCaptor.getValue();
         assertNotEquals("newPassword", capturedUser.getPassword());
         assertTrue(PasswordUtils.checkPassword("newPassword", capturedUser.getPassword()));
@@ -70,14 +106,23 @@ public class UserServiceImplTest {
     @Test
     void testEditWithoutPasswordChange() {
         User user = new User();
+        user.setId("1");
+        user.setFirstName("John");
+        user.setLastName("Doe");
         String hashedPassword = PasswordUtils.hashPassword("anypassword");
         user.setPassword(hashedPassword);
-        
+
+        User existingUser = new User();
+        existingUser.setFirstName("John");
+        existingUser.setLastName("Doe");
+
+        Mockito.when(userRepository.findById("1")).thenReturn(existingUser);
+
         service.edit(user);
-        
+
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.verify(userRepository).update(userCaptor.capture());
-        
+
         User capturedUser = userCaptor.getValue();
         assertEquals(hashedPassword, capturedUser.getPassword());
     }
