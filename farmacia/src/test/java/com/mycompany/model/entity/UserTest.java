@@ -4,6 +4,7 @@
  */
 package com.mycompany.model.entity;
 
+import com.mycompany.model.entity.enums.Role;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -53,7 +54,7 @@ public class UserTest {
         assertEquals(String.class, passwordField.getType());
         
         Field roleField = userClass.getDeclaredField("role");
-        assertEquals(String.class, roleField.getType());
+        assertEquals(Role.class, roleField.getType());
     }  
     
     @Test
@@ -67,7 +68,7 @@ public class UserTest {
             String.class,  // phoneNumber
             String.class,  // email
             String.class,  // password
-            String.class   // role
+            Role.class   // role
         );
         
         assertNotNull(constructor);
@@ -94,7 +95,7 @@ public class UserTest {
         assertNotNull(userClass.getMethod("setPhoneNumber", String.class));
         assertNotNull(userClass.getMethod("setEmail", String.class));
         assertNotNull(userClass.getMethod("setPassword", String.class));
-        assertNotNull(userClass.getMethod("setRole", String.class));
+        assertNotNull(userClass.getMethod("setRole", Role.class));
         
         // equals, hashCode, toString
         assertNotNull(userClass.getMethod("equals", Object.class));

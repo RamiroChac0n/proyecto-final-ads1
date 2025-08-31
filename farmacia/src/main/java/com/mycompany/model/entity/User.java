@@ -4,6 +4,7 @@
  */
 package com.mycompany.model.entity;
 
+import com.mycompany.model.entity.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,6 +54,7 @@ public class User {
     private String password;
     
     
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")    
-    private String role;
+    private Role role;
 }
