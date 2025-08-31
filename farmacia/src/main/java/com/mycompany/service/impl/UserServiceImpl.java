@@ -7,6 +7,7 @@ package com.mycompany.service.impl;
 import com.mycompany.model.entity.User;
 import com.mycompany.repository.UserRepository;
 import com.mycompany.service.IUserService;
+import com.mycompany.util.PasswordUtils;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.util.List;
@@ -23,11 +24,18 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public User save(User user) {
+        String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
         return userRepository.save(user);
     }
 
     @Override
     public User edit(User user) {
+        // Only hash the password if it's not already hashed
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
+            String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+        }
         return userRepository.update(user);
     }
 
