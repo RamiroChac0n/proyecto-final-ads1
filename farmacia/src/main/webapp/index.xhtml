@@ -53,9 +53,15 @@
                                         <h:outputText value="#{user.id}" />
                                     </p:column>                                    
 
-                                    <p:column headerText="Name" sortBy="#{user.name}" filterBy="#{user.name}">
-                                        <h:outputText value="#{user.name}" />
+                                    <p:column headerText="First Name" sortBy="#{user.firstName}" filterBy="#{user.firstName}">
+                                        <h:outputText value="#{user.firstName}" />
                                     </p:column>
+                                    <p:column headerText="Last Name" sortBy="#{user.lastName}" filterBy="#{user.lastName}">
+                                        <h:outputText value="#{user.lastName}" />
+                                    </p:column>   
+                                    <p:column headerText="Username" sortBy="#{user.userName}" filterBy="#{user.userName}">
+                                        <h:outputText value="#{user.userName}" />
+                                    </p:column>                                      
                                     <p:column headerText="Phone Number" sortBy="#{user.phoneNumber}" filterBy="#{user.phoneNumber}">
                                         <h:outputText value="#{user.phoneNumber}" />                                   
                                     </p:column>
@@ -99,9 +105,13 @@
                                                 <p:inputText id="id" value="#{userMB.user.id}" required="true" maxlength="13"/>
                                             </div>                                              
                                             <div class="field">
-                                                <p:outputLabel for="name">Name</p:outputLabel>
-                                                <p:inputText id="name" value="#{userMB.user.name}" required="true" />
-                                            </div>                                            
+                                                <p:outputLabel for="firstName">First Name</p:outputLabel>
+                                                <p:inputText id="firstName" value="#{userMB.user.firstName}" required="true" />
+                                            </div>     
+                                            <div class="field">
+                                                <p:outputLabel for="lastName">Last Name</p:outputLabel>
+                                                <p:inputText id="lastName" value="#{userMB.user.lastName}" required="true" />
+                                            </div>                                             
                                             <div class="field">
                                                 <p:outputLabel for="phone-number">Phone Number</p:outputLabel>
                                                 <p:inputText id="phone-number" value="#{userMB.user.phoneNumber}"/>

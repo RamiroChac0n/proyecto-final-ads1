@@ -34,9 +34,19 @@ public class User {
     private String id;
     
     @NotBlank
-    @Size(max = 100)
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Size(max = 20)
+    @Column(name = "first_name", nullable = false, length = 20)
+    private String firstName;
+    
+    @NotBlank
+    @Size(max = 20)
+    @Column(name = "last_name", nullable = false, length = 20)
+    private String lastName;
+    
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "user_name", nullable = false, unique = true, length = 50)
+    private String userName;
     
     @Size(max = 8)
     @Column(name = "phone_number", length = 8)

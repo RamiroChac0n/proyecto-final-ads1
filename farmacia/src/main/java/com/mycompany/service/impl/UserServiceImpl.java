@@ -11,6 +11,7 @@ import com.mycompany.util.PasswordUtils;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.util.List;
+import java.util.logging.Logger; // Import Logger
 
 /**
  *
@@ -19,18 +20,47 @@ import java.util.List;
 @Stateless
 public class UserServiceImpl implements IUserService{
     
+    private static final Logger LOGGER = Logger.getLogger(UserServiceImpl.class.getName()); // Initialize Logger
+
     @EJB
     private UserRepository userRepository;
 
     @Override
     public User save(User user) {
+        // Generate userName
+        String baseUserName = (user.getFirstName() + "." + user.getLastName()).toLowerCase();
+        String uniqueUserName = baseUserName;
+        int counter = 1;
+        while (isUserNameExists(uniqueUserName)) {
+            uniqueUserName = baseUserName + counter;
+            counter++;
+        }
+        user.setUserName(uniqueUserName);
+
+        // Hash password
         String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
+        
+        LOGGER.info("Saving user with userName: " + user.getUserName()); // Log userName
         return userRepository.save(user);
     }
 
     @Override
     public User edit(User user) {
+        User existingUser = userRepository.findById(user.getId());
+
+        // Regenerate username if names have changed
+        if (!existingUser.getFirstName().equals(user.getFirstName()) || !existingUser.getLastName().equals(user.getLastName())) {
+            String baseUserName = (user.getFirstName() + "." + user.getLastName()).toLowerCase();
+            String uniqueUserName = baseUserName;
+            int counter = 1;
+            while (isUserNameExists(uniqueUserName)) {
+                uniqueUserName = baseUserName + counter;
+                counter++;
+            }
+            user.setUserName(uniqueUserName);
+        }
+
         // Only hash the password if it's not already hashed
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
@@ -47,6 +77,21 @@ public class UserServiceImpl implements IUserService{
     @Override
     public List<User> list() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public User findByUserName(String userName) {
+        return userRepository.findByUserName(userName);
+    }
+
+    @Override
+    public boolean isUserNameExists(String userName) {
+        return userRepository.findByUserName(userName) != null;
+    }
+
+    @Override
+    public User findById(String id) {
+        return userRepository.findById(id);
     }
     
 }

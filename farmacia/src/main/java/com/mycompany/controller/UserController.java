@@ -38,7 +38,8 @@ public class UserController implements Serializable{
     }   
     
     public void save(){
-        if(user.getId() == null){
+        User existing = userService.findById(user.getId());
+        if(existing == null){
             userService.save(user);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User added"));
         }

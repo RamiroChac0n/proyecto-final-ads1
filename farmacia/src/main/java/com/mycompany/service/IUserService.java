@@ -17,5 +17,8 @@ public interface IUserService {
     User save(User user);
     User edit(User user);
     void delete(User user);
-    List<User> list();    
+    List<User> list();
+    User findByUserName(String userName);
+    boolean isUserNameExists(String userName);
+    User findById(String id);
 }
