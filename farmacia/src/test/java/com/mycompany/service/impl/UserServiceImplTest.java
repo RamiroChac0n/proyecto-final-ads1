@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -138,6 +139,63 @@ public class UserServiceImplTest {
     void testList() {
         Mockito.when(userRepository.findAll()).thenReturn(Collections.emptyList());
         assertEquals(Collections.emptyList(), service.list());
+    }
+
+    @Test
+    void testAuthenticateSuccess() {
+        // Arrange
+        String username = "testuser";
+        String plainPassword = "password";
+        String hashedPassword = PasswordUtils.hashPassword(plainPassword);
+        
+        User userFromRepo = new User();
+        userFromRepo.setUserName(username);
+        userFromRepo.setPassword(hashedPassword);
+        
+        when(userRepository.findByUserName(username)).thenReturn(userFromRepo);
+
+        // Act
+        User result = service.authenticate(username, plainPassword);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(username, result.getUserName());
+    }
+
+    @Test
+    void testAuthenticateFailureWrongPassword() {
+        // Arrange
+        String username = "testuser";
+        String correctPassword = "password";
+        String wrongPassword = "wrongpassword";
+        String hashedPassword = PasswordUtils.hashPassword(correctPassword);
+
+        User userFromRepo = new User();
+        userFromRepo.setUserName(username);
+        userFromRepo.setPassword(hashedPassword);
+
+        when(userRepository.findByUserName(username)).thenReturn(userFromRepo);
+
+        // Act
+        User result = service.authenticate(username, wrongPassword);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void testAuthenticateFailureUserNotFound() {
+        // Arrange
+        String username = "nonexistentuser";
+        String password = "password";
+
+        when(userRepository.findByUserName(username)).thenReturn(null);
+
+        // Act
+        User result = service.authenticate(username, password);
+
+        // Assert
+        assertNull(result);
     }
     
 }
