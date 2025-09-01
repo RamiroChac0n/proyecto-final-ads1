@@ -55,7 +55,7 @@ public class UserServiceImplTest {
         User capturedUser = userCaptor.getValue();
         assertNotEquals("plainPassword", capturedUser.getPassword());
         assertTrue(PasswordUtils.checkPassword("plainPassword", capturedUser.getPassword()));
-        assertEquals("john.doe", capturedUser.getUserName()); // Corrected: Verify generated userName
+        assertEquals("johnD", capturedUser.getUserName()); // Corrected: Verify generated userName
     }
 
     @Test
@@ -66,9 +66,9 @@ public class UserServiceImplTest {
         user.setPassword("plainPassword");
 
         // Mock findByUserName to simulate existing userNames
-        Mockito.when(userRepository.findByUserName("jane.doe")).thenReturn(new User()); // First attempt exists
-        Mockito.when(userRepository.findByUserName("jane.doe1")).thenReturn(new User()); // Second attempt exists
-        Mockito.when(userRepository.findByUserName("jane.doe2")).thenReturn(null); // Third attempt is unique
+        Mockito.when(userRepository.findByUserName("janeD")).thenReturn(new User()); // First attempt exists
+        Mockito.when(userRepository.findByUserName("janeD1")).thenReturn(new User()); // Second attempt exists
+        Mockito.when(userRepository.findByUserName("janeD2")).thenReturn(null); // Third attempt is unique
         
         service.save(user);
         
@@ -76,7 +76,7 @@ public class UserServiceImplTest {
         Mockito.verify(userRepository).save(userCaptor.capture());
         
         User capturedUser = userCaptor.getValue();
-        assertEquals("jane.doe2", capturedUser.getUserName()); // Corrected: Verify generated unique userName
+        assertEquals("janeD2", capturedUser.getUserName()); // Corrected: Verify generated unique userName
     }
 
     @Test
