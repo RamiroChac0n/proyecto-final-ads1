@@ -95,5 +95,14 @@ public class UserServiceImpl implements IUserService{
     public User findById(String id) {
         return userRepository.findById(id);
     }
+
+    @Override
+    public User authenticate(String username, String password) {
+        User user = userRepository.findByUserName(username);
+        if (user != null && PasswordUtils.checkPassword(password, user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
     
 }

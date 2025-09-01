@@ -21,4 +21,5 @@ public interface IUserService {
     User findByUserName(String userName);
     boolean isUserNameExists(String userName);
     User findById(String id);
+    User authenticate(String username, String password);
 }

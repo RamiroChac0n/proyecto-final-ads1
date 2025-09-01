@@ -4,6 +4,7 @@
       xmlns:h="jakarta.faces.html"
       xmlns:p="primefaces"
       xmlns:f="jakarta.faces.core">
+    <f:event type="preRenderView" listener="#{userController.checkLogin}" />
     <h:head>
         <title>Facelet Title</title>
     </h:head>
@@ -21,7 +22,7 @@
                                     <p:toolbarGroup>
                                         <p:commandButton value="New" 
                                                          icon="pi pi-plus" 
-                                                         actionListener="#{userMB.createNew()}"
+                                                         actionListener="#{userController.createNew()}"
                                                          update=":dialogs:panel-content" 
                                                          oncomplete="PF('dlgUserRegister').show()"
                                                          styleClass="ui-button-success" 
@@ -34,7 +35,7 @@
                                 <p:dataTable id="dt-users" 
                                              widgetVar="dtUsers" 
                                              var="user" 
-                                             value="#{userMB.users}"
+                                             value="#{userController.users}"
                                              reflow="true" 
                                              styleClass="products-table" 
                                              paginator="true" 
@@ -75,14 +76,14 @@
                                         <p:commandButton icon="pi pi-pencil" update=":dialogs:panel-content"
                                                          oncomplete="PF('dlgUserRegister').show()"
                                                          styleClass="edit-button rounded-button ui-button-success" process="@this">
-                                            <f:setPropertyActionListener value="#{user}" target="#{userMB.user}" />
+                                            <f:setPropertyActionListener value="#{user}" target="#{userController.user}" />
                                             <p:resetInput target="dialogs:panel-content" />
                                         </p:commandButton>
 
                                         <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
                                                          process="@this"
                                                          oncomplete="PF('dlgDeleteUser').show()">
-                                            <f:setPropertyActionListener value="#{user}" target="#{userMB.user}" />
+                                            <f:setPropertyActionListener value="#{user}" target="#{userController.user}" />
                                         </p:commandButton>                                        
 
                                     </p:column>
@@ -99,34 +100,34 @@
                                           widgetVar="dlgUserRegister"
                                           responsive="true">
                                     <p:outputPanel id="panel-content" class="ui-fluid">
-                                        <p:outputPanel rendered="#{not empty userMB.user}">     
+                                        <p:outputPanel rendered="#{not empty userController.user}">     
                                             <div class="field">
                                                 <p:outputLabel for="id">ID</p:outputLabel>
-                                                <p:inputText id="id" value="#{userMB.user.id}" required="true" maxlength="13"/>
+                                                <p:inputText id="id" value="#{userController.user.id}" required="true" maxlength="13"/>
                                             </div>                                              
                                             <div class="field">
                                                 <p:outputLabel for="firstName">First Name</p:outputLabel>
-                                                <p:inputText id="firstName" value="#{userMB.user.firstName}" required="true" />
+                                                <p:inputText id="firstName" value="#{userController.user.firstName}" required="true" />
                                             </div>     
                                             <div class="field">
                                                 <p:outputLabel for="lastName">Last Name</p:outputLabel>
-                                                <p:inputText id="lastName" value="#{userMB.user.lastName}" required="true" />
+                                                <p:inputText id="lastName" value="#{userController.user.lastName}" required="true" />
                                             </div>                                             
                                             <div class="field">
                                                 <p:outputLabel for="phone-number">Phone Number</p:outputLabel>
-                                                <p:inputText id="phone-number" value="#{userMB.user.phoneNumber}"/>
+                                                <p:inputText id="phone-number" value="#{userController.user.phoneNumber}"/>
                                             </div>
                                             <div class="field">
                                                 <p:outputLabel for="email">Email</p:outputLabel>
-                                                <p:inputText id="email" value="#{userMB.user.email}" required="true" />
+                                                <p:inputText id="email" value="#{userController.user.email}" required="true" />
                                             </div>     
                                             <div class="field">
                                                 <p:outputLabel for="password">Password</p:outputLabel>
-                                                <p:password id="password" value="#{userMB.user.password}" required="true" feedback="true"/>
+                                                <p:password id="password" value="#{userController.user.password}" required="true" feedback="true"/>
                                             </div>   
                                             <div class="field">
                                                 <p:outputLabel for="role">Role</p:outputLabel>
-                                                <p:selectOneMenu id="role" value="#{userMB.user.role}" required="true">
+                                                <p:selectOneMenu id="role" value="#{userController.user.role}" required="true">
                                                     <f:selectItem itemLabel="Select One" itemValue=""/>
                                                     <f:selectItem itemLabel="CASHIER" itemValue="CASHIER"/>
                                                     <f:selectItem itemLabel="STOREKEEPER" itemValue="STOREKEEPER"/>
@@ -139,7 +140,7 @@
 
                                     <f:facet name="footer">
                                         <p:commandButton value="Save" icon="pi pi-check" 
-                                                         actionListener="#{userMB.save()}"
+                                                         actionListener="#{userController.save()}"
                                                          update="panel-content" 
                                                          process="panel-content @this" />
                                         <p:commandButton value="Cancel" icon="pi pi-times" 
@@ -150,7 +151,7 @@
                                 </p:dialog>
                                 <p:confirmDialog widgetVar="dlgDeleteUser" showEffect="fade" width="300"
                                                  message="Eliminar a la user?" header="Confirm" severity="warn">
-                                    <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{userMB.delete()}"
+                                    <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{userController.delete()}"
                                                      process="@this"
                                                      oncomplete="PF('dlgDeleteUser').hide()" />
                                     <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
