@@ -27,10 +27,12 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public User save(User user) {
-        // Generate userName
-        String baseUserName = (user.getFirstName() + "." + user.getLastName()).toLowerCase();
+        // Generate userName in the new format: firstName + first letter of lastName (capitalized)
+        String baseUserName = user.getFirstName().toLowerCase() + 
+                             Character.toUpperCase(user.getLastName().charAt(0));
         String uniqueUserName = baseUserName;
         int counter = 1;
+
         while (isUserNameExists(uniqueUserName)) {
             uniqueUserName = baseUserName + counter;
             counter++;
@@ -40,7 +42,7 @@ public class UserServiceImpl implements IUserService{
         // Hash password
         String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        
+
         LOGGER.info("Saving user with userName: " + user.getUserName()); // Log userName
         return userRepository.save(user);
     }
