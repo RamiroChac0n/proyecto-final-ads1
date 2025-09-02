@@ -10,6 +10,17 @@
     </h:head>
     <h:body>
 
+        <div class="card">
+            <h:form>
+                <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
+                    <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
+                    <p:menuitem value="User Management" outcome="index" icon="pi pi-fw pi-users" />
+                    <p:menuitem value="Settings" outcome="" icon="pi pi-fw pi-cog" />
+                    <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
+                </p:tabMenu>
+            </h:form>
+        </div>        
+
         <div class="layout-wrapper">
             <div class="layout-content">
                 <div class="m-4">
