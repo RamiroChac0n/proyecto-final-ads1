@@ -114,37 +114,64 @@
                                     <p:outputPanel id="panel-content" class="ui-fluid">
                                         <p:outputPanel rendered="#{not empty userController.user}">     
                                             <div class="field">
-                                                <p:outputLabel for="id">ID</p:outputLabel>
-                                                <p:inputText id="id" value="#{userController.user.id}" required="true" maxlength="13"/>
+                                                <p:outputLabel for="id">ID *</p:outputLabel>
+                                                <p:inputText id="id" value="#{userController.user.id}" required="true" 
+                                                           placeholder="Enter ID (minimum 13 characters)"
+                                                           validatorMessage="ID must be at least 13 characters long">
+                                                    <f:validateLength minimum="13" />
+                                                </p:inputText>
                                             </div>                                              
                                             <div class="field">
-                                                <p:outputLabel for="firstName">First Name</p:outputLabel>
-                                                <p:inputText id="firstName" value="#{userController.user.firstName}" required="true" />
+                                                <p:outputLabel for="firstName">First Name *</p:outputLabel>
+                                                <p:inputText id="firstName" value="#{userController.user.firstName}" required="true" 
+                                                           placeholder="Enter first name"
+                                                           validatorMessage="First name cannot be blank and must be 20 characters or less" maxlength="13">
+                                                    <f:validateLength maximum="20" />
+                                                </p:inputText>
                                             </div>     
                                             <div class="field">
-                                                <p:outputLabel for="lastName">Last Name</p:outputLabel>
-                                                <p:inputText id="lastName" value="#{userController.user.lastName}" required="true" />
+                                                <p:outputLabel for="lastName">Last Name *</p:outputLabel>
+                                                <p:inputText id="lastName" value="#{userController.user.lastName}" required="true" 
+                                                           placeholder="Enter last name"
+                                                           validatorMessage="Last name cannot be blank and must be 20 characters or less">
+                                                    <f:validateLength maximum="20" />
+                                                </p:inputText>
                                             </div>                                             
                                             <div class="field">
                                                 <p:outputLabel for="phone-number">Phone Number</p:outputLabel>
-                                                <p:inputText id="phone-number" value="#{userController.user.phoneNumber}"/>
+                                                <p:inputText id="phone-number" value="#{userController.user.phoneNumber}"
+                                                           placeholder="Enter 8-digit phone number (optional)"
+                                                           validatorMessage="Phone number must be exactly 8 digits">
+                                                    <f:validateLength minimum="8" maximum="8" />
+                                                    <f:validateRegex pattern="[0-9]{8}" />
+                                                </p:inputText>
                                             </div>
                                             <div class="field">
-                                                <p:outputLabel for="email">Email</p:outputLabel>
-                                                <p:inputText id="email" value="#{userController.user.email}" required="true" />
+                                                <p:outputLabel for="email">Email *</p:outputLabel>
+                                                <p:inputText id="email" value="#{userController.user.email}" required="true" 
+                                                           placeholder="Enter valid email address"
+                                                           validatorMessage="Please enter a valid email address">
+                                                    <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" />
+                                                    <f:validateLength maximum="100" />
+                                                </p:inputText>
                                             </div>     
                                             <div class="field">
-                                                <p:outputLabel for="password">Password</p:outputLabel>
-                                                <p:password id="password" value="#{userController.user.password}" required="true" feedback="true"/>
+                                                <p:outputLabel for="password">Password *</p:outputLabel>
+                                                <p:password id="password" value="#{userController.user.password}" required="true" 
+                                                          feedback="true" placeholder="Enter password"
+                                                          validatorMessage="Password cannot be blank and must be 255 characters or less">
+                                                    <f:validateLength maximum="255" />
+                                                </p:password>
                                             </div>   
                                             <div class="field">
-                                                <p:outputLabel for="role">Role</p:outputLabel>
-                                                <p:selectOneMenu id="role" value="#{userController.user.role}" required="true">
-                                                    <f:selectItem itemLabel="Select One" itemValue=""/>
+                                                <p:outputLabel for="role">Role *</p:outputLabel>
+                                                <p:selectOneMenu id="role" value="#{userController.user.role}" required="true"
+                                                               requiredMessage="Please select a role">
+                                                    <f:selectItem itemLabel="Select a role..." itemValue="" noSelectionOption="true" />
                                                     <f:selectItem itemLabel="CASHIER" itemValue="CASHIER"/>
                                                     <f:selectItem itemLabel="STOREKEEPER" itemValue="STOREKEEPER"/>
                                                     <f:selectItem itemLabel="ADMIN" itemValue="ADMIN"/>
-                                                </p:selectOneMenu>                                              
+                                                </p:selectOneMenu>                                             
                                             </div>                                              
 
                                         </p:outputPanel>
@@ -153,8 +180,9 @@
                                     <f:facet name="footer">
                                         <p:commandButton value="Save" icon="pi pi-check" 
                                                          actionListener="#{userController.save()}"
-                                                         update="panel-content" 
-                                                         process="panel-content @this" />
+                                                         update="panel-content :form:dt-users :form:messages" 
+                                                         process="panel-content @this" 
+                                                         oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgUserRegister').hide()" />
                                         <p:commandButton value="Cancel" icon="pi pi-times" 
                                                          onclick="PF('dlgUserRegister').hide()"
                                                          class="ui-button-secondary" 

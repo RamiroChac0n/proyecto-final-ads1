@@ -48,7 +48,7 @@ public class User {
     @Column(name = "user_name", nullable = false, unique = true, length = 50)
     private String userName;
     
-    @Size(max = 8)
+    @Size(max = 8, min = 8)
     @Column(name = "phone_number", length = 8)
     private String phoneNumber;
     

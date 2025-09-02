@@ -10,7 +10,6 @@
     </h:head>
     <h:body>
         <div class="card">
-            <h5 class="mt-0">#{menuController.isAdmin() ? 'Administrator Menu' : 'User Menu'}</h5>
             <h:form>
                 <p:tabMenu activeIndex="#{menuController.userActiveTabIndex}">
                     <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
