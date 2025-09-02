@@ -4,7 +4,7 @@
       xmlns:h="jakarta.faces.html"
       xmlns:p="primefaces"
       xmlns:f="jakarta.faces.core">
-    <f:event type="preRenderView" listener="#{userController.checkLogin}" />
+    <f:event type="preRenderView" listener="#{userController.checkAdminAccess}" />
     <h:head>
         <title>Facelet Title</title>
     </h:head>
@@ -26,7 +26,8 @@
                                                          update=":dialogs:panel-content" 
                                                          oncomplete="PF('dlgUserRegister').show()"
                                                          styleClass="ui-button-success" 
-                                                         style="margin-right: .5rem">
+                                                         style="margin-right: .5rem"
+                                                         rendered="#{userController.admin}">
                                             <p:resetInput target=":dialogs:panel-content" />
                                         </p:commandButton>
                                     </p:toolbarGroup>
@@ -72,7 +73,7 @@
                                     <p:column headerText="Role" sortBy="#{user.role}" filterBy="#{user.role}">
                                         <h:outputText value="#{user.role}" />                                   
                                     </p:column>                                      
-                                    <p:column ariaHeaderText="Acciones">
+                                    <p:column ariaHeaderText="Acciones" rendered="#{userController.admin}">
                                         <p:commandButton icon="pi pi-pencil" update=":dialogs:panel-content"
                                                          oncomplete="PF('dlgUserRegister').show()"
                                                          styleClass="edit-button rounded-button ui-button-success" process="@this">
@@ -93,7 +94,7 @@
                             </h:form>
 
 
-                            <h:form id="dialogs">
+                            <h:form id="dialogs" rendered="#{userController.admin}">
                                 <p:dialog header="User" 
                                           showEffect="fade" 
                                           modal="true" 

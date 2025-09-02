@@ -5,6 +5,7 @@
 package com.mycompany.controller;
 
 import com.mycompany.model.entity.User;
+import com.mycompany.model.entity.enums.Role;
 import com.mycompany.service.IUserService;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
@@ -67,6 +68,34 @@ public class UserController implements Serializable {
         if (!isLoggedIn()) {
             try {
                 FacesContext.getCurrentInstance().getExternalContext().redirect("login.xhtml");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    // Get current logged-in user
+    public User getCurrentUser() {
+        return (User) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+    }
+    
+    // Check if current user is admin
+    public boolean isAdmin() {
+        User currentUser = getCurrentUser();
+        return currentUser != null && Role.ADMIN.equals(currentUser.getRole());
+    }
+    
+    // Page access check for admin-only pages
+    public void checkAdminAccess() {
+        if (!isLoggedIn()) {
+            try {
+                FacesContext.getCurrentInstance().getExternalContext().redirect("login.xhtml");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (!isAdmin()) {
+            try {
+                FacesContext.getCurrentInstance().getExternalContext().redirect("home.xhtml");
             } catch (Exception e) {
                 e.printStackTrace();
             }
