@@ -36,5 +36,15 @@ public class UserRepository extends PharmacyRepository<User>{
             return null;
         }
     }
+    
+    public long countAdminUsers() {
+        try {
+            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.role = :role", Long.class);
+            query.setParameter("role", com.mycompany.model.entity.enums.Role.ADMIN);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return 0L;
+        }
+    }
         
 }

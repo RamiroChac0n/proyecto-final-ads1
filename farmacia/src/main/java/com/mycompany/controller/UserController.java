@@ -140,9 +140,27 @@ public class UserController implements Serializable {
     }
 
     public void delete() {
-        userService.delete(user);
-        refreshUsers();
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User deleted"));
+        User currentUser = getCurrentUser();
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
+        
+        if (!userService.canDeleteUser(currentUserId, user)) {
+            String errorMessage;
+            if (currentUserId != null && currentUserId.equals(user.getId())) {
+                errorMessage = "No puedes eliminar tu propio usuario";
+            } else if (user.getRole() != null && user.getRole().equals(Role.ADMIN)) {
+                errorMessage = "No se puede eliminar el último administrador del sistema";
+            } else {
+                errorMessage = "No se puede eliminar este usuario";
+            }
+            
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", errorMessage));
+        } else {
+            userService.delete(user);
+            refreshUsers();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User deleted"));
+        }
+        
         PrimeFaces.current().executeScript("PF('dlgDeleteUser').hide()");
         PrimeFaces.current().ajax().update("form:messages", "form:dt-users");
     }

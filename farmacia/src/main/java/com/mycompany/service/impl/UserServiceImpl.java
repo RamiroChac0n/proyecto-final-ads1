@@ -5,6 +5,7 @@
 package com.mycompany.service.impl;
 
 import com.mycompany.model.entity.User;
+import com.mycompany.model.entity.enums.Role;
 import com.mycompany.repository.UserRepository;
 import com.mycompany.service.IUserService;
 import com.mycompany.util.PasswordUtils;
@@ -103,6 +104,31 @@ public class UserServiceImpl implements IUserService{
             return user;
         }
         return null;
+    }
+
+    @Override
+    public long countAdminUsers() {
+        return userRepository.countAdminUsers();
+    }
+
+    @Override
+    public boolean canDeleteUser(String currentUserId, User userToDelete) {
+        if (userToDelete == null) {
+            return false;
+        }
+        
+        if (currentUserId != null && currentUserId.equals(userToDelete.getId())) {
+            return false;
+        }
+        
+        if (Role.ADMIN.equals(userToDelete.getRole())) {
+            long adminCount = countAdminUsers();
+            if (adminCount <= 1) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
 }
