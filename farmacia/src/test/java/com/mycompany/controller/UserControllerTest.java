@@ -1,6 +1,7 @@
 package com.mycompany.controller;
 
 import com.mycompany.model.entity.User;
+import com.mycompany.model.entity.enums.Role;
 import com.mycompany.service.IUserService;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
@@ -49,6 +50,7 @@ class UserControllerTest {
         testUser.setId("1");
         testUser.setUserName("testuser");
         testUser.setPassword("password");
+        testUser.setRole(Role.CASHIER); // Default role for tests
 
         // Start static mocking of FacesContext
         facesContextMockedStatic = Mockito.mockStatic(FacesContext.class);
@@ -129,5 +131,118 @@ class UserControllerTest {
 
         // Assert
         verify(externalContext, never()).redirect(anyString());
+    }
+    
+    @Test
+    void testGetCurrentUserWhenLoggedIn() {
+        // Arrange
+        externalContext.getSessionMap().put("user", testUser);
+
+        // Act
+        User currentUser = userController.getCurrentUser();
+
+        // Assert
+        assertEquals(testUser, currentUser);
+    }
+
+    @Test
+    void testGetCurrentUserWhenNotLoggedIn() {
+        // Arrange - session map is empty by default
+
+        // Act
+        User currentUser = userController.getCurrentUser();
+
+        // Assert
+        assertNull(currentUser);
+    }
+
+    @Test
+    void testIsAdminWithAdminUser() {
+        // Arrange
+        User adminUser = new User();
+        adminUser.setRole(Role.ADMIN);
+        externalContext.getSessionMap().put("user", adminUser);
+
+        // Act
+        boolean isAdmin = userController.isAdmin();
+
+        // Assert
+        assertTrue(isAdmin);
+    }
+
+    @Test
+    void testIsAdminWithNonAdminUser() {
+        // Arrange
+        testUser.setRole(Role.CASHIER);
+        externalContext.getSessionMap().put("user", testUser);
+
+        // Act
+        boolean isAdmin = userController.isAdmin();
+
+        // Assert
+        assertFalse(isAdmin);
+    }
+
+    @Test
+    void testIsAdminWithNoUser() {
+        // Arrange - session map is empty by default
+
+        // Act
+        boolean isAdmin = userController.isAdmin();
+
+        // Assert
+        assertFalse(isAdmin);
+    }
+
+    @Test
+    void testCheckAdminAccessWhenNotLoggedIn() throws Exception {
+        // Arrange - session map is empty by default
+
+        // Act
+        userController.checkAdminAccess();
+
+        // Assert
+        verify(externalContext).redirect("login.xhtml");
+    }
+
+    @Test
+    void testCheckAdminAccessWhenLoggedInAsNonAdmin() throws Exception {
+        // Arrange
+        testUser.setRole(Role.CASHIER);
+        externalContext.getSessionMap().put("user", testUser);
+
+        // Act
+        userController.checkAdminAccess();
+
+        // Assert
+        verify(externalContext).redirect("home.xhtml");
+    }
+
+    @Test
+    void testCheckAdminAccessWhenLoggedInAsAdmin() throws Exception {
+        // Arrange
+        User adminUser = new User();
+        adminUser.setRole(Role.ADMIN);
+        externalContext.getSessionMap().put("user", adminUser);
+
+        // Act
+        userController.checkAdminAccess();
+
+        // Assert
+        verify(externalContext, never()).redirect(anyString());
+    }
+
+    @Test
+    void testCheckAdminAccessWithStorekeeper() throws Exception {
+        // Arrange
+        User storekeeperUser = new User();
+        storekeeperUser.setRole(Role.STOREKEEPER);
+        externalContext.getSessionMap().put("user", storekeeperUser);
+
+        // Act
+        userController.checkAdminAccess();
+
+        // Assert
+        verify(externalContext).redirect("home.xhtml");
     }
 }
