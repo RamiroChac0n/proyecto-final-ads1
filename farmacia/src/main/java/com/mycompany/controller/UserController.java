@@ -13,6 +13,7 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
@@ -103,12 +104,24 @@ public class UserController implements Serializable {
     }
 
     // User management methods
+    @PostConstruct
+    public void init() {
+        refreshUsers();
+    }
+    
+    public void refreshUsers() {
+        users = userService.list();
+    }
+    
     public void createNew() {
         user = new User();
     }
 
     public List<User> getUsers() {
-        return users = userService.list();
+        if (users == null) {
+            users = userService.list();
+        }
+        return users;
     }
 
     public void save() {
@@ -120,6 +133,7 @@ public class UserController implements Serializable {
             userService.edit(user);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User edited"));
         }
+        refreshUsers();
         createNew();
         PrimeFaces.current().executeScript("PF('dlgUserRegister').hide()");
         PrimeFaces.current().ajax().update("form:messages", "form:dt-users");
@@ -127,6 +141,7 @@ public class UserController implements Serializable {
 
     public void delete() {
         userService.delete(user);
+        refreshUsers();
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User deleted"));
         PrimeFaces.current().executeScript("PF('dlgDeleteUser').hide()");
         PrimeFaces.current().ajax().update("form:messages", "form:dt-users");
