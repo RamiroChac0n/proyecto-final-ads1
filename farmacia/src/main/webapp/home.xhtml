@@ -15,6 +15,8 @@
                     <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
                     <p:menuitem value="User Management" outcome="index" 
                                icon="pi pi-fw pi-users" rendered="#{menuController.isAdmin()}" />
+                    <p:menuitem value="Product Management" outcome="products" 
+                               icon="pi pi-fw pi-shopping-cart" rendered="#{menuController.isAdmin()}" />
                     <p:menuitem value="Profile" outcome="" icon="pi pi-fw pi-user" />
                     <p:menuitem value="Settings" outcome="" icon="pi pi-fw pi-cog" />
                     <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
