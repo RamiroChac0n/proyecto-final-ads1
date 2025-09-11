@@ -21,8 +21,8 @@ public class ConcentrationUnit {
     
     @Id
     @NotBlank
-    @Size(max = 4)
-    @Column(name = "unit_code", length = 4)
+    @Size(max = 3)
+    @Column(name = "unit_code", length = 3)
     private String unitCode;
     
     @NotBlank

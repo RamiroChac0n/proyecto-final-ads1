@@ -21,8 +21,8 @@ public class ActivePrinciple {
     
     @Id
     @NotBlank
-    @Size(max = 10)
-    @Column(name = "principle_code", length = 10)
+    @Size(max = 3)
+    @Column(name = "principle_code", length = 3)
     private String principleCode;
     
     @NotBlank
