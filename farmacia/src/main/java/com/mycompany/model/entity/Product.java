@@ -3,7 +3,6 @@ package com.mycompany.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -23,24 +22,22 @@ import java.util.List;
 public class Product {
     
     @Id
-    @NotBlank
-    @Size(max = 30)
-    @Pattern(regexp = "^[A-Z]{3}-[A-Z]{3}-[A-Z0-9]+-[0-9A-Z]+-[A-Z]{3}-[0-9]{3}$")
-    @Column(name = "product_id", length = 30)
-    private String productId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
+    private Long productId;
     
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_type", referencedColumnName = "type_code")
     private ProductType productType;
     
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_code", referencedColumnName = "category_code")
     private ProductCategory category;
     
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "principle_code", referencedColumnName = "principle_code")
     private ActivePrinciple activePrinciple;
     
@@ -50,14 +47,18 @@ public class Product {
     private String concentration;
     
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "concentration_unit", referencedColumnName = "unit_code")
     private ConcentrationUnit concentrationUnit;
     
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dosage_form", referencedColumnName = "form_code")
     private DosageForm dosageForm;
+    
+    @Builder.Default
+    @Column(name = "sequence_number")
+    private Integer sequenceNumber = 0;
     
     @NotBlank
     @Size(max = 200)

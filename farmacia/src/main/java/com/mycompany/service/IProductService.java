@@ -15,8 +15,8 @@ public interface IProductService {
     void delete(Product product);
     List<Product> list();
     List<Product> findActiveProducts();
-    Product findById(String productId);
+    Product findById(Long productId);
     List<Product> findByCommercialName(String commercialName);
     List<Product> findByManufacturer(String manufacturer);
-    boolean productIdExists(String productId);
+    boolean productIdExists(Long productId);
 }

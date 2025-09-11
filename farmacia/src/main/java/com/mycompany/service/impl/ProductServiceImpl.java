@@ -43,7 +43,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Product findById(String productId) {
+    public Product findById(Long productId) {
         return productRepository.findById(productId);
     }
 
@@ -58,7 +58,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public boolean productIdExists(String productId) {
+    public boolean productIdExists(Long productId) {
         return productRepository.findById(productId) != null;
     }
 }
