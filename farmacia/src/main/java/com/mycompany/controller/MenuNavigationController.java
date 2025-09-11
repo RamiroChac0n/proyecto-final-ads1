@@ -52,8 +52,10 @@ public class MenuNavigationController implements Serializable {
             return 0;
         } else if (isCurrentPage("index")) {
             return 1; // User Management
+        } else if (isCurrentPage("products")) {
+            return 2; // Product Management
         } else if (isCurrentPage("settings")) {
-            return 2;
+            return 3; // Settings
         }
         return 0;
     }
