@@ -62,7 +62,7 @@ public class ProductIntegrationTest {
         
         // Then - Verify the product was persisted with all correct data
         assertNotNull(savedProduct);
-        assertEquals("MED-ANT-AMOX-500-TAB-001", savedProduct.getProductId());
+        assertEquals(1L, savedProduct.getProductId());
         assertEquals("Amoxicillin 500mg", savedProduct.getCommercialName());
         assertEquals("Pfizer", savedProduct.getManufacturer());
         assertEquals("GSK", savedProduct.getBrand());
@@ -98,7 +98,7 @@ public class ProductIntegrationTest {
     void testProductIdFormatValidation() {
         // Given - Create product with invalid ID format
         Product productWithInvalidId = createCompleteTestProduct();
-        productWithInvalidId.setProductId("INVALID-FORMAT"); // Doesn't match regex pattern
+        productWithInvalidId.setProductId(999L); // Test with ID that doesn't exist
         
         // Mock constraint violation
         Mockito.doThrow(new PersistenceException("Product ID format validation failed"))
@@ -116,7 +116,7 @@ public class ProductIntegrationTest {
     @DisplayName("Should successfully retrieve saved product by ID from database")
     void testRetrieveProductByIdFromDatabase() {
         // Given
-        String productId = "MED-ANT-AMOX-500-TAB-001";
+        Long productId = 1L;
         Product expectedProduct = createCompleteTestProduct();
         
         Mockito.when(productRepository.findById(productId)).thenReturn(expectedProduct);
@@ -137,7 +137,7 @@ public class ProductIntegrationTest {
     @DisplayName("Should verify product exists in database")
     void testProductExistsInDatabase() {
         // Given
-        String productId = "MED-ANT-AMOX-500-TAB-001";
+        Long productId = 1L;
         Product existingProduct = createCompleteTestProduct();
         
         Mockito.when(productRepository.findById(productId)).thenReturn(existingProduct);
@@ -154,7 +154,7 @@ public class ProductIntegrationTest {
     @DisplayName("Should handle non-existent product ID correctly")
     void testNonExistentProductId() {
         // Given
-        String nonExistentId = "NON-EXISTENT-PRODUCT-ID";
+        Long nonExistentId = 999L;
         
         Mockito.when(productRepository.findById(nonExistentId)).thenReturn(null);
         
@@ -291,7 +291,7 @@ public class ProductIntegrationTest {
         
         // Create the complete product
         return Product.builder()
-                .productId("MED-ANT-AMOX-500-TAB-001")
+                .productId(1L)
                 .productType(productType)
                 .category(category)
                 .activePrinciple(activePrinciple)

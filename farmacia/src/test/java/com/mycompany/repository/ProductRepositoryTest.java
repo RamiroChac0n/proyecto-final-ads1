@@ -66,7 +66,7 @@ public class ProductRepositoryTest {
     @DisplayName("Should find product by ID from database")
     void testFindById() {
         // Given
-        String productId = "MED-ANT-AMOX-500-TAB-001";
+        Long productId = 1L;
         Product expectedProduct = createTestProduct();
         expectedProduct.setProductId(productId);
         
@@ -239,13 +239,14 @@ public class ProductRepositoryTest {
                 .build();
         
         return Product.builder()
-                .productId("MED-ANT-AMOX-500-TAB-001")
+                .productId(1L)
                 .productType(productType)
                 .category(category)
                 .activePrinciple(activePrinciple)
                 .concentration("500")
                 .concentrationUnit(unit)
                 .dosageForm(form)
+                .sequenceNumber(1)
                 .commercialName("Amoxil")
                 .brand("GSK")
                 .manufacturer("GlaxoSmithKline")

@@ -117,7 +117,7 @@ public class InventoryMovementTest {
     @DisplayName("Builder pattern should work correctly")
     void testBuilderPattern() {
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-001-TEST-001")
+                .productId(1L)
                 .commercialName("Test Product")
                 .manufacturer("Test Manufacturer")
                 .build();
@@ -171,7 +171,7 @@ public class InventoryMovementTest {
     @DisplayName("Should handle different movement types correctly")
     void testDifferentMovementTypes() {
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-002-TEST-001")
+                .productId(2L)
                 .commercialName("Test Product 2")
                 .manufacturer("Test Manufacturer")
                 .build();
@@ -217,7 +217,7 @@ public class InventoryMovementTest {
     @DisplayName("Should handle optional fields correctly")
     void testOptionalFields() {
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-003-TEST-001")
+                .productId(3L)
                 .commercialName("Test Product 3")
                 .manufacturer("Test Manufacturer")
                 .build();
@@ -249,7 +249,7 @@ public class InventoryMovementTest {
         LocalDateTime specificTime = LocalDateTime.of(2024, 6, 15, 14, 30, 45);
         
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-004-TEST-001")
+                .productId(4L)
                 .commercialName("Test Product 4")
                 .manufacturer("Test Manufacturer")
                 .build();

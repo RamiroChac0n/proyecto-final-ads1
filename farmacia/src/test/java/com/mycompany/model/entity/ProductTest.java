@@ -31,7 +31,7 @@ public class ProductTest {
         Class<?> productClass = Product.class;
         
         Field productIdField = productClass.getDeclaredField("productId");
-        assertEquals(String.class, productIdField.getType());
+        assertEquals(Long.class, productIdField.getType());
         
         Field productTypeField = productClass.getDeclaredField("productType");
         assertEquals(ProductType.class, productTypeField.getType());
@@ -94,13 +94,14 @@ public class ProductTest {
         Class<?> productClass = Product.class;
         
         Constructor<?> constructor = productClass.getDeclaredConstructor(
-            String.class,         // productId
+            Long.class,           // productId
             ProductType.class,    // productType
             ProductCategory.class, // category
             ActivePrinciple.class, // activePrinciple
             String.class,         // concentration
             ConcentrationUnit.class, // concentrationUnit
             DosageForm.class,     // dosageForm
+            Integer.class,        // sequenceNumber
             String.class,         // commercialName
             String.class,         // brand
             String.class,         // manufacturer
@@ -116,7 +117,7 @@ public class ProductTest {
         );
         
         assertNotNull(constructor);
-        assertEquals(19, constructor.getParameterCount());
+        assertEquals(20, constructor.getParameterCount());
     }
 
     @Test
@@ -146,7 +147,7 @@ public class ProductTest {
         assertNotNull(productClass.getMethod("getInventoryMovements"));
         
         // Test key setters
-        assertNotNull(productClass.getMethod("setProductId", String.class));
+        assertNotNull(productClass.getMethod("setProductId", Long.class));
         assertNotNull(productClass.getMethod("setProductType", ProductType.class));
         assertNotNull(productClass.getMethod("setCategory", ProductCategory.class));
         assertNotNull(productClass.getMethod("setActivePrinciple", ActivePrinciple.class));
@@ -191,7 +192,7 @@ public class ProductTest {
                 .build();
         
         Product product = Product.builder()
-                .productId("MED-ANT-AMOX500-500-TAB-001")
+                .productId(1L)
                 .productType(productType)
                 .category(category)
                 .activePrinciple(activePrinciple)
@@ -209,7 +210,7 @@ public class ProductTest {
                 .build();
         
         assertNotNull(product);
-        assertEquals("MED-ANT-AMOX500-500-TAB-001", product.getProductId());
+        assertEquals(1L, product.getProductId());
         assertEquals("Amoxil", product.getCommercialName());
         assertEquals("GSK", product.getBrand());
         assertEquals("GlaxoSmithKline", product.getManufacturer());
@@ -225,7 +226,7 @@ public class ProductTest {
     @DisplayName("Default values should be set correctly")
     void testDefaultValues() {
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-001-TEST-001")
+                .productId(2L)
                 .commercialName("Test Product")
                 .manufacturer("Test Manufacturer")
                 .build();
@@ -242,8 +243,8 @@ public class ProductTest {
     void testProductIdPatternStructure() {
         // Test that the pattern field exists and is correctly structured for validation
         // This is a structure test, actual validation would be done by Jakarta Validation
-        String validProductId = "MED-ANT-AMOX500-500-TAB-001";
-        String invalidProductId = "invalid-format";
+        Long validProductId = 1L;
+        Long invalidProductId = 999L;
         
         Product validProduct = Product.builder()
                 .productId(validProductId)

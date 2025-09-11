@@ -69,7 +69,7 @@ public class ProductServiceImplTest {
         verify(productRepository).save(productCaptor.capture());
         Product capturedProduct = productCaptor.getValue();
         
-        assertEquals("MED-ANT-AMOX-500-TAB-001", capturedProduct.getProductId());
+        assertEquals(1L, capturedProduct.getProductId());
         assertEquals("Amoxil", capturedProduct.getCommercialName());
         assertEquals("GlaxoSmithKline", capturedProduct.getManufacturer());
         assertEquals("500", capturedProduct.getConcentration());
@@ -152,7 +152,7 @@ public class ProductServiceImplTest {
     @DisplayName("Should find product by ID through service layer")
     void testFindById() {
         // Given
-        String productId = "MED-ANT-AMOX-500-TAB-001";
+        Long productId = 1L;
         Product expectedProduct = createTestProduct();
         
         when(productRepository.findById(productId)).thenReturn(expectedProduct);
@@ -171,7 +171,7 @@ public class ProductServiceImplTest {
     @DisplayName("Should return null when product not found by ID")
     void testFindById_NotFound() {
         // Given
-        String productId = "NON-EXISTENT-PRODUCT-ID";
+        Long productId = 999L;
         
         when(productRepository.findById(productId)).thenReturn(null);
         
@@ -225,7 +225,7 @@ public class ProductServiceImplTest {
     @DisplayName("Should verify product exists when productIdExists returns true")
     void testProductIdExists_True() {
         // Given
-        String productId = "MED-ANT-AMOX-500-TAB-001";
+        Long productId = 1L;
         Product existingProduct = createTestProduct();
         
         when(productRepository.findById(productId)).thenReturn(existingProduct);
@@ -242,7 +242,7 @@ public class ProductServiceImplTest {
     @DisplayName("Should verify product does not exist when productIdExists returns false")
     void testProductIdExists_False() {
         // Given
-        String productId = "NON-EXISTENT-PRODUCT-ID";
+        Long productId = 999L;
         
         when(productRepository.findById(productId)).thenReturn(null);
         
@@ -319,13 +319,14 @@ public class ProductServiceImplTest {
                 .build();
         
         return Product.builder()
-                .productId("MED-ANT-AMOX-500-TAB-001")
+                .productId(1L)
                 .productType(productType)
                 .category(category)
                 .activePrinciple(activePrinciple)
                 .concentration("500")
                 .concentrationUnit(unit)
                 .dosageForm(form)
+                .sequenceNumber(1)
                 .commercialName("Amoxil")
                 .brand("GSK")
                 .manufacturer("GlaxoSmithKline")

@@ -147,7 +147,7 @@ public class ProductBatchTest {
     @DisplayName("Builder pattern should work correctly with BigDecimal and LocalDate")
     void testBuilderPattern() {
         Product product = Product.builder()
-                .productId("TEST-TEST-TEST-001-TEST-001")
+                .productId(1L)
                 .commercialName("Test Product")
                 .manufacturer("Test Manufacturer")
                 .build();
