@@ -70,43 +70,43 @@
                                     <p:column headerText="Commercial Name" sortBy="#{prod.commercialName}" filterBy="#{prod.commercialName}">
                                         <h:outputText value="#{prod.commercialName}" />
                                     </p:column>
-                                    
+
                                     <p:column headerText="Brand" sortBy="#{prod.brand}" filterBy="#{prod.brand}">
                                         <h:outputText value="#{prod.brand}" />
                                     </p:column>   
-                                    
+
                                     <p:column headerText="Manufacturer" sortBy="#{prod.manufacturer}" filterBy="#{prod.manufacturer}">
                                         <h:outputText value="#{prod.manufacturer}" />
                                     </p:column>                                      
-                                    
+
                                     <p:column headerText="Type" sortBy="#{prod.productType.typeName}" filterBy="#{prod.productType.typeName}">
                                         <h:outputText value="#{prod.productType.typeName}" />                                   
                                     </p:column>
-                                    
+
                                     <p:column headerText="Category" sortBy="#{prod.category.categoryName}" filterBy="#{prod.category.categoryName}">
                                         <h:outputText value="#{prod.category.categoryName}" />                                   
                                     </p:column>   
-                                    
+
                                     <p:column headerText="Active Principle" sortBy="#{prod.activePrinciple.innName}" filterBy="#{prod.activePrinciple.innName}">
                                         <h:outputText value="#{prod.activePrinciple.innName}" />                                   
                                     </p:column>
-                                    
+
                                     <p:column headerText="Concentration" sortBy="#{prod.concentration}" filterBy="#{prod.concentration}">
                                         <h:outputText value="#{prod.concentration} #{prod.concentrationUnit.unitCode}" />                                   
                                     </p:column>
-                                    
+
                                     <p:column headerText="Dosage Form" sortBy="#{prod.dosageForm.formName}" filterBy="#{prod.dosageForm.formName}">
                                         <h:outputText value="#{prod.dosageForm.formName}" />                                   
                                     </p:column>
-                                    
+
                                     <p:column headerText="Stock" sortBy="#{prod.currentStock}" filterBy="#{prod.currentStock}">
                                         <h:outputText value="#{prod.currentStock}" />                                   
                                     </p:column>
-                                    
+
                                     <p:column headerText="Active" sortBy="#{prod.isActive}" filterBy="#{prod.isActive}">
                                         <p:selectBooleanCheckbox value="#{prod.isActive}" disabled="true" />                                 
                                     </p:column>                                      
-                                    
+
                                     <p:column ariaHeaderText="Actions" rendered="#{productController.admin}">
                                         <p:commandButton icon="pi pi-pencil" update=":dialogs:panel-content"
                                                          oncomplete="PF('dlgProductRegister').show()"
@@ -134,141 +134,132 @@
                                           modal="true" 
                                           widgetVar="dlgProductRegister"
                                           responsive="true"
-                                          width="800">
+                                          width="1200">
                                     <p:outputPanel id="panel-content" class="ui-fluid">
-                                        <p:outputPanel rendered="#{not empty productController.product}">     
-                                            <div class="field">
-                                                <p:outputLabel for="productId">Product ID *</p:outputLabel>
-                                                <p:inputText id="productId" value="#{productController.product.productId}" required="true" 
-                                                           placeholder="Enter Product ID (format: XXX-XXX-XXXX-XXXX-XXX-XXX)"
-                                                           validatorMessage="Product ID must follow the format XXX-XXX-XXXX-XXXX-XXX-XXX"
-                                                           maxlength="30">
-                                                    <f:validateRegex pattern="^[A-Z]{3}-[A-Z]{3}-[A-Z0-9]+-[0-9A-Z]+-[A-Z]{3}-[0-9]{3}$" />
-                                                </p:inputText>
-                                            </div>
-                                            
+                                        <p:outputPanel rendered="#{productController.product != null}">     
+                                            <!-- Product ID is auto-generated by PostgreSQL -->
+
                                             <div class="field">
                                                 <p:outputLabel for="commercialName">Commercial Name *</p:outputLabel>
                                                 <p:inputText id="commercialName" value="#{productController.product.commercialName}" required="true" 
-                                                           placeholder="Enter commercial name"
-                                                           validatorMessage="Commercial name cannot be blank and must be 200 characters or less"
-                                                           maxlength="200">
+                                                             placeholder="Enter commercial name"
+                                                             validatorMessage="Commercial name cannot be blank and must be 200 characters or less"
+                                                             maxlength="200">
                                                     <f:validateLength maximum="200" />
                                                 </p:inputText>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="brand">Brand</p:outputLabel>
                                                 <p:inputText id="brand" value="#{productController.product.brand}"
-                                                           placeholder="Enter brand (optional)"
-                                                           maxlength="100">
+                                                             placeholder="Enter brand (optional)"
+                                                             maxlength="100">
                                                     <f:validateLength maximum="100" />
                                                 </p:inputText>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="manufacturer">Manufacturer *</p:outputLabel>
                                                 <p:inputText id="manufacturer" value="#{productController.product.manufacturer}" required="true" 
-                                                           placeholder="Enter manufacturer"
-                                                           validatorMessage="Manufacturer cannot be blank and must be 200 characters or less"
-                                                           maxlength="200">
+                                                             placeholder="Enter manufacturer"
+                                                             validatorMessage="Manufacturer cannot be blank and must be 200 characters or less"
+                                                             maxlength="200">
                                                     <f:validateLength maximum="200" />
                                                 </p:inputText>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="productType">Product Type *</p:outputLabel>
                                                 <p:selectOneMenu id="productType" value="#{productController.product.productType}" required="true"
-                                                               requiredMessage="Please select a product type"
-                                                               converter="#{productTypeConverter}">
-                                                    <f:selectItem itemLabel="Select a product type..." itemValue="" noSelectionOption="true" />
+                                                                 requiredMessage="Please select a product type"
+                                                                 converter="productTypeConverter">
+                                                    <f:selectItem itemLabel="Select a product type..." itemValue="#{null}" noSelectionOption="true" />
                                                     <f:selectItems value="#{productController.productTypes}" var="pt" 
                                                                    itemLabel="#{pt.typeName}" itemValue="#{pt}" />
-                                                </p:selectOneMenu>                                             
+                                                </p:selectOneMenu>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="category">Category *</p:outputLabel>
                                                 <p:selectOneMenu id="category" value="#{productController.product.category}" required="true"
-                                                               requiredMessage="Please select a category"
-                                                               converter="#{productCategoryConverter}">
-                                                    <f:selectItem itemLabel="Select a category..." itemValue="" noSelectionOption="true" />
+                                                                 requiredMessage="Please select a category"
+                                                                 converter="productCategoryConverter">
+                                                    <f:selectItem itemLabel="Select a category..." itemValue="#{null}" noSelectionOption="true" />
                                                     <f:selectItems value="#{productController.productCategories}" var="pc" 
                                                                    itemLabel="#{pc.categoryName}" itemValue="#{pc}" />
-                                                </p:selectOneMenu>                                             
+                                                </p:selectOneMenu>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="activePrinciple">Active Principle *</p:outputLabel>
                                                 <p:selectOneMenu id="activePrinciple" value="#{productController.product.activePrinciple}" required="true"
-                                                               requiredMessage="Please select an active principle"
-                                                               converter="#{activePrincipleConverter}">
-                                                    <f:selectItem itemLabel="Select an active principle..." itemValue="" noSelectionOption="true" />
+                                                                 requiredMessage="Please select an active principle"
+                                                                 converter="activePrincipleConverter">
+                                                    <f:selectItem itemLabel="Select an active principle..." itemValue="#{null}" noSelectionOption="true" />
                                                     <f:selectItems value="#{productController.activePrinciples}" var="ap" 
                                                                    itemLabel="#{ap.innName}" itemValue="#{ap}" />
-                                                </p:selectOneMenu>                                             
+                                                </p:selectOneMenu>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="concentration">Concentration *</p:outputLabel>
                                                 <p:inputText id="concentration" value="#{productController.product.concentration}" required="true" 
-                                                           placeholder="Enter concentration"
-                                                           validatorMessage="Concentration cannot be blank and must be 10 characters or less"
-                                                           maxlength="10">
+                                                             placeholder="Enter concentration"
+                                                             validatorMessage="Concentration cannot be blank and must be 10 characters or less"
+                                                             maxlength="10">
                                                     <f:validateLength maximum="10" />
                                                 </p:inputText>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="concentrationUnit">Concentration Unit *</p:outputLabel>
                                                 <p:selectOneMenu id="concentrationUnit" value="#{productController.product.concentrationUnit}" required="true"
-                                                               requiredMessage="Please select a concentration unit"
-                                                               converter="#{concentrationUnitConverter}">
-                                                    <f:selectItem itemLabel="Select a concentration unit..." itemValue="" noSelectionOption="true" />
+                                                                 requiredMessage="Please select a concentration unit"
+                                                                 converter="concentrationUnitConverter">
+                                                    <f:selectItem itemLabel="Select a concentration unit..." itemValue="#{null}" noSelectionOption="true" />
                                                     <f:selectItems value="#{productController.concentrationUnits}" var="cu" 
                                                                    itemLabel="#{cu.unitName} (#{cu.unitCode})" itemValue="#{cu}" />
-                                                </p:selectOneMenu>                                             
+                                                </p:selectOneMenu>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="dosageForm">Dosage Form *</p:outputLabel>
                                                 <p:selectOneMenu id="dosageForm" value="#{productController.product.dosageForm}" required="true"
-                                                               requiredMessage="Please select a dosage form"
-                                                               converter="#{dosageFormConverter}">
-                                                    <f:selectItem itemLabel="Select a dosage form..." itemValue="" noSelectionOption="true" />
+                                                                 requiredMessage="Please select a dosage form"
+                                                                 converter="dosageFormConverter">
+                                                    <f:selectItem itemLabel="Select a dosage form..." itemValue="#{null}" noSelectionOption="true" />
                                                     <f:selectItems value="#{productController.dosageForms}" var="df" 
                                                                    itemLabel="#{df.formName}" itemValue="#{df}" />
-                                                </p:selectOneMenu>                                             
+                                                </p:selectOneMenu>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:selectBooleanCheckbox id="requiresPrescription" value="#{productController.product.requiresPrescription}" />
                                                 <p:outputLabel for="requiresPrescription">Requires Prescription</p:outputLabel>
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="minStock">Min Stock</p:outputLabel>
                                                 <p:inputNumber id="minStock" value="#{productController.product.minStock}" 
-                                                             minValue="0" decimalPlaces="0" />
+                                                               minValue="0" decimalPlaces="0" />
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="maxStock">Max Stock</p:outputLabel>
                                                 <p:inputNumber id="maxStock" value="#{productController.product.maxStock}" 
-                                                             minValue="1" decimalPlaces="0" />
+                                                               minValue="1" decimalPlaces="0" />
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:outputLabel for="currentStock">Current Stock</p:outputLabel>
                                                 <p:inputNumber id="currentStock" value="#{productController.product.currentStock}" 
-                                                             minValue="0" decimalPlaces="0" />
+                                                               minValue="0" decimalPlaces="0" />
                                             </div>
-                                            
+
                                             <div class="field">
                                                 <p:selectBooleanCheckbox id="isActive" value="#{productController.product.isActive}" />
                                                 <p:outputLabel for="isActive">Active</p:outputLabel>
                                             </div>
-
                                         </p:outputPanel>
                                     </p:outputPanel>
 
@@ -295,10 +286,6 @@
                             </h:form>
                         </div>
                     </div>
-
-
-
-
                 </div>
             </div>
         </div>        

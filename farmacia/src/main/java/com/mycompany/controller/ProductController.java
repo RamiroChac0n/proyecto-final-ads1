@@ -11,6 +11,7 @@ import jakarta.inject.Named;
 import jakarta.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.List;
+import java.util.logging.Logger;
 import lombok.Data;
 import org.primefaces.PrimeFaces;
 
@@ -22,6 +23,8 @@ import org.primefaces.PrimeFaces;
 @Named(value = "productController")
 @SessionScoped
 public class ProductController implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(ProductController.class.getName());
 
     @EJB
     private IProductService productService;
@@ -54,8 +57,21 @@ public class ProductController implements Serializable {
 
     @PostConstruct
     public void init() {
+        LOGGER.info("ProductController.init() - Starting initialization");
+        
+        // Check EJB injection
+        LOGGER.info("Checking EJB injections:");
+        LOGGER.info("  productService: " + (productService != null ? "OK" : "NULL"));
+        LOGGER.info("  productTypeService: " + (productTypeService != null ? "OK" : "NULL"));
+        LOGGER.info("  productCategoryService: " + (productCategoryService != null ? "OK" : "NULL"));
+        LOGGER.info("  activePrincipleService: " + (activePrincipleService != null ? "OK" : "NULL"));
+        LOGGER.info("  dosageFormService: " + (dosageFormService != null ? "OK" : "NULL"));
+        LOGGER.info("  concentrationUnitService: " + (concentrationUnitService != null ? "OK" : "NULL"));
+        
         refreshProducts();
         loadDropdownData();
+        
+        LOGGER.info("ProductController.init() - Initialization completed");
     }
     
     // Check if current user is admin
@@ -96,14 +112,34 @@ public class ProductController implements Serializable {
     }
     
     public void loadDropdownData() {
-        productTypes = productTypeService.findActiveTypes();
-        productCategories = productCategoryService.findActiveCategories();
-        activePrinciples = activePrincipleService.findAllOrderedByName();
-        dosageForms = dosageFormService.findAllOrderedByName();
-        concentrationUnits = concentrationUnitService.findAllOrderedByName();
+        LOGGER.info("ProductController.loadDropdownData() - Starting data loading");
+        
+        try {
+            productTypes = productTypeService.findActiveTypes();
+            LOGGER.info("  Loaded productTypes: " + (productTypes != null ? productTypes.size() + " items" : "NULL"));
+            
+            productCategories = productCategoryService.findActiveCategories();
+            LOGGER.info("  Loaded productCategories: " + (productCategories != null ? productCategories.size() + " items" : "NULL"));
+            
+            activePrinciples = activePrincipleService.findAllOrderedByName();
+            LOGGER.info("  Loaded activePrinciples: " + (activePrinciples != null ? activePrinciples.size() + " items" : "NULL"));
+            
+            dosageForms = dosageFormService.findAllOrderedByName();
+            LOGGER.info("  Loaded dosageForms: " + (dosageForms != null ? dosageForms.size() + " items" : "NULL"));
+            
+            concentrationUnits = concentrationUnitService.findAllOrderedByName();
+            LOGGER.info("  Loaded concentrationUnits: " + (concentrationUnits != null ? concentrationUnits.size() + " items" : "NULL"));
+            
+            LOGGER.info("ProductController.loadDropdownData() - Data loading completed successfully");
+        } catch (Exception e) {
+            LOGGER.severe("ProductController.loadDropdownData() - Error loading data: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     public void createNew() {
+        LOGGER.info("ProductController.createNew() - Creating new product");
+        
         product = Product.builder()
                 .requiresPrescription(false)
                 .minStock(0)
@@ -111,6 +147,14 @@ public class ProductController implements Serializable {
                 .currentStock(0)
                 .isActive(true)
                 .build();
+                
+        LOGGER.info("ProductController.createNew() - New product created: " + (product != null ? "OK" : "NULL"));
+        LOGGER.info("ProductController.createNew() - Dropdown data available:");
+        LOGGER.info("  productTypes: " + (productTypes != null ? productTypes.size() + " items" : "NULL"));
+        LOGGER.info("  productCategories: " + (productCategories != null ? productCategories.size() + " items" : "NULL"));
+        LOGGER.info("  activePrinciples: " + (activePrinciples != null ? activePrinciples.size() + " items" : "NULL"));
+        LOGGER.info("  dosageForms: " + (dosageForms != null ? dosageForms.size() + " items" : "NULL"));
+        LOGGER.info("  concentrationUnits: " + (concentrationUnits != null ? concentrationUnits.size() + " items" : "NULL"));
     }
 
     public List<Product> getProducts() {
@@ -122,11 +166,12 @@ public class ProductController implements Serializable {
 
     public void save() {
         try {
-            Product existing = productService.findById(product.getProductId());
-            if (existing == null) {
+            if (product.getProductId() == null) {
+                // New product
                 productService.save(product);
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Product added successfully"));
             } else {
+                // Existing product
                 productService.edit(product);
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Product updated successfully"));
             }
