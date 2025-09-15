@@ -10,10 +10,12 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.annotation.PostConstruct;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.Data;
 import org.primefaces.PrimeFaces;
+import org.primefaces.event.FlowEvent;
 
 /**
  * Controller for Product management
@@ -54,6 +56,7 @@ public class ProductController implements Serializable {
     private List<ActivePrinciple> activePrinciples;
     private List<DosageForm> dosageForms;
     private List<ConcentrationUnit> concentrationUnits;
+    
 
     @PostConstruct
     public void init() {
@@ -197,5 +200,10 @@ public class ProductController implements Serializable {
         
         PrimeFaces.current().executeScript("PF('dlgDeleteProduct').hide()");
         PrimeFaces.current().ajax().update("form:messages", "form:dt-products");
+    }
+    
+    public String onFlowProcess(FlowEvent event) {
+        LOGGER.info("ProductController.onFlowProcess() - Flow from '" + event.getOldStep() + "' to '" + event.getNewStep() + "'");
+        return event.getNewStep();
     }
 }
