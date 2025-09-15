@@ -17,5 +17,11 @@ public interface IUserService {
     User save(User user);
     User edit(User user);
     void delete(User user);
-    List<User> list();    
+    List<User> list();
+    User findByUserName(String userName);
+    boolean isUserNameExists(String userName);
+    User findById(String id);
+    User authenticate(String username, String password);
+    long countAdminUsers();
+    boolean canDeleteUser(String currentUserId, User userToDelete);
 }

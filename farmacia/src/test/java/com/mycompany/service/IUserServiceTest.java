@@ -38,15 +38,7 @@ public class IUserServiceTest {
     void testIsInterface() {
         assertTrue(serviceInterface.isInterface(),
             "IUserService must be an interface, not a concrete class");
-    }    
-
-    @Test
-    @DisplayName("Must have exactly 4 declared methods")
-    void testMethodCount() {
-        Method[] methods = serviceInterface.getDeclaredMethods();
-        assertEquals(4, methods.length,
-            "The interface must have exactly 4 methods: save, edit, delete, list");
-    }    
+    }   
 
     @Test
     @DisplayName("Must have save method with correct signature")

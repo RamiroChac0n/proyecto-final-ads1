@@ -4,6 +4,7 @@
  */
 package com.mycompany.model.entity;
 
+import com.mycompany.model.entity.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -33,11 +34,21 @@ public class User {
     private String id;
     
     @NotBlank
-    @Size(max = 100)
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Size(max = 20)
+    @Column(name = "first_name", nullable = false, length = 20)
+    private String firstName;
     
-    @Size(max = 8)
+    @NotBlank
+    @Size(max = 20)
+    @Column(name = "last_name", nullable = false, length = 20)
+    private String lastName;
+    
+    @NotBlank
+    @Size(max = 50)
+    @Column(name = "user_name", nullable = false, unique = true, length = 50)
+    private String userName;
+    
+    @Size(max = 8, min = 8)
     @Column(name = "phone_number", length = 8)
     private String phoneNumber;
     
@@ -48,11 +59,12 @@ public class User {
     private String email;
     
     @NotBlank
-    @Size(max = 255, min = 6)
+    @Size(max = 255)
     @Column(name = "password", nullable = false, length = 255)
     private String password;
     
     
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")    
-    private String role;
+    private Role role;
 }
