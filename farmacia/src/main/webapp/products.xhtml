@@ -99,10 +99,6 @@
                                         <h:outputText value="#{prod.dosageForm.formName}" />                                   
                                     </p:column>
 
-                                    <p:column headerText="Stock" sortBy="#{prod.currentStock}" filterBy="#{prod.currentStock}">
-                                        <h:outputText value="#{prod.currentStock}" />                                   
-                                    </p:column>
-
                                     <p:column headerText="Active" sortBy="#{prod.isActive}" filterBy="#{prod.isActive}">
                                         <p:selectBooleanCheckbox value="#{prod.isActive}" disabled="true" />                                 
                                     </p:column>                                      
@@ -312,14 +308,6 @@
                                                                 <p:outputLabel for="maxStock">Maximum Stock</p:outputLabel>
                                                                 <p:inputNumber id="maxStock" value="#{productController.product.maxStock}" 
                                                                                minValue="1" decimalPlaces="0" placeholder="100" />
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div class="col-12 md:col-4">
-                                                            <div class="field">
-                                                                <p:outputLabel for="currentStock">Current Stock</p:outputLabel>
-                                                                <p:inputNumber id="currentStock" value="#{productController.product.currentStock}" 
-                                                                               minValue="0" decimalPlaces="0" placeholder="0" />
                                                             </div>
                                                         </div>
                                                         

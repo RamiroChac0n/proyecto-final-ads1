@@ -87,10 +87,6 @@ public class Product {
     private Integer maxStock = 1000;
     
     @Builder.Default
-    @Column(name = "current_stock")
-    private Integer currentStock = 0;
-    
-    @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
     

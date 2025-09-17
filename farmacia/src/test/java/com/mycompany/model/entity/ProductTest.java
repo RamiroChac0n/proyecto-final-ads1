@@ -69,9 +69,6 @@ public class ProductTest {
         Field maxStockField = productClass.getDeclaredField("maxStock");
         assertEquals(Integer.class, maxStockField.getType());
         
-        Field currentStockField = productClass.getDeclaredField("currentStock");
-        assertEquals(Integer.class, currentStockField.getType());
-        
         Field isActiveField = productClass.getDeclaredField("isActive");
         assertEquals(Boolean.class, isActiveField.getType());
         
@@ -108,7 +105,6 @@ public class ProductTest {
             Boolean.class,        // requiresPrescription
             Integer.class,        // minStock
             Integer.class,        // maxStock
-            Integer.class,        // currentStock
             Boolean.class,        // isActive
             LocalDateTime.class,  // createdAt
             LocalDateTime.class,  // updatedAt
@@ -117,7 +113,6 @@ public class ProductTest {
         );
         
         assertNotNull(constructor);
-        assertEquals(20, constructor.getParameterCount());
     }
 
     @Test
@@ -139,7 +134,6 @@ public class ProductTest {
         assertNotNull(productClass.getMethod("getRequiresPrescription"));
         assertNotNull(productClass.getMethod("getMinStock"));
         assertNotNull(productClass.getMethod("getMaxStock"));
-        assertNotNull(productClass.getMethod("getCurrentStock"));
         assertNotNull(productClass.getMethod("getIsActive"));
         assertNotNull(productClass.getMethod("getCreatedAt"));
         assertNotNull(productClass.getMethod("getUpdatedAt"));
@@ -205,7 +199,6 @@ public class ProductTest {
                 .requiresPrescription(true)
                 .minStock(10)
                 .maxStock(1000)
-                .currentStock(50)
                 .isActive(true)
                 .build();
         
@@ -218,7 +211,6 @@ public class ProductTest {
         assertTrue(product.getRequiresPrescription());
         assertEquals(10, product.getMinStock());
         assertEquals(1000, product.getMaxStock());
-        assertEquals(50, product.getCurrentStock());
         assertTrue(product.getIsActive());
     }
     
@@ -234,7 +226,6 @@ public class ProductTest {
         assertFalse(product.getRequiresPrescription()); // Should default to false
         assertEquals(0, product.getMinStock()); // Should default to 0
         assertEquals(1000, product.getMaxStock()); // Should default to 1000
-        assertEquals(0, product.getCurrentStock()); // Should default to 0
         assertTrue(product.getIsActive()); // Should default to true
     }
     

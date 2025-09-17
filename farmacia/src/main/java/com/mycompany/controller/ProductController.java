@@ -147,7 +147,6 @@ public class ProductController implements Serializable {
                 .requiresPrescription(false)
                 .minStock(0)
                 .maxStock(1000)
-                .currentStock(0)
                 .isActive(true)
                 .build();
                 

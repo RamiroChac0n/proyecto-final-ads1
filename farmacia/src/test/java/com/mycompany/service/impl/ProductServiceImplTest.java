@@ -40,7 +40,6 @@ public class ProductServiceImplTest {
         // Given
         Product product = createTestProduct();
         Product savedProduct = createTestProduct();
-        savedProduct.setCurrentStock(100); // Simulate some change after saving
         
         when(productRepository.save(product)).thenReturn(savedProduct);
         
@@ -333,7 +332,6 @@ public class ProductServiceImplTest {
                 .requiresPrescription(true)
                 .minStock(10)
                 .maxStock(1000)
-                .currentStock(50)
                 .isActive(true)
                 .build();
     }
