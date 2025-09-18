@@ -12,13 +12,23 @@
 
         <div class="card">
             <h:form>
-                <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
-                    <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
-                    <p:menuitem value="User Management" outcome="index" icon="pi pi-fw pi-users" />
-                    <p:menuitem value="Product Management" outcome="products" icon="pi pi-fw pi-shopping-cart" />
-                    <p:menuitem value="Settings" outcome="" icon="pi pi-fw pi-cog" />
-                    <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
-                </p:tabMenu>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <h:link outcome="home" style="margin-right: 20px;">
+                        <h:graphicImage library="images"
+                                        name="logo.PNG"
+                                        style="height: 40px; width: auto;"
+                                        alt="Logo"/>
+                    </h:link>
+                    <div style="flex: 1;">
+                        <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
+                            <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
+                            <p:menuitem value="User Management" outcome="index" icon="pi pi-fw pi-users" />
+                            <p:menuitem value="Product Management" outcome="products" icon="pi pi-fw pi-shopping-cart" />
+                            <p:menuitem value="Settings" outcome="" icon="pi pi-fw pi-cog" />
+                            <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
+                        </p:tabMenu>
+                    </div>
+                </div>
             </h:form>
         </div>        
 
