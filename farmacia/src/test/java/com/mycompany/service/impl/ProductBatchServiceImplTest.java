@@ -12,9 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -166,7 +167,9 @@ public class ProductBatchServiceImplTest {
         // Given
         Long productId = 1L;
         ProductBatch invalidBatch = createNewProductBatch();
-        invalidBatch.setExpirationDate(LocalDate.now().minusDays(1));
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        invalidBatch.setExpirationDate(calendar.getTime());
 
         when(productService.findById(productId)).thenReturn(testProduct);
         when(productBatchRepository.existsByProductAndBatchNumber(testProduct, "BATCH002")).thenReturn(false);
@@ -304,7 +307,9 @@ public class ProductBatchServiceImplTest {
     @DisplayName("Should find expiring batches")
     void testFindExpiringBatches() {
         // Given
-        LocalDate cutoffDate = LocalDate.now().plusMonths(6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, 6);
+        Date cutoffDate = calendar.getTime();
         List<ProductBatch> expectedBatches = Arrays.asList(testBatch);
 
         when(productBatchRepository.findByExpirationDateBefore(cutoffDate)).thenReturn(expectedBatches);
@@ -374,6 +379,20 @@ public class ProductBatchServiceImplTest {
      * Helper method to create a test ProductBatch
      */
     private ProductBatch createTestProductBatch() {
+        Calendar calendar = Calendar.getInstance();
+
+        // Manufacture date: January 15, 2024
+        calendar.set(2024, Calendar.JANUARY, 15);
+        Date manufactureDate = calendar.getTime();
+
+        // Expiration date: January 15, 2026
+        calendar.set(2026, Calendar.JANUARY, 15);
+        Date expirationDate = calendar.getTime();
+
+        // Received date: February 1, 2024
+        calendar.set(2024, Calendar.FEBRUARY, 1);
+        Date receivedDate = calendar.getTime();
+
         return ProductBatch.builder()
                 .product(testProduct)
                 .batchNumber("BATCH001")
@@ -381,9 +400,9 @@ public class ProductBatchServiceImplTest {
                 .quantityAvailable(100)
                 .unitCost(new BigDecimal("10.50"))
                 .salePrice(new BigDecimal("15.75"))
-                .manufactureDate(LocalDate.of(2024, 1, 15))
-                .expirationDate(LocalDate.of(2026, 1, 15))
-                .receivedDate(LocalDate.of(2024, 2, 1))
+                .manufactureDate(manufactureDate)
+                .expirationDate(expirationDate)
+                .receivedDate(receivedDate)
                 .isActive(true)
                 .isExpired(false)
                 .daysUntilExpiration(365)
@@ -394,14 +413,24 @@ public class ProductBatchServiceImplTest {
      * Helper method to create a new ProductBatch for testing add functionality
      */
     private ProductBatch createNewProductBatch() {
+        Calendar calendar = Calendar.getInstance();
+
+        // Manufacture date: March 1, 2024
+        calendar.set(2024, Calendar.MARCH, 1);
+        Date manufactureDate = calendar.getTime();
+
+        // Expiration date: March 1, 2026
+        calendar.set(2026, Calendar.MARCH, 1);
+        Date expirationDate = calendar.getTime();
+
         return ProductBatch.builder()
                 .batchNumber("BATCH002")
                 .quantityReceived(50)
                 .quantityAvailable(50)
                 .unitCost(new BigDecimal("12.00"))
                 .salePrice(new BigDecimal("18.00"))
-                .manufactureDate(LocalDate.of(2024, 3, 1))
-                .expirationDate(LocalDate.of(2026, 3, 1))
+                .manufactureDate(manufactureDate)
+                .expirationDate(expirationDate)
                 .isActive(true)
                 .isExpired(false)
                 .daysUntilExpiration(400)

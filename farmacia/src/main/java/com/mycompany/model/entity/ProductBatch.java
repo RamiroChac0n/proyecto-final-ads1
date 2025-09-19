@@ -8,8 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,14 +58,17 @@ public class ProductBatch {
     private BigDecimal salePrice;
     
     @Column(name = "manufacture_date")
-    private LocalDate manufactureDate;
-    
+    @Temporal(TemporalType.DATE)
+    private Date manufactureDate;
+
     @NotNull
     @Column(name = "expiration_date", nullable = false)
-    private LocalDate expirationDate;
-    
+    @Temporal(TemporalType.DATE)
+    private Date expirationDate;
+
     @Column(name = "received_date")
-    private LocalDate receivedDate;
+    @Temporal(TemporalType.DATE)
+    private Date receivedDate;
     
     @Builder.Default
     @Column(name = "is_active")
@@ -81,16 +83,17 @@ public class ProductBatch {
     private Integer daysUntilExpiration = 0;
     
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
     
     @OneToMany(mappedBy = "batch", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<InventoryMovement> inventoryMovements;
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        createdAt = new Date();
         if (receivedDate == null) {
-            receivedDate = LocalDate.now();
+            receivedDate = new Date();
         }
     }
 }

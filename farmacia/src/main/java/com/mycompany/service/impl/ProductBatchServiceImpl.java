@@ -10,7 +10,7 @@ import com.mycompany.service.IProductService;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -94,7 +94,7 @@ public class ProductBatchServiceImpl implements IProductBatchService {
     }
 
     @Override
-    public List<ProductBatch> findExpiringBatches(LocalDate date) {
+    public List<ProductBatch> findExpiringBatches(Date date) {
         return productBatchRepository.findByExpirationDateBefore(date);
     }
 
@@ -156,7 +156,7 @@ public class ProductBatchServiceImpl implements IProductBatchService {
             throw new IllegalArgumentException("Expiration date is required");
         }
 
-        if (batch.getExpirationDate().isBefore(LocalDate.now())) {
+        if (batch.getExpirationDate().before(new Date())) {
             throw new IllegalArgumentException("Expiration date cannot be in the past");
         }
 

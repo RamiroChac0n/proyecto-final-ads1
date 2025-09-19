@@ -3,6 +3,7 @@ package com.mycompany.model.entity;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,10 +74,10 @@ public class ProductTest {
         assertEquals(Boolean.class, isActiveField.getType());
         
         Field createdAtField = productClass.getDeclaredField("createdAt");
-        assertEquals(LocalDateTime.class, createdAtField.getType());
+        assertEquals(Date.class, createdAtField.getType());
         
         Field updatedAtField = productClass.getDeclaredField("updatedAt");
-        assertEquals(LocalDateTime.class, updatedAtField.getType());
+        assertEquals(Date.class, updatedAtField.getType());
         
         Field batchesField = productClass.getDeclaredField("batches");
         assertEquals(List.class, batchesField.getType());
@@ -106,8 +107,8 @@ public class ProductTest {
             Integer.class,        // minStock
             Integer.class,        // maxStock
             Boolean.class,        // isActive
-            LocalDateTime.class,  // createdAt
-            LocalDateTime.class,  // updatedAt
+            Date.class,  // createdAt
+            Date.class,  // updatedAt
             List.class,          // batches
             List.class           // inventoryMovements
         );

@@ -4,7 +4,7 @@ import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
 import jakarta.ejb.Local;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -74,7 +74,7 @@ public interface IProductBatchService {
      * @param date The expiration date threshold
      * @return List of ProductBatches expiring before the date
      */
-    List<ProductBatch> findExpiringBatches(LocalDate date);
+    List<ProductBatch> findExpiringBatches(Date date);
 
     /**
      * Check if a batch number already exists for a product

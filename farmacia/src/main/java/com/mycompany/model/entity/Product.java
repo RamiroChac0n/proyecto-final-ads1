@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,10 +92,10 @@ public class Product {
     private Boolean isActive = true;
     
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
     
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
     
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductBatch> batches;
@@ -104,12 +105,12 @@ public class Product {
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = new Date();
+        updatedAt = new Date();
     }
     
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = new Date();
     }
 }
