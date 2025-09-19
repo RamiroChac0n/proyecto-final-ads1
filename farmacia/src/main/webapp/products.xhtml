@@ -113,19 +113,30 @@
                                         <p:selectBooleanCheckbox value="#{prod.isActive}" disabled="true" />                                 
                                     </p:column>                                      
 
-                                    <p:column ariaHeaderText="Actions" rendered="#{productController.admin}">
+                                    <p:column ariaHeaderText="Actions">
+                                        <p:button icon="pi pi-eye"
+                                                  styleClass="ui-button-info rounded-button"
+                                                  outcome="product-details"
+                                                  title="Ver Detalles"
+                                                  style="margin-right: .5rem">
+                                            <f:param name="productId" value="#{prod.productId}" />
+                                        </p:button>
+
                                         <p:commandButton icon="pi pi-pencil" update=":dialogs:panel-content"
                                                          oncomplete="PF('dlgProductRegister').show()"
-                                                         styleClass="edit-button rounded-button ui-button-success" process="@this">
+                                                         styleClass="edit-button rounded-button ui-button-success" process="@this"
+                                                         rendered="#{productController.admin}"
+                                                         style="margin-right: .5rem">
                                             <f:setPropertyActionListener value="#{prod}" target="#{productController.product}" />
                                             <p:resetInput target="dialogs:panel-content" />
                                         </p:commandButton>
 
                                         <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
                                                          process="@this"
-                                                         oncomplete="PF('dlgDeleteProduct').show()">
+                                                         oncomplete="PF('dlgDeleteProduct').show()"
+                                                         rendered="#{productController.admin}">
                                             <f:setPropertyActionListener value="#{prod}" target="#{productController.product}" />
-                                        </p:commandButton>                                        
+                                        </p:commandButton>
 
                                     </p:column>
 
