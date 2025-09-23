@@ -20,7 +20,7 @@
                                         alt="Logo"/>
                     </h:link>
                     <div style="flex: 1;">
-                        <p:tabMenu activeIndex="#{menuController.userActiveTabIndex}">
+                        <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
                             <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
                             <p:menuitem value="User Management" outcome="index"
                                        icon="pi pi-fw pi-users" rendered="#{menuController.isAdmin()}" />
@@ -45,11 +45,10 @@
                                 <p:growl id="messages" showDetail="true" />
 
                                 <!-- Navigation breadcrumb -->
-                                <div class="mb-3">
-                                    <p:link outcome="products" value="Products" styleClass="text-primary" />
-                                    <span class="mx-2">></span>
-                                    <span class="text-600">#{productDetailsController.product.commercialName}</span>
-                                </div>
+                                <p:breadCrumb styleClass="mb-3">
+                                    <p:menuitem value="Products" outcome="products" />
+                                    <p:menuitem value="#{productDetailsController.product.commercialName}" />
+                                </p:breadCrumb>
 
                                 <!-- Product Details Panel -->
                                 <p:panel header="Product Information" styleClass="mb-4">
