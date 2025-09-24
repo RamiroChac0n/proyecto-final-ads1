@@ -7,7 +7,7 @@ import com.mycompany.model.entity.User;
 import com.mycompany.service.IProductService;
 import com.mycompany.service.IProductBatchService;
 import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.view.ViewScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
@@ -27,7 +27,7 @@ import org.primefaces.PrimeFaces;
  */
 @Data
 @Named(value = "productDetailsController")
-@SessionScoped
+@ViewScoped
 public class ProductDetailsController implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(ProductDetailsController.class.getName());
