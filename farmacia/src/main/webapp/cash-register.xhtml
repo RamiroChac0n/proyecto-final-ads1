@@ -27,14 +27,8 @@
                                        icon="pi pi-fw pi-users" rendered="#{userController.isAdmin()}" />
                             <p:menuitem value="Product Management" outcome="products"
                                        icon="pi pi-fw pi-shopping-cart" rendered="#{userController.isAdmin()}" />
-                            <p:menuitem value="Sales" outcome="sales"
-                                       icon="pi pi-fw pi-shopping-bag" rendered="#{userController.canProcessSales()}" />
-                            <p:menuitem value="Sales History" outcome="sales-history"
-                                       icon="pi pi-fw pi-list" rendered="#{userController.canProcessSales()}" />
                             <p:menuitem value="Cash Register" outcome="cash-register"
                                        icon="pi pi-fw pi-money-bill" rendered="#{userController.isAdmin()}" />
-                            <p:menuitem value="Reports" outcome="reports"
-                                       icon="pi pi-fw pi-chart-bar" rendered="#{userController.isAdmin()}" />
                             <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
                         </p:tabMenu>
                     </div>

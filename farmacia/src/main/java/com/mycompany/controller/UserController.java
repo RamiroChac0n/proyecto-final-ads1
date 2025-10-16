@@ -85,7 +85,24 @@ public class UserController implements Serializable {
         User currentUser = getCurrentUser();
         return currentUser != null && Role.ADMIN.equals(currentUser.getRole());
     }
-    
+
+    // Check if current user can process sales (ADMIN, CASHIER, or STOREKEEPER)
+    public boolean canProcessSales() {
+        User currentUser = getCurrentUser();
+        return currentUser != null &&
+               (Role.ADMIN.equals(currentUser.getRole()) ||
+                Role.CASHIER.equals(currentUser.getRole()) ||
+                Role.STOREKEEPER.equals(currentUser.getRole()));
+    }
+
+    // Check if current user is admin or cashier
+    public boolean isAdminOrCashier() {
+        User currentUser = getCurrentUser();
+        return currentUser != null &&
+               (Role.ADMIN.equals(currentUser.getRole()) ||
+                Role.CASHIER.equals(currentUser.getRole()));
+    }
+
     // Page access check for admin-only pages
     public void checkAdminAccess() {
         if (!isLoggedIn()) {

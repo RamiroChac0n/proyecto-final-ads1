@@ -46,7 +46,7 @@ public class MenuNavigationController implements Serializable {
         return currentViewId != null && currentViewId.contains(page);
     }
     
-    // Get active tab index for admin menu
+    // Get active tab index for admin menu (index.xhtml and products.xhtml)
     public int getAdminActiveTabIndex() {
         if (isCurrentPage("home")) {
             return 0;
@@ -54,24 +54,28 @@ public class MenuNavigationController implements Serializable {
             return 1; // User Management
         } else if (isCurrentPage("products") || isCurrentPage("product-details")) {
             return 2; // Product Management
-        } else if (isCurrentPage("settings")) {
-            return 3; // Settings
+        } else if (isCurrentPage("cash-register")) {
+            return 3; // Cash Register
         }
         return 0;
     }
-    
-    // Get active tab index for user menu (used in home.xhtml)
+
+    // Get active tab index for user menu (used in home.xhtml and cash-register.xhtml)
     public int getUserActiveTabIndex() {
+        User currentUser = userController.getCurrentUser();
+        boolean isAdmin = currentUser != null && Role.ADMIN.equals(currentUser.getRole());
+
         if (isCurrentPage("home")) {
-            return 0;
-        } else if (isCurrentPage("index") && isAdmin()) {
-            return 1; // User Management for admin
-        } else if (isCurrentPage("profile")) {
-            return isAdmin() ? 2 : 1; // Profile position depends on if User Management is shown
-        } else if (isCurrentPage("settings")) {
-            return isAdmin() ? 3 : 2; // Settings position depends on if User Management is shown
+            return 0; // Home
+        } else if (isCurrentPage("index") && isAdmin) {
+            return 1; // User Management
+        } else if ((isCurrentPage("products") || isCurrentPage("product-details")) && isAdmin) {
+            return 2; // Product Management
+        } else if (isCurrentPage("cash-register") && isAdmin) {
+            return 3; // Cash Register
         }
-        return 0;
+
+        return 0; // Default to Home
     }
     
     // Check if current user is admin (delegating to UserController)
