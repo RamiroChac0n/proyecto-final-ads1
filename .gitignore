@@ -52,3 +52,5 @@ nbdist/
 .DS_Store
 Thumbs.db
 /farmacia/nbproject/
+
+*.sql
