@@ -31,7 +31,7 @@ public class CashRegister {
     private Integer registerId;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "branch_id", referencedColumnName = "branch_id")
     private Branch branch;
 
@@ -47,11 +47,11 @@ public class CashRegister {
     private LocalTime closingTime;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "opening_user", referencedColumnName = "id")
     private User openingUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "closing_user", referencedColumnName = "id")
     private User closingUser;
 
