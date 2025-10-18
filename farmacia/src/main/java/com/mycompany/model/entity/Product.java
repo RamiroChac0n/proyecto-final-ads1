@@ -96,10 +96,14 @@ public class Product {
     
     @Column(name = "updated_at")
     private Date updatedAt;
-    
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductBatch> batches;
-    
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<InventoryMovement> inventoryMovements;
     
