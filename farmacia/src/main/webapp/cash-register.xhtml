@@ -174,7 +174,7 @@
 
                                         <p:column headerText="Difference">
                                             <h:outputText value="#{cashRegisterController.formatCurrency(register.cashDifference)}"
-                                                         style="#{register.cashDifference.compareTo(0) lt 0 ? 'color: red;' : 'color: green;'}" />
+                                                         style="#{register.cashDifference lt 0 ? 'color: red;' : 'color: green;'}" />
                                         </p:column>
 
                                         <p:column headerText="Actions" style="width: 100px;">
@@ -390,7 +390,7 @@
                                             </div>
                                             <div class="col-6">
                                                 <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.cashDifference)}"
-                                                             style="#{cashRegisterController.selectedRegister.cashDifference.compareTo(0) lt 0 ? 'color: red; font-weight: bold;' : 'color: green; font-weight: bold;'}" />
+                                                             style="#{cashRegisterController.selectedRegister.cashDifference lt 0 ? 'color: red; font-weight: bold;' : 'color: green; font-weight: bold;'}" />
                                             </div>
 
                                             <div class="col-12" rendered="#{not empty cashRegisterController.selectedRegister.notes}">

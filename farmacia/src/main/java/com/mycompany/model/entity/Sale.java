@@ -128,6 +128,8 @@ public class Sale {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "sale", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SaleDetail> saleDetails;
 

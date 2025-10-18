@@ -92,4 +92,12 @@ public interface ICashRegisterService {
      * @throws IllegalArgumentException if user is not ADMIN
      */
     void validateAdminRole(User user);
+
+    /**
+     * Update cash register totals after a sale
+     * @param register The cash register to update
+     * @param saleAmount The amount of the sale
+     * @return Updated CashRegister
+     */
+    CashRegister updateRegisterAfterSale(CashRegister register, BigDecimal saleAmount);
 }

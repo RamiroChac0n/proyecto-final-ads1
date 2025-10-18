@@ -69,7 +69,7 @@ public class CashRegister {
 
     @Builder.Default
     @Column(name = "total_transactions")
-    private Integer totalTransactions = 0;
+    private Long totalTransactions = 0L;
 
     @Column(name = "cash_difference", precision = 10, scale = 2)
     private BigDecimal cashDifference;
@@ -86,6 +86,8 @@ public class CashRegister {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "cashRegister", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Sale> sales;
 

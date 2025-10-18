@@ -49,7 +49,7 @@ public class CashRegisterServiceImpl implements ICashRegisterService {
             .openingUser(admin)
             .initialCash(initialCash)
             .totalSales(BigDecimal.ZERO)
-            .totalTransactions(0)
+            .totalTransactions(0L)
             .status(CashRegisterStatus.OPEN)
             .build();
 
@@ -134,5 +134,31 @@ public class CashRegisterServiceImpl implements ICashRegisterService {
         if (user == null || !Role.ADMIN.equals(user.getRole())) {
             throw new IllegalArgumentException("Solo usuarios ADMIN pueden realizar esta operación");
         }
+    }
+
+    @Override
+    public CashRegister updateRegisterAfterSale(CashRegister register, BigDecimal saleAmount) {
+        if (register == null) {
+            throw new IllegalArgumentException("Cash register cannot be null");
+        }
+
+        if (saleAmount == null || saleAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Sale amount must be greater than or equal to zero");
+        }
+
+        // Update total sales (BigDecimal)
+        BigDecimal currentTotalSales = register.getTotalSales() != null
+            ? register.getTotalSales()
+            : BigDecimal.ZERO;
+        register.setTotalSales(currentTotalSales.add(saleAmount));
+
+        // Update total transactions (Long)
+        Long currentTransactions = register.getTotalTransactions() != null
+            ? register.getTotalTransactions()
+            : 0L;
+        register.setTotalTransactions(currentTransactions + 1);
+
+        // Save updated register
+        return cashRegisterRepository.update(register);
     }
 }
