@@ -365,7 +365,300 @@ public class SaleServiceImplTest {
             "Should return false when stock is insufficient");
     }
 
+    /**
+     * TEST 7: findByIdWithDetails delegates to repository
+     * Verifies the new method for preventing LazyInitializationException
+     */
+    @Test
+    @DisplayName("Test 7: findByIdWithDetails should delegate to repository")
+    void testFindByIdWithDetails_DelegatesToRepository() throws NoSuchFieldException, IllegalAccessException {
+        // Given
+        Integer saleId = 1;
+        Sale expectedSale = createTestSale();
+
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        injectMock(service, "saleRepository", saleRepository);
+
+        when(saleRepository.findByIdWithDetails(saleId)).thenReturn(expectedSale);
+
+        // When
+        Sale result = service.findByIdWithDetails(saleId);
+
+        // Then
+        assertNotNull(result, "Result should not be null");
+        assertEquals(expectedSale, result);
+        verify(saleRepository).findByIdWithDetails(saleId);
+    }
+
+    /**
+     * TEST 8: list() uses findAllWithUser to prevent LazyInitializationException
+     */
+    @Test
+    @DisplayName("Test 8: list should use findAllWithUser to prevent LazyInitializationException")
+    void testList_UsesFindAllWithUser() throws NoSuchFieldException, IllegalAccessException {
+        // Given
+        List<Sale> expectedSales = Arrays.asList(createTestSale(), createTestSale());
+
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        injectMock(service, "saleRepository", saleRepository);
+
+        when(saleRepository.findAllWithUser()).thenReturn(expectedSales);
+
+        // When
+        List<Sale> result = service.list();
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(saleRepository).findAllWithUser();
+        verify(saleRepository, never()).findAll(); // Should NOT use findAll()
+    }
+
+    /**
+     * TEST 9: processSale handles multiple sale details correctly
+     */
+    @Test
+    @DisplayName("Test 9: processSale should handle multiple sale details correctly")
+    void testProcessSale_MultipleSaleDetails_Success() throws NoSuchFieldException, IllegalAccessException {
+        // Given: Sale with 2 different products
+        Sale sale = createTestSale();
+
+        Product product1 = createTestProduct();
+        Product product2 = createTestProduct();
+        product2.setProductId(2L);
+        product2.setCommercialName("Paracetamol 500mg");
+
+        ProductBatch batch1 = createBatch(1, "BATCH001", 100, 100,
+            new Date(2024, 0, 1), new Date(2025, 5, 1));
+        ProductBatch batch2 = createBatch(2, "BATCH002", 100, 100,
+            new Date(2024, 0, 1), new Date(2025, 5, 1));
+
+        SaleDetail detail1 = SaleDetail.builder()
+            .product(product1)
+            .quantity(10)
+            .unitPrice(new BigDecimal("15.75"))
+            .unitCost(new BigDecimal("10.50"))
+            .lineTotal(new BigDecimal("157.50"))
+            .build();
+
+        SaleDetail detail2 = SaleDetail.builder()
+            .product(product2)
+            .quantity(5)
+            .unitPrice(new BigDecimal("8.50"))
+            .unitCost(new BigDecimal("5.00"))
+            .lineTotal(new BigDecimal("42.50"))
+            .build();
+
+        List<SaleDetail> details = Arrays.asList(detail1, detail2);
+
+        // Mock repository and service dependencies
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        com.mycompany.service.ICashRegisterService cashRegisterService = mock(com.mycompany.service.ICashRegisterService.class);
+        injectMock(service, "saleRepository", saleRepository);
+        injectMock(service, "cashRegisterService", cashRegisterService);
+
+        // Mock batch allocations
+        when(productBatchRepository.findAvailableBatchesByProductFIFO(product1))
+            .thenReturn(Arrays.asList(batch1));
+        when(productBatchRepository.findAvailableBatchesByProductFIFO(product2))
+            .thenReturn(Arrays.asList(batch2));
+        when(productBatchRepository.findById(1)).thenReturn(batch1);
+        when(productBatchRepository.findById(2)).thenReturn(batch2);
+        when(saleRepository.save(any(Sale.class))).thenReturn(sale);
+
+        // When
+        Sale result = service.processSale(sale, details);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, details.size());
+
+        // Verify both details have batches assigned
+        assertNotNull(details.get(0).getBatch());
+        assertNotNull(details.get(1).getBatch());
+
+        // Verify inventory was reduced
+        verify(productBatchService).updateBatchQuantity(1, -10);
+        verify(productBatchService).updateBatchQuantity(2, -5);
+
+        // Verify sale was saved
+        verify(saleRepository).save(sale);
+    }
+
+    /**
+     * TEST 10: processSale updates cash register totals
+     */
+    @Test
+    @DisplayName("Test 10: processSale should update cash register totals")
+    void testProcessSale_UpdatesCashRegister() throws NoSuchFieldException, IllegalAccessException {
+        // Given
+        CashRegister cashRegister = CashRegister.builder()
+            .registerId(1)
+            .build();
+
+        Sale sale = createTestSale();
+        sale.setCashRegister(cashRegister);
+        sale.setTotalAmount(new BigDecimal("100.00"));
+
+        ProductBatch batch = createBatch(1, "BATCH001", 100, 100,
+            new Date(2024, 0, 1), new Date(2025, 5, 1));
+
+        SaleDetail detail = SaleDetail.builder()
+            .product(testProduct)
+            .quantity(5)
+            .unitPrice(new BigDecimal("20.00"))
+            .unitCost(new BigDecimal("10.00"))
+            .lineTotal(new BigDecimal("100.00"))
+            .build();
+
+        List<SaleDetail> details = Arrays.asList(detail);
+
+        // Mock dependencies
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        com.mycompany.service.ICashRegisterService cashRegisterService = mock(com.mycompany.service.ICashRegisterService.class);
+        injectMock(service, "saleRepository", saleRepository);
+        injectMock(service, "cashRegisterService", cashRegisterService);
+
+        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+            .thenReturn(Arrays.asList(batch));
+        when(productBatchRepository.findById(1)).thenReturn(batch);
+        when(saleRepository.save(any(Sale.class))).thenReturn(sale);
+
+        // When
+        service.processSale(sale, details);
+
+        // Then
+        verify(cashRegisterService).updateRegisterAfterSale(
+            eq(cashRegister),
+            eq(new BigDecimal("100.00"))
+        );
+    }
+
+    /**
+     * TEST 11: cancelSale reverses inventory correctly
+     */
+    @Test
+    @DisplayName("Test 11: cancelSale should reverse inventory correctly")
+    void testCancelSale_ReversesInventory() throws NoSuchFieldException, IllegalAccessException {
+        // Given
+        Integer saleId = 1;
+        String userId = "USR123";
+        String reason = "Customer request";
+
+        User user = User.builder()
+            .id(userId)
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        ProductBatch batch1 = createBatch(1, "BATCH001", 100, 90,
+            new Date(2024, 0, 1), new Date(2025, 5, 1));
+        ProductBatch batch2 = createBatch(2, "BATCH002", 100, 95,
+            new Date(2024, 0, 1), new Date(2025, 5, 1));
+
+        SaleDetail detail1 = SaleDetail.builder()
+            .detailId(1)
+            .product(testProduct)
+            .batch(batch1)
+            .quantity(10)
+            .build();
+
+        SaleDetail detail2 = SaleDetail.builder()
+            .detailId(2)
+            .product(testProduct)
+            .batch(batch2)
+            .quantity(5)
+            .build();
+
+        Sale sale = createTestSale();
+        sale.setSaleId(saleId);
+        sale.setSaleStatus(com.mycompany.model.entity.enums.SaleStatus.COMPLETED);
+        sale.setSaleDetails(Arrays.asList(detail1, detail2));
+
+        // Mock dependencies
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        com.mycompany.repository.UserRepository userRepository = mock(com.mycompany.repository.UserRepository.class);
+        injectMock(service, "saleRepository", saleRepository);
+        injectMock(service, "userRepository", userRepository);
+
+        when(saleRepository.findById(saleId)).thenReturn(sale);
+        when(userRepository.findById(userId)).thenReturn(user);
+        when(saleRepository.update(any(Sale.class))).thenReturn(sale);
+
+        // When
+        Sale result = service.cancelSale(saleId, userId, reason);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(com.mycompany.model.entity.enums.SaleStatus.CANCELLED, result.getSaleStatus());
+        assertEquals(reason, result.getCancellationReason());
+        assertEquals(user, result.getCancelledBy());
+        assertNotNull(result.getCancellationDate());
+
+        // Verify inventory was restored (positive values)
+        verify(productBatchService).updateBatchQuantity(1, 10);  // Restore 10 units
+        verify(productBatchService).updateBatchQuantity(2, 5);   // Restore 5 units
+
+        verify(saleRepository).update(sale);
+    }
+
+    /**
+     * TEST 12: cancelSale throws exception if already cancelled
+     */
+    @Test
+    @DisplayName("Test 12: cancelSale should throw exception if already cancelled")
+    void testCancelSale_AlreadyCancelled_ThrowsException() throws NoSuchFieldException, IllegalAccessException {
+        // Given
+        Integer saleId = 1;
+        String userId = "USR123";
+
+        Sale sale = createTestSale();
+        sale.setSaleId(saleId);
+        sale.setSaleStatus(com.mycompany.model.entity.enums.SaleStatus.CANCELLED); // Already cancelled
+
+        com.mycompany.repository.SaleRepository saleRepository = mock(com.mycompany.repository.SaleRepository.class);
+        injectMock(service, "saleRepository", saleRepository);
+
+        when(saleRepository.findById(saleId)).thenReturn(sale);
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> service.cancelSale(saleId, userId, "Test reason"),
+            "Should throw exception for already cancelled sale"
+        );
+
+        assertTrue(exception.getMessage().contains("already cancelled"),
+            "Exception message should indicate sale is already cancelled");
+
+        // Verify no inventory changes were made
+        verify(productBatchService, never()).updateBatchQuantity(anyInt(), anyInt());
+    }
+
     // ==================== HELPER METHODS ====================
+
+    /**
+     * Helper method to create a test Sale
+     */
+    private Sale createTestSale() {
+        User user = User.builder()
+            .id("USR123")
+            .firstName("Test")
+            .lastName("User")
+            .build();
+
+        return Sale.builder()
+            .saleId(1)
+            .saleNumber("VEN-001")
+            .saleDate(new Date())
+            .user(user)
+            .subtotal(new BigDecimal("100.00"))
+            .totalAmount(new BigDecimal("100.00"))
+            .cashReceived(new BigDecimal("100.00"))
+            .changeGiven(BigDecimal.ZERO)
+            .saleStatus(com.mycompany.model.entity.enums.SaleStatus.COMPLETED)
+            .build();
+    }
 
     /**
      * Helper method to inject mocks using reflection
