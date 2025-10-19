@@ -85,8 +85,15 @@
             <groupId>org.webjars.npm</groupId>
             <artifactId>primeflex</artifactId>
             <version>3.3.1</version>
-        </dependency>   
-        
+        </dependency>
+
+        <!-- OmniFaces utilities for JSF/Jakarta EE 10 -->
+        <dependency>
+            <groupId>org.omnifaces</groupId>
+            <artifactId>omnifaces</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
