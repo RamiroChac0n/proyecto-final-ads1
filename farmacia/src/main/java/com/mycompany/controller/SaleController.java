@@ -464,9 +464,11 @@ public class SaleController implements Serializable {
 
     /**
      * View sale details
+     * Loads sale with all relationships to avoid LazyInitializationException
      */
     public void viewSaleDetails(Sale sale) {
-        selectedSale = sale;
+        // Load the complete sale with all details and relationships
+        selectedSale = saleService.findByIdWithDetails(sale.getSaleId());
     }
 
     /**

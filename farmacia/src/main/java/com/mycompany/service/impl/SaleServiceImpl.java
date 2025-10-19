@@ -184,12 +184,19 @@ public class SaleServiceImpl implements ISaleService {
 
     @Override
     public List<Sale> list() {
-        return saleRepository.findAll();
+        // Use findAllWithUser to avoid LazyInitializationException in sales history view
+        return saleRepository.findAllWithUser();
     }
 
     @Override
     public Sale findById(Integer saleId) {
         return saleRepository.findById(saleId);
+    }
+
+    @Override
+    public Sale findByIdWithDetails(Integer saleId) {
+        // Load sale with all relationships to avoid LazyInitializationException in detail dialog
+        return saleRepository.findByIdWithDetails(saleId);
     }
 
     @Override

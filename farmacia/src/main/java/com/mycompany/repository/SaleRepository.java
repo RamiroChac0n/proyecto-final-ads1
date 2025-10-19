@@ -96,4 +96,44 @@ public class SaleRepository extends PharmacyRepository<Sale> {
             return List.of();
         }
     }
+
+    /**
+     * Find all sales with User loaded (JOIN FETCH)
+     * Used for sales history view to avoid LazyInitializationException
+     * @return List of all sales with user relationship loaded
+     */
+    public List<Sale> findAllWithUser() {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT s FROM Sale s " +
+                "LEFT JOIN FETCH s.user " +
+                "ORDER BY s.saleDate DESC",
+                Sale.class);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Find sale by ID with all details loaded (JOIN FETCH)
+     * Used for sale details dialog to avoid LazyInitializationException
+     * @param saleId The sale ID
+     * @return Sale with user, saleDetails, and products loaded, or null if not found
+     */
+    public Sale findByIdWithDetails(Integer saleId) {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT DISTINCT s FROM Sale s " +
+                "LEFT JOIN FETCH s.user " +
+                "LEFT JOIN FETCH s.saleDetails sd " +
+                "LEFT JOIN FETCH sd.product " +
+                "WHERE s.saleId = :saleId",
+                Sale.class);
+            query.setParameter("saleId", saleId);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }

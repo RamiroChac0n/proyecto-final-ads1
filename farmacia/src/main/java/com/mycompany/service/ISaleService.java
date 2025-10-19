@@ -84,6 +84,14 @@ public interface ISaleService {
     Sale findById(Integer saleId);
 
     /**
+     * Find a sale by ID with all details loaded (eager)
+     * Loads user, saleDetails, and products to avoid LazyInitializationException
+     * @param saleId The sale ID
+     * @return Sale with all relationships loaded, or null if not found
+     */
+    Sale findByIdWithDetails(Integer saleId);
+
+    /**
      * Cancel a sale and revert inventory
      * @param saleId The sale ID to cancel
      * @param cancelledBy User ID who cancels

@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="primefaces">
+      xmlns:p="primefaces"
+      xmlns:o="http://omnifaces.org/ui">
     <f:event type="preRenderView" listener="#{saleController.checkSalesAccess}" />
     <h:head>
         <title>Sales - Pharmacy Management</title>
@@ -93,7 +94,7 @@
                                             <p:ajax update="cash-register-info" />
                                         </p:selectOneMenu>
                                     </div>
-                                    <div class="p-field p-col-12 p-md-6" id="cash-register-info">
+                                    <h:panelGroup id="cash-register-info" layout="block" styleClass="p-field p-col-12 p-md-6">
                                         <p:outputLabel value="Cash Register Status:" />
                                         <h:panelGroup rendered="#{saleController.hasOpenCashRegister()}">
                                             <p:tag severity="success" value="Open" icon="pi pi-check" />
@@ -101,7 +102,7 @@
                                         <h:panelGroup rendered="#{!saleController.hasOpenCashRegister() and saleController.selectedBranchId != null}">
                                             <p:tag severity="danger" value="No open cash register" icon="pi pi-times" />
                                         </h:panelGroup>
-                                    </div>
+                                    </h:panelGroup>
                                 </div>
                             </p:panel>
 
