@@ -29,6 +29,8 @@
                                        icon="pi pi-fw pi-shopping-cart" rendered="#{userController.isAdmin()}" />
                             <p:menuitem value="Cash Register" outcome="cash-register"
                                        icon="pi pi-fw pi-money-bill" rendered="#{userController.isAdmin()}" />
+                            <p:menuitem value="Sales" outcome="sales"
+                                       icon="pi pi-fw pi-shopping-bag" rendered="#{userController.isAdminOrCashier()}" />
                             <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
                         </p:tabMenu>
                     </div>

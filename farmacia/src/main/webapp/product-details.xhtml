@@ -23,11 +23,13 @@
                         <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
                             <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
                             <p:menuitem value="User Management" outcome="index"
-                                       icon="pi pi-fw pi-users" rendered="#{menuController.isAdmin()}" />
+                                       icon="pi pi-fw pi-users" rendered="#{userController.isAdmin()}" />
                             <p:menuitem value="Product Management" outcome="products"
-                                       icon="pi pi-fw pi-shopping-cart" rendered="#{menuController.isAdmin()}" />
-                            <p:menuitem value="Profile" outcome="" icon="pi pi-fw pi-user" />
-                            <p:menuitem value="Settings" outcome="" icon="pi pi-fw pi-cog" />
+                                       icon="pi pi-fw pi-shopping-cart" rendered="#{userController.isAdmin()}" />
+                            <p:menuitem value="Cash Register" outcome="cash-register"
+                                       icon="pi pi-fw pi-money-bill" rendered="#{userController.isAdmin()}" />
+                            <p:menuitem value="Sales" outcome="sales"
+                                       icon="pi pi-fw pi-shopping-bag" rendered="#{userController.isAdminOrCashier()}" />
                             <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
                         </p:tabMenu>
                     </div>
