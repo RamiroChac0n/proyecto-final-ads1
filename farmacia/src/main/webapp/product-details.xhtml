@@ -3,387 +3,368 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:p="primefaces"
-      xmlns:f="jakarta.faces.core">
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
     <f:event type="preRenderView" listener="#{productDetailsController.checkAccess}" />
-    <h:head>
-        <title>Product Details</title>
-    </h:head>
-    <h:body>
 
-        <div class="card">
-            <h:form>
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <h:link outcome="home" style="margin-right: 20px;">
-                        <h:graphicImage library="images"
-                                        name="logo.PNG"
-                                        style="height: 40px; width: auto;"
-                                        alt="Logo"/>
-                    </h:link>
-                    <div style="flex: 1;">
-                        <p:tabMenu activeIndex="#{menuController.adminActiveTabIndex}">
-                            <p:menuitem value="Home" outcome="home" icon="pi pi-fw pi-home" />
-                            <p:menuitem value="User Management" outcome="index"
-                                       icon="pi pi-fw pi-users" rendered="#{userController.isAdmin()}" />
-                            <p:menuitem value="Product Management" outcome="products"
-                                       icon="pi pi-fw pi-shopping-cart" rendered="#{userController.isAdmin()}" />
-                            <p:menuitem value="Cash Register" outcome="cash-register"
-                                       icon="pi pi-fw pi-money-bill" rendered="#{userController.isAdmin()}" />
-                            <p:menuitem value="Sales" outcome="sales"
-                                       icon="pi pi-fw pi-shopping-bag" rendered="#{userController.isAdminOrCashier()}" />
-                            <p:menuitem value="Logout" action="#{menuController.logout}" icon="pi pi-fw pi-sign-out" />
-                        </p:tabMenu>
-                    </div>
-                </div>
-            </h:form>
-        </div>
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
 
-        <div class="layout-wrapper">
-            <div class="layout-content">
-                <div class="m-4">
+        <!-- Page title -->
+        <ui:define name="title">Product Details</ui:define>
 
-                    <div class="grid">
-                        <div class="col-12">
-                            <h:form id="form">
-                                <p:growl id="messages" showDetail="true" />
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
 
-                                <!-- Navigation breadcrumb -->
-                                <p:breadCrumb styleClass="mb-3">
-                                    <p:menuitem value="Products" outcome="products" />
-                                    <p:menuitem value="#{productDetailsController.product.commercialName}" />
-                                </p:breadCrumb>
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
 
-                                <!-- Product Details Panel -->
-                                <p:panel header="Product Information" styleClass="mb-4">
-                                    <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
-                                        <p:outputLabel value="Product ID:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.productId}" />
+                                    <!-- Navigation breadcrumb -->
+                                    <p:breadCrumb styleClass="mb-3">
+                                        <p:menuitem value="Products" outcome="products" />
+                                        <p:menuitem value="#{productDetailsController.product.commercialName}" />
+                                    </p:breadCrumb>
 
-                                        <p:outputLabel value="Commercial Name:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.commercialName}" />
+                                    <!-- Product Details Panel -->
+                                    <p:panel header="Product Information" styleClass="mb-4">
+                                        <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                            <p:outputLabel value="Product ID:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.productId}" />
 
-                                        <p:outputLabel value="Brand:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.brand}"
-                                                      rendered="#{not empty productDetailsController.product.brand}" />
-                                        <h:outputText value="N/A"
-                                                      rendered="#{empty productDetailsController.product.brand}"
-                                                      styleClass="text-muted" />
+                                            <p:outputLabel value="Commercial Name:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.commercialName}" />
 
-                                        <p:outputLabel value="Manufacturer:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.manufacturer}" />
-
-                                        <p:outputLabel value="Product Type:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.productType.typeName}" />
-
-                                        <p:outputLabel value="Category:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.category.categoryName}" />
-
-                                        <p:outputLabel value="Active Principle:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.activePrinciple.innName}" />
-
-                                        <p:outputLabel value="Concentration:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.concentration} #{productDetailsController.product.concentrationUnit.unitCode}" />
-
-                                        <p:outputLabel value="Dosage Form:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.dosageForm.formName}" />
-
-                                        <p:outputLabel value="Requires Prescription:" styleClass="font-bold" />
-                                        <p:selectBooleanCheckbox value="#{productDetailsController.product.requiresPrescription}" disabled="true" />
-
-                                        <p:outputLabel value="Min Stock:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.minStock}" />
-
-                                        <p:outputLabel value="Max Stock:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.maxStock}" />
-
-                                        <p:outputLabel value="Active:" styleClass="font-bold" />
-                                        <p:selectBooleanCheckbox value="#{productDetailsController.product.isActive}" disabled="true" />
-
-                                        <p:outputLabel value="Created:" styleClass="font-bold" />
-                                        <h:outputText value="#{productDetailsController.product.createdAt}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-                                        </h:outputText>
-                                    </p:panelGrid>
-                                </p:panel>
-
-                                <!-- Batches Section -->
-                                <p:panel header="Product Batches" styleClass="mb-4">
-                                    <p:toolbar>
-                                        <p:toolbarGroup>
-                                            <p:commandButton value="Add New Batch"
-                                                             icon="pi pi-plus"
-                                                             actionListener="#{productDetailsController.createNewBatch()}"
-                                                             update=":dialogs:batch-panel-content"
-                                                             oncomplete="PF('dlgBatch').show()"
-                                                             styleClass="ui-button-success"
-                                                             style="margin-right: .5rem"
-                                                             rendered="#{productDetailsController.admin}">
-                                                <p:resetInput target=":dialogs:batch-panel-content" />
-                                            </p:commandButton>
-
-                                            <p:selectBooleanCheckbox value="#{productDetailsController.showInactiveBatches}"
-                                                                     itemLabel="Show Inactive Batches"
-                                                                     style="margin-left: 1rem">
-                                                <p:ajax listener="#{productDetailsController.toggleInactiveBatches()}"
-                                                        update="dt-batches" />
-                                            </p:selectBooleanCheckbox>
-                                        </p:toolbarGroup>
-                                    </p:toolbar>
-
-                                    <p:dataTable id="dt-batches"
-                                                 widgetVar="dtBatches"
-                                                 var="batch"
-                                                 value="#{productDetailsController.batches}"
-                                                 reflow="true"
-                                                 styleClass="batches-table"
-                                                 paginator="true"
-                                                 rows="10"
-                                                 paginatorPosition="bottom"
-                                                 emptyMessage="No batches found for this product">
-
-                                        <p:column headerText="Batch Number" sortBy="#{batch.batchNumber}" filterBy="#{batch.batchNumber}">
-                                            <h:outputText value="#{batch.batchNumber}" />
-                                        </p:column>
-
-                                        <p:column headerText="Quantity Received" sortBy="#{batch.quantityReceived}">
-                                            <h:outputText value="#{batch.quantityReceived}" />
-                                        </p:column>
-
-                                        <p:column headerText="Quantity Available" sortBy="#{batch.quantityAvailable}">
-                                            <h:outputText value="#{batch.quantityAvailable}" />
-                                        </p:column>
-
-                                        <p:column headerText="Unit Cost" sortBy="#{batch.unitCost}">
-                                            <h:outputText value="#{batch.unitCost}">
-                                                <f:convertNumber type="currency" />
-                                            </h:outputText>
-                                        </p:column>
-
-                                        <p:column headerText="Sale Price" sortBy="#{batch.salePrice}">
-                                            <h:outputText value="#{batch.salePrice}">
-                                                <f:convertNumber type="currency" />
-                                            </h:outputText>
-                                        </p:column>
-
-                                        <p:column headerText="Manufacture Date" sortBy="#{batch.manufactureDate}">
-                                            <h:outputText value="#{batch.manufactureDate}"
-                                                          rendered="#{not empty batch.manufactureDate}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy" />
-                                            </h:outputText>
+                                            <p:outputLabel value="Brand:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.brand}"
+                                                          rendered="#{not empty productDetailsController.product.brand}" />
                                             <h:outputText value="N/A"
-                                                          rendered="#{empty batch.manufactureDate}"
+                                                          rendered="#{empty productDetailsController.product.brand}"
                                                           styleClass="text-muted" />
-                                        </p:column>
 
-                                        <p:column headerText="Expiration Date" sortBy="#{batch.expirationDate}">
-                                            <div class="flex align-items-center">
-                                                <i class="#{productDetailsController.getExpirationStatusIcon(batch)} mr-2 #{productDetailsController.getExpirationStatusClass(batch)}" />
-                                                <h:outputText value="#{batch.expirationDate}"
-                                                              styleClass="#{productDetailsController.getExpirationStatusClass(batch)}">
+                                            <p:outputLabel value="Manufacturer:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.manufacturer}" />
+
+                                            <p:outputLabel value="Product Type:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.productType.typeName}" />
+
+                                            <p:outputLabel value="Category:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.category.categoryName}" />
+
+                                            <p:outputLabel value="Active Principle:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.activePrinciple.innName}" />
+
+                                            <p:outputLabel value="Concentration:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.concentration} #{productDetailsController.product.concentrationUnit.unitCode}" />
+
+                                            <p:outputLabel value="Dosage Form:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.dosageForm.formName}" />
+
+                                            <p:outputLabel value="Requires Prescription:" styleClass="font-bold" />
+                                            <p:selectBooleanCheckbox value="#{productDetailsController.product.requiresPrescription}" disabled="true" />
+
+                                            <p:outputLabel value="Min Stock:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.minStock}" />
+
+                                            <p:outputLabel value="Max Stock:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.maxStock}" />
+
+                                            <p:outputLabel value="Active:" styleClass="font-bold" />
+                                            <p:selectBooleanCheckbox value="#{productDetailsController.product.isActive}" disabled="true" />
+
+                                            <p:outputLabel value="Created:" styleClass="font-bold" />
+                                            <h:outputText value="#{productDetailsController.product.createdAt}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                            </h:outputText>
+                                        </p:panelGrid>
+                                    </p:panel>
+
+                                    <!-- Batches Section -->
+                                    <p:panel header="Product Batches" styleClass="mb-4">
+                                        <p:toolbar>
+                                            <p:toolbarGroup>
+                                                <p:commandButton value="Add New Batch"
+                                                                 icon="pi pi-plus"
+                                                                 actionListener="#{productDetailsController.createNewBatch()}"
+                                                                 update=":dialogs:batch-panel-content"
+                                                                 oncomplete="PF('dlgBatch').show()"
+                                                                 styleClass="ui-button-success"
+                                                                 style="margin-right: .5rem"
+                                                                 rendered="#{productDetailsController.admin}">
+                                                    <p:resetInput target=":dialogs:batch-panel-content" />
+                                                </p:commandButton>
+
+                                                <p:selectBooleanCheckbox value="#{productDetailsController.showInactiveBatches}"
+                                                                         itemLabel="Show Inactive Batches"
+                                                                         style="margin-left: 1rem">
+                                                    <p:ajax listener="#{productDetailsController.toggleInactiveBatches()}"
+                                                            update="dt-batches" />
+                                                </p:selectBooleanCheckbox>
+                                            </p:toolbarGroup>
+                                        </p:toolbar>
+
+                                        <p:dataTable id="dt-batches"
+                                                     widgetVar="dtBatches"
+                                                     var="batch"
+                                                     value="#{productDetailsController.batches}"
+                                                     reflow="true"
+                                                     styleClass="batches-table"
+                                                     paginator="true"
+                                                     rows="10"
+                                                     paginatorPosition="bottom"
+                                                     emptyMessage="No batches found for this product">
+
+                                            <p:column headerText="Batch Number" sortBy="#{batch.batchNumber}" filterBy="#{batch.batchNumber}">
+                                                <h:outputText value="#{batch.batchNumber}" />
+                                            </p:column>
+
+                                            <p:column headerText="Quantity Received" sortBy="#{batch.quantityReceived}">
+                                                <h:outputText value="#{batch.quantityReceived}" />
+                                            </p:column>
+
+                                            <p:column headerText="Quantity Available" sortBy="#{batch.quantityAvailable}">
+                                                <h:outputText value="#{batch.quantityAvailable}" />
+                                            </p:column>
+
+                                            <p:column headerText="Unit Cost" sortBy="#{batch.unitCost}">
+                                                <h:outputText value="#{batch.unitCost}">
+                                                    <f:convertNumber type="currency" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="Sale Price" sortBy="#{batch.salePrice}">
+                                                <h:outputText value="#{batch.salePrice}">
+                                                    <f:convertNumber type="currency" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="Manufacture Date" sortBy="#{batch.manufactureDate}">
+                                                <h:outputText value="#{batch.manufactureDate}"
+                                                              rendered="#{not empty batch.manufactureDate}">
                                                     <f:convertDateTime pattern="dd/MM/yyyy" />
                                                 </h:outputText>
-                                            </div>
-                                        </p:column>
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty batch.manufactureDate}"
+                                                              styleClass="text-muted" />
+                                            </p:column>
 
-                                        <p:column headerText="Days Until Expiry" sortBy="#{batch.daysUntilExpiration}">
-                                            <h:outputText value="#{batch.daysUntilExpiration}"
-                                                          styleClass="#{productDetailsController.getExpirationStatusClass(batch)}" />
-                                        </p:column>
-
-                                        <p:column headerText="Received Date" sortBy="#{batch.receivedDate}">
-                                            <h:outputText value="#{batch.receivedDate}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy" />
-                                            </h:outputText>
-                                        </p:column>
-
-                                        <p:column headerText="Active" sortBy="#{batch.isActive}">
-                                            <p:selectBooleanCheckbox value="#{batch.isActive}" disabled="true" />
-                                        </p:column>
-
-                                        <p:column ariaHeaderText="Actions" rendered="#{productDetailsController.admin}">
-                                            <p:commandButton icon="pi pi-pencil"
-                                                             update=":dialogs:batch-panel-content"
-                                                             oncomplete="PF('dlgBatch').show()"
-                                                             styleClass="edit-button rounded-button ui-button-success"
-                                                             process="@this"
-                                                             style="margin-right: .5rem"
-                                                             title="Edit Batch">
-                                                <f:setPropertyActionListener value="#{batch}" target="#{productDetailsController.currentBatch}" />
-                                                <p:resetInput target=":dialogs:batch-panel-content" />
-                                            </p:commandButton>
-
-                                            <p:commandButton class="ui-button-warning rounded-button"
-                                                             icon="pi pi-trash"
-                                                             process="@this"
-                                                             oncomplete="PF('dlgDeleteBatch').show()"
-                                                             title="Delete Batch">
-                                                <f:setPropertyActionListener value="#{batch}" target="#{productDetailsController.currentBatch}" />
-                                            </p:commandButton>
-                                        </p:column>
-
-                                    </p:dataTable>
-                                </p:panel>
-
-                            </h:form>
-
-                            <!-- Batch Dialog -->
-                            <h:form id="dialogs" rendered="#{productDetailsController.admin}">
-                                <p:dialog header="Batch Information"
-                                          showEffect="fade"
-                                          modal="true"
-                                          widgetVar="dlgBatch"
-                                          responsive="true"
-                                          width="800">
-                                    <p:outputPanel id="batch-panel-content" class="ui-fluid">
-                                        <p:outputPanel rendered="#{productDetailsController.currentBatch != null}">
-
-                                            <div class="grid">
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="batchNumber">Batch Number *</p:outputLabel>
-                                                        <p:inputText id="batchNumber"
-                                                                     value="#{productDetailsController.currentBatch.batchNumber}"
-                                                                     required="true"
-                                                                     placeholder="Enter batch number"
-                                                                     maxlength="50">
-                                                            <f:validateLength maximum="50" />
-                                                        </p:inputText>
-                                                    </div>
+                                            <p:column headerText="Expiration Date" sortBy="#{batch.expirationDate}">
+                                                <div class="flex align-items-center">
+                                                    <i class="#{productDetailsController.getExpirationStatusIcon(batch)} mr-2 #{productDetailsController.getExpirationStatusClass(batch)}" />
+                                                    <h:outputText value="#{batch.expirationDate}"
+                                                                  styleClass="#{productDetailsController.getExpirationStatusClass(batch)}">
+                                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                    </h:outputText>
                                                 </div>
+                                            </p:column>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="quantityReceived">Quantity Received *</p:outputLabel>
-                                                        <p:inputNumber id="quantityReceived"
-                                                                       value="#{productDetailsController.currentBatch.quantityReceived}"
-                                                                       required="true"
-                                                                       minValue="0"
-                                                                       decimalPlaces="0"
-                                                                       placeholder="0" />
+                                            <p:column headerText="Days Until Expiry" sortBy="#{batch.daysUntilExpiration}">
+                                                <h:outputText value="#{batch.daysUntilExpiration}"
+                                                              styleClass="#{productDetailsController.getExpirationStatusClass(batch)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Received Date" sortBy="#{batch.receivedDate}">
+                                                <h:outputText value="#{batch.receivedDate}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="Active" sortBy="#{batch.isActive}">
+                                                <p:selectBooleanCheckbox value="#{batch.isActive}" disabled="true" />
+                                            </p:column>
+
+                                            <p:column ariaHeaderText="Actions" rendered="#{productDetailsController.admin}">
+                                                <p:commandButton icon="pi pi-pencil"
+                                                                 update=":dialogs:batch-panel-content"
+                                                                 oncomplete="PF('dlgBatch').show()"
+                                                                 styleClass="edit-button rounded-button ui-button-success"
+                                                                 process="@this"
+                                                                 style="margin-right: .5rem"
+                                                                 title="Edit Batch">
+                                                    <f:setPropertyActionListener value="#{batch}" target="#{productDetailsController.currentBatch}" />
+                                                    <p:resetInput target=":dialogs:batch-panel-content" />
+                                                </p:commandButton>
+
+                                                <p:commandButton class="ui-button-warning rounded-button"
+                                                                 icon="pi pi-trash"
+                                                                 process="@this"
+                                                                 oncomplete="PF('dlgDeleteBatch').show()"
+                                                                 title="Delete Batch">
+                                                    <f:setPropertyActionListener value="#{batch}" target="#{productDetailsController.currentBatch}" />
+                                                </p:commandButton>
+                                            </p:column>
+
+                                        </p:dataTable>
+                                    </p:panel>
+
+                                </h:form>
+
+                                <!-- Batch Dialog -->
+                                <h:form id="dialogs" rendered="#{productDetailsController.admin}">
+                                    <p:dialog header="Batch Information"
+                                              showEffect="fade"
+                                              modal="true"
+                                              widgetVar="dlgBatch"
+                                              responsive="true"
+                                              width="800">
+                                        <p:outputPanel id="batch-panel-content" class="ui-fluid">
+                                            <p:outputPanel rendered="#{productDetailsController.currentBatch != null}">
+
+                                                <div class="grid">
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="batchNumber">Batch Number *</p:outputLabel>
+                                                            <p:inputText id="batchNumber"
+                                                                         value="#{productDetailsController.currentBatch.batchNumber}"
+                                                                         required="true"
+                                                                         placeholder="Enter batch number"
+                                                                         maxlength="50">
+                                                                <f:validateLength maximum="50" />
+                                                            </p:inputText>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="quantityAvailable">Quantity Available *</p:outputLabel>
-                                                        <p:inputNumber id="quantityAvailable"
-                                                                       value="#{productDetailsController.currentBatch.quantityAvailable}"
-                                                                       required="true"
-                                                                       minValue="0"
-                                                                       decimalPlaces="0"
-                                                                       placeholder="0" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="quantityReceived">Quantity Received *</p:outputLabel>
+                                                            <p:inputNumber id="quantityReceived"
+                                                                           value="#{productDetailsController.currentBatch.quantityReceived}"
+                                                                           required="true"
+                                                                           minValue="0"
+                                                                           decimalPlaces="0"
+                                                                           placeholder="0" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="unitCost">Unit Cost *</p:outputLabel>
-                                                        <p:inputNumber id="unitCost"
-                                                                       value="#{productDetailsController.currentBatch.unitCost}"
-                                                                       required="true"
-                                                                       minValue="0"
-                                                                       decimalPlaces="2"
-                                                                       placeholder="0.00" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="quantityAvailable">Quantity Available *</p:outputLabel>
+                                                            <p:inputNumber id="quantityAvailable"
+                                                                           value="#{productDetailsController.currentBatch.quantityAvailable}"
+                                                                           required="true"
+                                                                           minValue="0"
+                                                                           decimalPlaces="0"
+                                                                           placeholder="0" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="salePrice">Sale Price *</p:outputLabel>
-                                                        <p:inputNumber id="salePrice"
-                                                                       value="#{productDetailsController.currentBatch.salePrice}"
-                                                                       required="true"
-                                                                       minValue="0"
-                                                                       decimalPlaces="2"
-                                                                       placeholder="0.00" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="unitCost">Unit Cost *</p:outputLabel>
+                                                            <p:inputNumber id="unitCost"
+                                                                           value="#{productDetailsController.currentBatch.unitCost}"
+                                                                           required="true"
+                                                                           minValue="0"
+                                                                           decimalPlaces="2"
+                                                                           placeholder="0.00" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="manufactureDate">Manufacture Date</p:outputLabel>
-                                                        <p:datePicker id="manufactureDate"
-                                                                      value="#{productDetailsController.currentBatch.manufactureDate}"
-                                                                      pattern="dd/MM/yyyy"
-                                                                      showIcon="true" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="salePrice">Sale Price *</p:outputLabel>
+                                                            <p:inputNumber id="salePrice"
+                                                                           value="#{productDetailsController.currentBatch.salePrice}"
+                                                                           required="true"
+                                                                           minValue="0"
+                                                                           decimalPlaces="2"
+                                                                           placeholder="0.00" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="expirationDate">Expiration Date *</p:outputLabel>
-                                                        <p:datePicker id="expirationDate"
-                                                                      value="#{productDetailsController.currentBatch.expirationDate}"
-                                                                      required="true"
-                                                                      pattern="dd/MM/yyyy"
-                                                                      showIcon="true" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="manufactureDate">Manufacture Date</p:outputLabel>
+                                                            <p:datePicker id="manufactureDate"
+                                                                          value="#{productDetailsController.currentBatch.manufactureDate}"
+                                                                          pattern="dd/MM/yyyy"
+                                                                          showIcon="true" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <p:outputLabel for="receivedDate">Received Date</p:outputLabel>
-                                                        <p:datePicker id="receivedDate"
-                                                                      value="#{productDetailsController.currentBatch.receivedDate}"
-                                                                      pattern="dd/MM/yyyy"
-                                                                      showIcon="true" />
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="expirationDate">Expiration Date *</p:outputLabel>
+                                                            <p:datePicker id="expirationDate"
+                                                                          value="#{productDetailsController.currentBatch.expirationDate}"
+                                                                          required="true"
+                                                                          pattern="dd/MM/yyyy"
+                                                                          showIcon="true" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="col-12 md:col-6">
-                                                    <div class="field">
-                                                        <div class="field-checkbox">
-                                                            <p:selectBooleanCheckbox id="isActive"
-                                                                                     value="#{productDetailsController.currentBatch.isActive}" />
-                                                            <p:outputLabel for="isActive">Batch is Active</p:outputLabel>
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="receivedDate">Received Date</p:outputLabel>
+                                                            <p:datePicker id="receivedDate"
+                                                                          value="#{productDetailsController.currentBatch.receivedDate}"
+                                                                          pattern="dd/MM/yyyy"
+                                                                          showIcon="true" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <div class="field-checkbox">
+                                                                <p:selectBooleanCheckbox id="isActive"
+                                                                                         value="#{productDetailsController.currentBatch.isActive}" />
+                                                                <p:outputLabel for="isActive">Batch is Active</p:outputLabel>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
+                                            </p:outputPanel>
                                         </p:outputPanel>
-                                    </p:outputPanel>
 
-                                    <f:facet name="footer">
-                                        <p:commandButton value="Save Batch"
+                                        <f:facet name="footer">
+                                            <p:commandButton value="Save Batch"
+                                                             icon="pi pi-check"
+                                                             actionListener="#{productDetailsController.saveBatch()}"
+                                                             update="batch-panel-content :form:dt-batches :form:messages"
+                                                             process="batch-panel-content @this"
+                                                             styleClass="ui-button-success"
+                                                             oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgBatch').hide()" />
+                                            <p:commandButton value="Cancel"
+                                                             icon="pi pi-times"
+                                                             onclick="PF('dlgBatch').hide();"
+                                                             styleClass="ui-button-secondary"
+                                                             type="button" />
+                                        </f:facet>
+                                    </p:dialog>
+
+                                    <!-- Delete Batch Confirmation Dialog -->
+                                    <p:confirmDialog widgetVar="dlgDeleteBatch"
+                                                     showEffect="fade"
+                                                     width="300"
+                                                     message="Delete this batch?"
+                                                     header="Confirm"
+                                                     severity="warn">
+                                        <p:commandButton value="Yes"
                                                          icon="pi pi-check"
-                                                         actionListener="#{productDetailsController.saveBatch()}"
-                                                         update="batch-panel-content :form:dt-batches :form:messages"
-                                                         process="batch-panel-content @this"
-                                                         styleClass="ui-button-success"
-                                                         oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgBatch').hide()" />
-                                        <p:commandButton value="Cancel"
-                                                         icon="pi pi-times"
-                                                         onclick="PF('dlgBatch').hide();"
+                                                         actionListener="#{productDetailsController.deleteBatch()}"
+                                                         process="@this"
+                                                         oncomplete="PF('dlgDeleteBatch').hide()" />
+                                        <p:commandButton value="No"
+                                                         type="button"
                                                          styleClass="ui-button-secondary"
-                                                         type="button" />
-                                    </f:facet>
-                                </p:dialog>
+                                                         icon="pi pi-times"
+                                                         onclick="PF('dlgDeleteBatch').hide()" />
+                                    </p:confirmDialog>
+                                </h:form>
 
-                                <!-- Delete Batch Confirmation Dialog -->
-                                <p:confirmDialog widgetVar="dlgDeleteBatch"
-                                                 showEffect="fade"
-                                                 width="300"
-                                                 message="Delete this batch?"
-                                                 header="Confirm"
-                                                 severity="warn">
-                                    <p:commandButton value="Yes"
-                                                     icon="pi pi-check"
-                                                     actionListener="#{productDetailsController.deleteBatch()}"
-                                                     process="@this"
-                                                     oncomplete="PF('dlgDeleteBatch').hide()" />
-                                    <p:commandButton value="No"
-                                                     type="button"
-                                                     styleClass="ui-button-secondary"
-                                                     icon="pi pi-times"
-                                                     onclick="PF('dlgDeleteBatch').hide()" />
-                                </p:confirmDialog>
-                            </h:form>
-
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </ui:define>
 
-    </h:body>
+    </ui:composition>
 </html>

@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Navigation Menu Component - Reusable across all authenticated pages -->
+    <ui:composition>
+        <div class="card">
+            <h:form>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <!-- Logo -->
+                    <h:link outcome="home" style="margin-right: 20px;">
+                        <h:graphicImage library="images"
+                                        name="logo.PNG"
+                                        style="height: 40px; width: auto;"
+                                        alt="Logo"/>
+                    </h:link>
+
+                    <!-- Navigation Menu -->
+                    <div style="flex: 1;">
+                        <p:tabMenu activeIndex="#{menuController.userActiveTabIndex}">
+                            <!-- Home - Visible to all authenticated users -->
+                            <p:menuitem value="Home"
+                                       outcome="home"
+                                       icon="pi pi-fw pi-home" />
+
+                            <!-- User Management - ADMIN only -->
+                            <p:menuitem value="User Management"
+                                       outcome="index"
+                                       icon="pi pi-fw pi-users"
+                                       rendered="#{userController.isAdmin()}" />
+
+                            <!-- Product Management - ADMIN only -->
+                            <p:menuitem value="Product Management"
+                                       outcome="products"
+                                       icon="pi pi-fw pi-shopping-cart"
+                                       rendered="#{userController.isAdmin()}" />
+
+                            <!-- Cash Register - ADMIN only -->
+                            <p:menuitem value="Cash Register"
+                                       outcome="cash-register"
+                                       icon="pi pi-fw pi-money-bill"
+                                       rendered="#{userController.isAdmin()}" />
+
+                            <!-- Sales - ADMIN and CASHIER -->
+                            <p:menuitem value="Sales"
+                                       outcome="sales"
+                                       icon="pi pi-fw pi-shopping-bag"
+                                       rendered="#{userController.isAdminOrCashier()}" />
+
+                            <!-- Inventory - ADMIN and STOREKEEPER (Future implementation) -->
+                            <!-- Uncomment when inventory views are implemented
+                            <p:menuitem value="Inventory"
+                                       outcome="inventory"
+                                       icon="pi pi-fw pi-box"
+                                       rendered="#{userController.isAdmin() or userController.getCurrentUser().role == 'STOREKEEPER'}" />
+                            -->
+
+                            <!-- Logout - Visible to all -->
+                            <p:menuitem value="Logout"
+                                       action="#{menuController.logout}"
+                                       icon="pi pi-fw pi-sign-out" />
+                        </p:tabMenu>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+    </ui:composition>
+</html>
