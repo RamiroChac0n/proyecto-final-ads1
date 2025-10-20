@@ -166,20 +166,44 @@
                                 <p:panel id="customer-panel" header="Customer Information" styleClass="p-mb-3">
                                     <div class="p-fluid">
                                         <div class="p-field">
-                                            <p:outputLabel for="customerName" value="Name" />
-                                            <p:inputText id="customerName" value="#{saleController.customerName}" />
-                                        </div>
-                                        <div class="p-field">
                                             <p:outputLabel for="customerNit" value="NIT" />
-                                            <p:inputText id="customerNit" value="#{saleController.customerNit}" />
+                                            <p:inputText id="customerNit" value="#{saleController.customerNit}">
+                                                <p:ajax event="blur" update="customer-panel" />
+                                            </p:inputText>
+                                            <p:message for="customerNit" />
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel for="customerAddress" value="Address" />
-                                            <p:inputText id="customerAddress" value="#{saleController.customerAddress}" />
+                                            <p:outputLabel for="customerName">
+                                                <h:outputText value="Name" />
+                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
+                                            </p:outputLabel>
+                                            <p:inputText id="customerName"
+                                                        value="#{saleController.customerName}"
+                                                        required="#{saleController.customerInfoRequired}"
+                                                        requiredMessage="Customer name is required when NIT is provided" />
+                                            <p:message for="customerName" />
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel for="customerPhone" value="Phone" />
-                                            <p:inputText id="customerPhone" value="#{saleController.customerPhone}" />
+                                            <p:outputLabel for="customerAddress">
+                                                <h:outputText value="Address" />
+                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
+                                            </p:outputLabel>
+                                            <p:inputText id="customerAddress"
+                                                        value="#{saleController.customerAddress}"
+                                                        required="#{saleController.customerInfoRequired}"
+                                                        requiredMessage="Customer address is required when NIT is provided" />
+                                            <p:message for="customerAddress" />
+                                        </div>
+                                        <div class="p-field">
+                                            <p:outputLabel for="customerPhone">
+                                                <h:outputText value="Phone" />
+                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
+                                            </p:outputLabel>
+                                            <p:inputText id="customerPhone"
+                                                        value="#{saleController.customerPhone}"
+                                                        required="#{saleController.customerInfoRequired}"
+                                                        requiredMessage="Customer phone is required when NIT is provided" />
+                                            <p:message for="customerPhone" />
                                         </div>
                                     </div>
                                 </p:panel>

@@ -280,6 +280,11 @@ public class SaleController implements Serializable {
             BigDecimal subtotal = calculateSubtotal();
             BigDecimal total = subtotal; // Add tax/discount logic here if needed
 
+            // Validate customer information based on NIT
+            if (!validateCustomerInformation()) {
+                return; // Validation errors already added to FacesContext
+            }
+
             // Validate payment
             if (cashReceived == null || cashReceived.compareTo(total) < 0) {
                 FacesContext.getCurrentInstance().addMessage(null,
@@ -460,6 +465,56 @@ public class SaleController implements Serializable {
         return sale != null &&
                SaleStatus.COMPLETED.equals(sale.getSaleStatus()) &&
                userController.isAdmin();
+    }
+
+    /**
+     * Check if customer information is required based on NIT
+     * If NIT is not "C/F", then customer information is required
+     */
+    public boolean isCustomerInfoRequired() {
+        return customerNit != null &&
+               !customerNit.trim().isEmpty() &&
+               !"C/F".equalsIgnoreCase(customerNit.trim());
+    }
+
+    /**
+     * Validate customer information when required
+     * @return true if validation passes, false otherwise
+     */
+    private boolean validateCustomerInformation() {
+        if (!isCustomerInfoRequired()) {
+            // Customer info not required when NIT is "C/F"
+            return true;
+        }
+
+        // When NIT is provided (not "C/F"), customer information is required
+        boolean isValid = true;
+
+        if (customerName == null || customerName.trim().isEmpty()) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Nombre requerido",
+                    "El nombre del cliente es requerido cuando se proporciona un NIT específico"));
+            isValid = false;
+        }
+
+        if (customerAddress == null || customerAddress.trim().isEmpty()) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Dirección requerida",
+                    "La dirección del cliente es requerida cuando se proporciona un NIT específico"));
+            isValid = false;
+        }
+
+        if (customerPhone == null || customerPhone.trim().isEmpty()) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Teléfono requerido",
+                    "El teléfono del cliente es requerido cuando se proporciona un NIT específico"));
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     /**
