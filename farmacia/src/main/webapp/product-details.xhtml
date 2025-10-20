@@ -32,6 +32,16 @@
                                         <p:menuitem value="#{productDetailsController.product.commercialName}" />
                                     </p:breadCrumb>
 
+                                    <!-- Action Buttons -->
+                                    <div class="mb-3">
+                                        <p:button value="View KARDEX"
+                                                  outcome="product-kardex"
+                                                  icon="pi pi-chart-line"
+                                                  styleClass="ui-button-info">
+                                            <f:param name="productId" value="#{productDetailsController.product.productId}" />
+                                        </p:button>
+                                    </div>
+
                                     <!-- Product Details Panel -->
                                     <p:panel header="Product Information" styleClass="mb-4">
                                         <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">

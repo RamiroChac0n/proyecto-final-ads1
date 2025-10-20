@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{productKardexController.checkAccess}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Product KARDEX - Inventory Movements</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Navigation breadcrumb -->
+                                    <p:breadCrumb styleClass="mb-3">
+                                        <p:menuitem value="Products" outcome="products" />
+                                        <p:menuitem value="#{productKardexController.product.commercialName}"
+                                                    outcome="product-details">
+                                            <f:param name="productId" value="#{productKardexController.product.productId}" />
+                                        </p:menuitem>
+                                        <p:menuitem value="KARDEX" />
+                                    </p:breadCrumb>
+
+                                    <!-- Product Information Header -->
+                                    <p:panel header="Product Information" styleClass="mb-4">
+                                        <div class="grid">
+                                            <div class="col-12 md:col-3">
+                                                <p:outputLabel value="Product ID:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.productId}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-6">
+                                                <p:outputLabel value="Commercial Name:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.commercialName}"
+                                                              styleClass="text-xl font-bold" />
+                                            </div>
+
+                                            <div class="col-12 md:col-3">
+                                                <p:outputLabel value="Brand:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.brand}"
+                                                              rendered="#{not empty productKardexController.product.brand}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty productKardexController.product.brand}"
+                                                              styleClass="text-muted" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Manufacturer:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.manufacturer}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Active Principle:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.activePrinciple.innName}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Concentration:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.concentration} #{productKardexController.product.concentrationUnit.unitCode}" />
+                                            </div>
+                                        </div>
+                                    </p:panel>
+
+                                    <!-- KARDEX Panel -->
+                                    <p:panel header="KARDEX - Inventory Movement History" styleClass="mb-4">
+                                        <p:dataTable id="dt-kardex"
+                                                     widgetVar="dtKardex"
+                                                     var="row"
+                                                     value="#{productKardexController.kardexRows}"
+                                                     reflow="true"
+                                                     styleClass="kardex-table"
+                                                     paginator="true"
+                                                     rows="20"
+                                                     paginatorPosition="bottom"
+                                                     emptyMessage="No inventory movements found for this product"
+                                                     filteredValue="#{productKardexController.filteredKardexRows}"
+                                                     sortMode="multiple">
+
+                                            <!-- Movement Date -->
+                                            <p:column headerText="Date/Time"
+                                                      sortBy="#{row.movement.movementDate}"
+                                                      filterBy="#{productKardexController.formatMovementDate(row.movement)}"
+                                                      filterMatchMode="contains"
+                                                      style="width: 180px;">
+                                                <h:outputText value="#{productKardexController.formatMovementDate(row.movement)}" />
+                                            </p:column>
+
+                                            <!-- Movement Type -->
+                                            <p:column headerText="Type"
+                                                      sortBy="#{row.movement.movementType}"
+                                                      filterBy="#{row.movement.movementType}"
+                                                      filterMatchMode="equals"
+                                                      style="width: 140px;">
+                                                <f:facet name="filter">
+                                                    <p:selectOneMenu onchange="PF('dtKardex').filter()" styleClass="w-full">
+                                                        <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                                        <f:selectItem itemLabel="IN" itemValue="IN" />
+                                                        <f:selectItem itemLabel="OUT" itemValue="OUT" />
+                                                        <f:selectItem itemLabel="ADJUSTMENT" itemValue="ADJUSTMENT" />
+                                                    </p:selectOneMenu>
+                                                </f:facet>
+                                                <div class="flex align-items-center">
+                                                    <i class="#{productKardexController.getMovementTypeIcon(row.movement.movementType)} mr-2 #{productKardexController.getMovementTypeClass(row.movement.movementType)}" />
+                                                    <p:tag value="#{row.movement.movementType}"
+                                                           severity="#{productKardexController.getMovementTypeSeverity(row.movement.movementType)}" />
+                                                </div>
+                                            </p:column>
+
+                                            <!-- Batch Number -->
+                                            <p:column headerText="Batch"
+                                                      filterBy="#{productKardexController.getBatchNumber(row.movement)}"
+                                                      filterMatchMode="contains"
+                                                      style="width: 140px;">
+                                                <h:outputText value="#{productKardexController.getBatchNumber(row.movement)}" />
+                                            </p:column>
+
+                                            <!-- Branch -->
+                                            <p:column headerText="Branch"
+                                                      filterBy="#{productKardexController.getBranchName(row.movement)}"
+                                                      filterMatchMode="contains"
+                                                      style="width: 150px;">
+                                                <h:outputText value="#{productKardexController.getBranchName(row.movement)}" />
+                                            </p:column>
+
+                                            <!-- Quantity (Effective) -->
+                                            <p:column headerText="Quantity"
+                                                      sortBy="#{row.effectiveQuantity}"
+                                                      style="width: 100px; text-align: right;">
+                                                <h:outputText value="#{row.effectiveQuantity}"
+                                                              styleClass="#{row.effectiveQuantity >= 0 ? 'text-success' : 'text-danger'} font-bold">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- Running Balance -->
+                                            <p:column headerText="Balance"
+                                                      sortBy="#{row.runningBalance}"
+                                                      style="width: 120px; text-align: right;">
+                                                <h:outputText value="#{row.runningBalance}"
+                                                              styleClass="font-bold text-primary"
+                                                              style="font-size: 1.1rem;">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- User -->
+                                            <p:column headerText="User"
+                                                      filterBy="#{productKardexController.getUserName(row.movement)}"
+                                                      filterMatchMode="contains"
+                                                      style="width: 150px;">
+                                                <h:outputText value="#{productKardexController.getUserName(row.movement)}" />
+                                            </p:column>
+
+                                            <!-- Reason -->
+                                            <p:column headerText="Reason"
+                                                      filterBy="#{row.movement.reason}"
+                                                      filterMatchMode="contains">
+                                                <h:outputText value="#{row.movement.reason}"
+                                                              rendered="#{not empty row.movement.reason}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty row.movement.reason}"
+                                                              styleClass="text-muted" />
+                                            </p:column>
+
+                                        </p:dataTable>
+
+                                        <!-- Export Options -->
+                                        <div class="mt-3">
+                                            <p:commandButton value="Export to Excel"
+                                                             icon="pi pi-file-excel"
+                                                             styleClass="ui-button-success mr-2">
+                                                <p:dataExporter type="xlsx" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
+                                            </p:commandButton>
+
+                                            <p:commandButton value="Export to PDF"
+                                                             icon="pi pi-file-pdf"
+                                                             styleClass="ui-button-danger mr-2">
+                                                <p:dataExporter type="pdf" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
+                                            </p:commandButton>
+
+                                            <p:commandButton value="Export to CSV"
+                                                             icon="pi pi-file"
+                                                             styleClass="ui-button-info">
+                                                <p:dataExporter type="csv" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
+                                            </p:commandButton>
+                                        </div>
+                                    </p:panel>
+
+                                </h:form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>
