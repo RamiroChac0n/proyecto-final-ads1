@@ -382,6 +382,19 @@ public class SaleController implements Serializable {
     }
 
     /**
+     * Calculate change based on cash received and total amount
+     * This method is called automatically when cash received changes
+     */
+    public void calculateChange() {
+        BigDecimal total = calculateTotal();
+        if (cashReceived != null && cashReceived.compareTo(BigDecimal.ZERO) > 0) {
+            changeGiven = cashReceived.subtract(total);
+        } else {
+            changeGiven = BigDecimal.ZERO;
+        }
+    }
+
+    /**
      * Generate unique sale number
      */
     private String generateSaleNumber() {

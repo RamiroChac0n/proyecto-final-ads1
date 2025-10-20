@@ -233,7 +233,10 @@
                                         <div class="p-field">
                                             <p:outputLabel for="cashReceived" value="Cash Received *" />
                                             <p:inputNumber id="cashReceived" value="#{saleController.cashReceived}"
-                                                          decimalPlaces="2" minValue="0" symbol="Q " />
+                                                          decimalPlaces="2" minValue="0" symbol="Q ">
+                                                <p:ajax event="change" listener="#{saleController.calculateChange}"
+                                                       update="payment-panel" />
+                                            </p:inputNumber>
                                         </div>
                                         <div class="p-field">
                                             <p:outputLabel value="Change:" />
