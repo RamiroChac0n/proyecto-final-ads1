@@ -5,7 +5,7 @@
     <artifactId>farmacia</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>farmacia-1.0-SNAPSHOT</name>
+    <name>salud+</name>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -158,5 +158,6 @@
                 <version>3.3.2</version>
             </plugin>
         </plugins>
+        <finalName>salud+</finalName>
     </build>
 </project>
