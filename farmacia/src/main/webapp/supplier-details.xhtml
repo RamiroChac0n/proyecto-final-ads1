@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{userController.checkLogin}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Detalles del Proveedor</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <h:panelGroup rendered="#{supplierDetailsController.supplier != null}">
+                                        <!-- Navigation breadcrumb -->
+                                        <p:breadCrumb styleClass="mb-3">
+                                            <p:menuitem value="Proveedores" outcome="suppliers" />
+                                            <p:menuitem value="#{supplierDetailsController.supplier.businessName}" />
+                                        </p:breadCrumb>
+
+                                        <!-- Basic Information Panel -->
+                                        <p:panel header="Información Básica" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Código:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.supplierCode}" />
+
+                                                <p:outputLabel value="NIT:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.taxId}" />
+
+                                                <p:outputLabel value="Nombre Oficial:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.businessName}" />
+
+                                                <p:outputLabel value="Nombre Comercial:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.tradeName}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.tradeName}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.tradeName}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Estado:" styleClass="font-bold" />
+                                                <p:tag severity="#{supplierDetailsController.supplier.isActive ? 'success' : 'danger'}"
+                                                       value="#{supplierDetailsController.supplier.isActive ? 'Activo' : 'Inactivo'}" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Contact Information Panel -->
+                                        <p:panel header="Información de Contacto" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Persona de Contacto:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.contactPerson}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.contactPerson}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.contactPerson}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Teléfono:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.phone}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.phone}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.phone}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Correo Electrónico:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.email}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.email}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.email}"
+                                                              styleClass="text-muted" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Location Information Panel -->
+                                        <p:panel header="Información de Ubicación" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Dirección:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.address}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.address}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.address}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Ciudad:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.city}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.city}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.city}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="País:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.country}" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Notes and Audit Information Panel -->
+                                        <p:panel header="Notas y Auditoría" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Notas:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.notes}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.notes}" />
+                                                <h:outputText value="Sin notas"
+                                                              rendered="#{empty supplierDetailsController.supplier.notes}"
+                                                              styleClass="text-muted" />
+
+                                                <h:outputText value="" />
+                                                <h:outputText value="" />
+
+                                                <p:outputLabel value="Fecha de Creación:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.createdAt}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                </h:outputText>
+
+                                                <p:outputLabel value="Última Actualización:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.updatedAt}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                </h:outputText>
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                    </h:panelGroup>
+
+                                    <h:panelGroup rendered="#{supplierDetailsController.supplier == null}">
+                                        <div class="card">
+                                            <div style="text-align: center; padding: 50px;">
+                                                <i class="pi pi-exclamation-triangle" style="font-size: 4rem; color: #f59e0b;"></i>
+                                                <h3 style="color: #6c757d; margin-top: 20px;">Proveedor no encontrado</h3>
+                                                <p style="color: #6c757d;">
+                                                    El proveedor solicitado no existe o no está disponible.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+
+                                </h:form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>
