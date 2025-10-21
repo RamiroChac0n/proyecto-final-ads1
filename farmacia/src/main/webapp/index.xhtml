@@ -13,7 +13,7 @@
     <ui:composition template="/templates/main-template.xhtml">
 
         <!-- Page title -->
-        <ui:define name="title">User Management</ui:define>
+        <ui:define name="title">Gestión de Usuarios</ui:define>
 
         <!-- Page content -->
         <ui:define name="content">
@@ -26,7 +26,7 @@
                                     <p:growl id="messages" showDetail="true" />
                                     <p:toolbar>
                                         <p:toolbarGroup>
-                                            <p:commandButton value="New"
+                                            <p:commandButton value="Nuevo"
                                                              icon="pi pi-plus"
                                                              actionListener="#{userController.createNew()}"
                                                              update=":dialogs:panel-content"
@@ -50,9 +50,9 @@
                                                  paginatorPosition="bottom">
                                         <f:facet name="header">
                                             <div class="products-table-header">
-                                                <span style="font-weight: bold">Users</span>
+                                                <span style="font-weight: bold">Usuarios</span>
                                                 <span class="filter-container ui-input-icon-left"> <i class="pi pi-search"></i>
-                                                    <p:inputText id="globalFilter" onkeyup="PrimeFaces.debounce(() => PF('dtUsers').filter())" placeholder="Search" />
+                                                    <p:inputText id="globalFilter" onkeyup="PrimeFaces.debounce(() => PF('dtUsers').filter())" placeholder="Buscar" />
                                                 </span>
                                             </div>
                                         </f:facet>
@@ -61,22 +61,22 @@
                                             <h:outputText value="#{user.id}" />
                                         </p:column>
 
-                                        <p:column headerText="First Name" sortBy="#{user.firstName}" filterBy="#{user.firstName}">
+                                        <p:column headerText="Nombre" sortBy="#{user.firstName}" filterBy="#{user.firstName}">
                                             <h:outputText value="#{user.firstName}" />
                                         </p:column>
-                                        <p:column headerText="Last Name" sortBy="#{user.lastName}" filterBy="#{user.lastName}">
+                                        <p:column headerText="Apellido" sortBy="#{user.lastName}" filterBy="#{user.lastName}">
                                             <h:outputText value="#{user.lastName}" />
                                         </p:column>
-                                        <p:column headerText="Username" sortBy="#{user.userName}" filterBy="#{user.userName}">
+                                        <p:column headerText="Usuario" sortBy="#{user.userName}" filterBy="#{user.userName}">
                                             <h:outputText value="#{user.userName}" />
                                         </p:column>
-                                        <p:column headerText="Phone Number" sortBy="#{user.phoneNumber}" filterBy="#{user.phoneNumber}">
+                                        <p:column headerText="Teléfono" sortBy="#{user.phoneNumber}" filterBy="#{user.phoneNumber}">
                                             <h:outputText value="#{user.phoneNumber}" />
                                         </p:column>
-                                        <p:column headerText="Email" sortBy="#{user.email}" filterBy="#{user.email}">
+                                        <p:column headerText="Correo Electrónico" sortBy="#{user.email}" filterBy="#{user.email}">
                                             <h:outputText value="#{user.email}" />
                                         </p:column>
-                                        <p:column headerText="Role" sortBy="#{user.role}" filterBy="#{user.role}">
+                                        <p:column headerText="Rol" sortBy="#{user.role}" filterBy="#{user.role}">
                                             <h:outputText value="#{user.role}" />
                                         </p:column>
                                         <p:column ariaHeaderText="Acciones" rendered="#{userController.admin}">
@@ -101,7 +101,7 @@
 
 
                                 <h:form id="dialogs" rendered="#{userController.admin}">
-                                    <p:dialog header="User"
+                                    <p:dialog header="Usuario"
                                               showEffect="fade"
                                               modal="true"
                                               widgetVar="dlgUserRegister"
@@ -111,33 +111,33 @@
                                                 <div class="field">
                                                     <p:outputLabel for="id">ID *</p:outputLabel>
                                                     <p:inputText id="id" value="#{userController.user.id}" required="true"
-                                                               placeholder="Enter ID (minimum 13 characters)"
-                                                               validatorMessage="ID must be at least 13 characters long"
+                                                               placeholder="Ingrese ID (mínimo 13 caracteres)"
+                                                               validatorMessage="El ID debe tener al menos 13 caracteres"
                                                                maxlength="13">
                                                         <f:validateLength minimum="13" />
                                                     </p:inputText>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="firstName">First Name</p:outputLabel>
+                                                    <p:outputLabel for="firstName">Nombre</p:outputLabel>
                                                     <p:inputText id="firstName" value="#{userController.user.firstName}" required="true"
-                                                               placeholder="Enter first name"
-                                                               validatorMessage="First name cannot be blank and must be 20 characters or less" maxlength="13">
+                                                               placeholder="Ingrese nombre"
+                                                               validatorMessage="El nombre no puede estar vacío y debe tener 20 caracteres o menos" maxlength="13">
                                                         <f:validateLength maximum="20" />
                                                     </p:inputText>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="lastName">Last Name</p:outputLabel>
+                                                    <p:outputLabel for="lastName">Apellido</p:outputLabel>
                                                     <p:inputText id="lastName" value="#{userController.user.lastName}" required="true"
-                                                               placeholder="Enter last name"
-                                                               validatorMessage="Last name cannot be blank and must be 20 characters or less">
+                                                               placeholder="Ingrese apellido"
+                                                               validatorMessage="El apellido no puede estar vacío y debe tener 20 caracteres o menos">
                                                         <f:validateLength maximum="20" />
                                                     </p:inputText>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="phone-number">Phone Number</p:outputLabel>
+                                                    <p:outputLabel for="phone-number">Teléfono</p:outputLabel>
                                                     <p:inputText id="phone-number" value="#{userController.user.phoneNumber}"
-                                                               placeholder="Enter 8-digit phone number (optional)"
-                                                               validatorMessage="Phone number must be exactly 8 digits"
+                                                               placeholder="Ingrese teléfono de 8 dígitos (opcional)"
+                                                               validatorMessage="El teléfono debe tener exactamente 8 dígitos"
                                                                maxlength="8"
                                                                required="true">
                                                         <f:validateLength minimum="8" maximum="8" />
@@ -145,30 +145,30 @@
                                                     </p:inputText>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="email">Email *</p:outputLabel>
+                                                    <p:outputLabel for="email">Correo Electrónico *</p:outputLabel>
                                                     <p:inputText id="email" value="#{userController.user.email}" required="true"
-                                                               placeholder="Enter valid email address"
-                                                               validatorMessage="Please enter a valid email address">
+                                                               placeholder="Ingrese dirección de correo válida"
+                                                               validatorMessage="Por favor ingrese una dirección de correo válida">
                                                         <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" />
                                                         <f:validateLength maximum="100" />
                                                     </p:inputText>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="password">Password</p:outputLabel>
+                                                    <p:outputLabel for="password">Contraseña</p:outputLabel>
                                                     <p:password id="password" value="#{userController.user.password}" required="true"
-                                                              feedback="true" placeholder="Enter password"
-                                                              validatorMessage="Password cannot be blank and must be 255 characters or less">
+                                                              feedback="true" placeholder="Ingrese contraseña"
+                                                              validatorMessage="La contraseña no puede estar vacía y debe tener 255 caracteres o menos">
                                                         <f:validateLength maximum="255" />
                                                     </p:password>
                                                 </div>
                                                 <div class="field">
-                                                    <p:outputLabel for="role">Role</p:outputLabel>
+                                                    <p:outputLabel for="role">Rol</p:outputLabel>
                                                     <p:selectOneMenu id="role" value="#{userController.user.role}" required="true"
-                                                                   requiredMessage="Please select a role">
-                                                        <f:selectItem itemLabel="Select a role..." itemValue="" noSelectionOption="true" />
-                                                        <f:selectItem itemLabel="CASHIER" itemValue="CASHIER"/>
-                                                        <f:selectItem itemLabel="STOREKEEPER" itemValue="STOREKEEPER"/>
-                                                        <f:selectItem itemLabel="ADMIN" itemValue="ADMIN"/>
+                                                                   requiredMessage="Por favor seleccione un rol">
+                                                        <f:selectItem itemLabel="Seleccione un rol..." itemValue="" noSelectionOption="true" />
+                                                        <f:selectItem itemLabel="CAJERO" itemValue="CASHIER"/>
+                                                        <f:selectItem itemLabel="BODEGUERO" itemValue="STOREKEEPER"/>
+                                                        <f:selectItem itemLabel="ADMINISTRADOR" itemValue="ADMIN"/>
                                                     </p:selectOneMenu>
                                                 </div>
 
@@ -176,20 +176,20 @@
                                         </p:outputPanel>
 
                                         <f:facet name="footer">
-                                            <p:commandButton value="Save" icon="pi pi-check"
+                                            <p:commandButton value="Guardar" icon="pi pi-check"
                                                              actionListener="#{userController.save()}"
                                                              update="panel-content :form:dt-users :form:messages"
                                                              process="panel-content @this"
                                                              oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgUserRegister').hide()" />
-                                            <p:commandButton value="Cancel" icon="pi pi-times"
+                                            <p:commandButton value="Cancelar" icon="pi pi-times"
                                                              onclick="PF('dlgUserRegister').hide()"
                                                              class="ui-button-secondary"
                                                              type="button" />
                                         </f:facet>
                                     </p:dialog>
                                     <p:confirmDialog widgetVar="dlgDeleteUser" showEffect="fade" width="300"
-                                                     message="Eliminar a la user?" header="Confirm" severity="warn">
-                                        <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{userController.delete()}"
+                                                     message="¿Eliminar este usuario?" header="Confirmar" severity="warn">
+                                        <p:commandButton value="Sí" icon="pi pi-check" actionListener="#{userController.delete()}"
                                                          process="@this"
                                                          oncomplete="PF('dlgDeleteUser').hide()" />
                                         <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"

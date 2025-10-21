@@ -171,19 +171,19 @@ public class ProductController implements Serializable {
             if (product.getProductId() == null) {
                 // New product
                 productService.save(product);
-                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Product added successfully"));
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Producto agregado exitosamente"));
             } else {
                 // Existing product
                 productService.edit(product);
-                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Product updated successfully"));
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Producto actualizado exitosamente"));
             }
             refreshProducts();
             createNew();
             PrimeFaces.current().executeScript("PF('dlgProductRegister').hide()");
             PrimeFaces.current().ajax().update("form:messages", "form:dt-products");
         } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to save product: " + e.getMessage()));
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Error al guardar el producto: " + e.getMessage()));
         }
     }
 
@@ -191,10 +191,10 @@ public class ProductController implements Serializable {
         try {
             productService.delete(product);
             refreshProducts();
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Product deleted successfully"));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Producto eliminado exitosamente"));
         } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null, 
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to delete product: " + e.getMessage()));
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Error al eliminar el producto: " + e.getMessage()));
         }
         
         PrimeFaces.current().executeScript("PF('dlgDeleteProduct').hide()");

@@ -113,7 +113,7 @@ public class ProductDetailsController implements Serializable {
             if (product == null) {
                 LOGGER.warning("Product not found with ID: " + productId);
                 FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Product not found"));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Producto no encontrado"));
                 redirectToProducts();
             }
         }
@@ -174,12 +174,12 @@ public class ProductDetailsController implements Serializable {
                 // New batch
                 productBatchService.addBatchToExistingProduct(productId, currentBatch);
                 FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage("Batch added successfully"));
+                    new FacesMessage("Lote agregado exitosamente"));
             } else {
                 // Existing batch
                 productBatchService.edit(currentBatch);
                 FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage("Batch updated successfully"));
+                    new FacesMessage("Lote actualizado exitosamente"));
             }
 
             loadBatches();
@@ -189,11 +189,11 @@ public class ProductDetailsController implements Serializable {
         } catch (IllegalArgumentException e) {
             LOGGER.warning("Validation error saving batch: " + e.getMessage());
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", e.getMessage()));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error de Validación", e.getMessage()));
         } catch (Exception e) {
             LOGGER.severe("Error saving batch: " + e.getMessage());
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to save batch: " + e.getMessage()));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Error al guardar el lote: " + e.getMessage()));
         }
     }
 
@@ -204,12 +204,12 @@ public class ProductDetailsController implements Serializable {
             productBatchService.delete(currentBatch);
             loadBatches();
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage("Batch deleted successfully"));
+                new FacesMessage("Lote eliminado exitosamente"));
 
         } catch (Exception e) {
             LOGGER.severe("Error deleting batch: " + e.getMessage());
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to delete batch: " + e.getMessage()));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Error al eliminar el lote: " + e.getMessage()));
         }
 
         PrimeFaces.current().executeScript("PF('dlgDeleteBatch').hide()");

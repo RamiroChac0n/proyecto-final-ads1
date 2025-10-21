@@ -22,44 +22,44 @@
                     <div style="flex: 1;">
                         <p:tabMenu activeIndex="#{menuController.userActiveTabIndex}">
                             <!-- Home - Visible to all authenticated users -->
-                            <p:menuitem value="Home"
+                            <p:menuitem value="Inicio"
                                        outcome="home"
                                        icon="pi pi-fw pi-home" />
 
                             <!-- User Management - ADMIN only -->
-                            <p:menuitem value="User Management"
+                            <p:menuitem value="Gestión de Usuarios"
                                        outcome="index"
                                        icon="pi pi-fw pi-users"
                                        rendered="#{userController.isAdmin()}" />
 
                             <!-- Product Management - ADMIN only -->
-                            <p:menuitem value="Product Management"
+                            <p:menuitem value="Gestión de Productos"
                                        outcome="products"
                                        icon="pi pi-fw pi-shopping-cart"
                                        rendered="#{userController.isAdmin()}" />
 
                             <!-- Cash Register - ADMIN only -->
-                            <p:menuitem value="Cash Register"
+                            <p:menuitem value="Caja Registradora"
                                        outcome="cash-register"
                                        icon="pi pi-fw pi-money-bill"
                                        rendered="#{userController.isAdmin()}" />
 
                             <!-- Sales - ADMIN and CASHIER -->
-                            <p:menuitem value="Sales"
+                            <p:menuitem value="Ventas"
                                        outcome="sales"
                                        icon="pi pi-fw pi-shopping-bag"
                                        rendered="#{userController.isAdminOrCashier()}" />
 
                             <!-- Inventory - ADMIN and STOREKEEPER (Future implementation) -->
                             <!-- Uncomment when inventory views are implemented
-                            <p:menuitem value="Inventory"
+                            <p:menuitem value="Inventario"
                                        outcome="inventory"
                                        icon="pi pi-fw pi-box"
                                        rendered="#{userController.isAdmin() or userController.getCurrentUser().role == 'STOREKEEPER'}" />
                             -->
 
                             <!-- Logout - Visible to all -->
-                            <p:menuitem value="Logout"
+                            <p:menuitem value="Cerrar Sesión"
                                        action="#{menuController.logout}"
                                        icon="pi pi-fw pi-sign-out" />
                         </p:tabMenu>

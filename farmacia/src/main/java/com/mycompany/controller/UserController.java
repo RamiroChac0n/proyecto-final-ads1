@@ -47,7 +47,7 @@ public class UserController implements Serializable {
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("user", user);
             return "home?faces-redirect=true";
         } else {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login Error", "Invalid credentials"));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error de Inicio de Sesión", "Credenciales inválidas"));
             return null;
         }
     }
@@ -145,10 +145,10 @@ public class UserController implements Serializable {
         User existing = userService.findById(user.getId());
         if (existing == null) {
             userService.save(user);
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User added"));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Usuario agregado exitosamente"));
         } else {
             userService.edit(user);
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User edited"));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Usuario editado exitosamente"));
         }
         refreshUsers();
         createNew();
@@ -175,7 +175,7 @@ public class UserController implements Serializable {
         } else {
             userService.delete(user);
             refreshUsers();
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("User deleted"));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Usuario eliminado exitosamente"));
         }
         
         PrimeFaces.current().executeScript("PF('dlgDeleteUser').hide()");

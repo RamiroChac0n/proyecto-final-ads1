@@ -5,22 +5,22 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
-        <title>Login</title>
+        <title>Inicio de Sesión</title>
     </h:head>
     <h:body>
         <p:growl id="growl" showDetail="true" />
 
         <h:form id="loginForm">
-            <p:panel header="Login">
+            <p:panel header="Iniciar Sesión">
                 <h:panelGrid columns="2" cellpadding="5">
-                    <p:outputLabel for="username" value="Username:" />
-                    <p:inputText id="username" value="#{userController.username}" required="true" label="username" autocomplete="on"/>
+                    <p:outputLabel for="username" value="Usuario:" />
+                    <p:inputText id="username" value="#{userController.username}" required="true" label="usuario" autocomplete="on"/>
 
-                    <p:outputLabel for="password" value="Password:" />
-                    <p:password id="password" value="#{userController.password}" required="true" label="password" autocomplete="on"/>
+                    <p:outputLabel for="password" value="Contraseña:" />
+                    <p:password id="password" value="#{userController.password}" required="true" label="contraseña" autocomplete="on"/>
 
                     <f:facet name="footer">
-                        <p:commandButton value="Login" action="#{userController.login}" update="growl"/>
+                        <p:commandButton value="Ingresar" action="#{userController.login}" update="growl"/>
                     </f:facet>
                 </h:panelGrid>
             </p:panel>

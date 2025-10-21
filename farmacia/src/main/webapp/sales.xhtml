@@ -14,7 +14,7 @@
     <ui:composition template="/templates/main-template.xhtml">
 
         <!-- Page title -->
-        <ui:define name="title">Sales - Pharmacy Management</ui:define>
+        <ui:define name="title">Ventas - Sistema de Farmacia</ui:define>
 
         <!-- Additional head content for page-specific styles -->
         <ui:define name="head">
@@ -50,7 +50,7 @@
             <div class="p-grid p-m-2">
                 <div class="p-col-12">
                     <h1>
-                        <i class="pi pi-shopping-bag"></i> Sales Management
+                        <i class="pi pi-shopping-bag"></i> Gestión de Ventas
                     </h1>
                 </div>
             </div>
@@ -60,17 +60,17 @@
 
                 <p:tabView>
                     <!-- TAB 1: New Sale -->
-                    <p:tab title="New Sale">
+                    <p:tab title="Nueva Venta">
                         <div class="p-grid">
                             <!-- Left Column: Product Selection and Cart -->
                             <div class="p-col-12 p-md-8">
                                 <!-- Branch Selection -->
-                                <p:panel header="Branch and Cash Register" styleClass="p-mb-3">
+                                <p:panel header="Sucursal y Caja Registradora" styleClass="p-mb-3">
                                     <div class="p-fluid p-formgrid p-grid">
                                         <div class="p-field p-col-12 p-md-6">
-                                            <p:outputLabel for="branch" value="Branch *" />
+                                            <p:outputLabel for="branch" value="Sucursal *" />
                                             <p:selectOneMenu id="branch" value="#{saleController.selectedBranchId}" required="true">
-                                                <f:selectItem itemLabel="Select Branch" itemValue="#{null}" noSelectionOption="true" />
+                                                <f:selectItem itemLabel="Seleccione Sucursal" itemValue="#{null}" noSelectionOption="true" />
                                                 <f:selectItems value="#{saleController.branches}"
                                                              var="branch"
                                                              itemLabel="#{branch.branchName}"
@@ -79,26 +79,26 @@
                                             </p:selectOneMenu>
                                         </div>
                                         <h:panelGroup id="cash-register-info" layout="block" styleClass="p-field p-col-12 p-md-6">
-                                            <p:outputLabel value="Cash Register Status:" />
+                                            <p:outputLabel value="Estado de Caja:" />
                                             <h:panelGroup rendered="#{saleController.hasOpenCashRegister()}">
-                                                <p:tag severity="success" value="Open" icon="pi pi-check" />
+                                                <p:tag severity="success" value="Abierta" icon="pi pi-check" />
                                             </h:panelGroup>
                                             <h:panelGroup rendered="#{!saleController.hasOpenCashRegister() and saleController.selectedBranchId != null}">
-                                                <p:tag severity="danger" value="No open cash register" icon="pi pi-times" />
+                                                <p:tag severity="danger" value="Sin caja abierta" icon="pi pi-times" />
                                             </h:panelGroup>
                                         </h:panelGroup>
                                     </div>
                                 </p:panel>
 
                                 <!-- Product Selection -->
-                                <p:panel header="Add Products" styleClass="p-mb-3">
+                                <p:panel header="Agregar Productos" styleClass="p-mb-3">
                                     <div class="p-fluid p-formgrid p-grid">
                                         <div class="p-field p-col-12 p-md-6">
-                                            <p:outputLabel for="product" value="Product *" />
+                                            <p:outputLabel for="product" value="Producto *" />
                                             <p:selectOneMenu id="product" value="#{saleController.selectedProduct}"
                                                             converter="omnifaces.SelectItemsConverter"
                                                             filter="true">
-                                                <f:selectItem itemLabel="Select Product" itemValue="#{null}" noSelectionOption="true" />
+                                                <f:selectItem itemLabel="Seleccione Producto" itemValue="#{null}" noSelectionOption="true" />
                                                 <f:selectItems value="#{saleController.availableProducts}"
                                                              var="prod"
                                                              itemLabel="#{prod.commercialName} - #{prod.brand}"
@@ -107,53 +107,53 @@
                                             </p:selectOneMenu>
                                         </div>
                                         <div class="p-field p-col-12 p-md-3">
-                                            <p:outputLabel for="quantity" value="Quantity *" />
+                                            <p:outputLabel for="quantity" value="Cantidad *" />
                                             <p:inputNumber id="quantity" value="#{saleController.selectedQuantity}"
                                                           decimalPlaces="0" minValue="1" />
                                         </div>
                                         <div class="p-field p-col-12 p-md-3" style="display: flex; align-items: flex-end;">
-                                            <p:commandButton value="Add to Cart" icon="pi pi-plus"
+                                            <p:commandButton value="Agregar al Carrito" icon="pi pi-plus"
                                                             action="#{saleController.addToCart}"
                                                             update="cart-table totals-panel messages"
                                                             styleClass="p-button-success" />
                                         </div>
                                     </div>
                                     <h:panelGroup id="stock-info">
-                                        <p:outputLabel value="Available Stock: " rendered="#{saleController.selectedProduct != null}" />
-                                        <p:tag value="#{saleController.getAvailableQuantity(saleController.selectedProduct)} units"
+                                        <p:outputLabel value="Stock Disponible: " rendered="#{saleController.selectedProduct != null}" />
+                                        <p:tag value="#{saleController.getAvailableQuantity(saleController.selectedProduct)} unidades"
                                               severity="info"
                                               rendered="#{saleController.selectedProduct != null}" />
                                     </h:panelGroup>
                                 </p:panel>
 
                                 <!-- Shopping Cart -->
-                                <p:panel header="Shopping Cart" styleClass="p-mb-3">
+                                <p:panel header="Carrito de Compras" styleClass="p-mb-3">
                                     <p:dataTable id="cart-table" value="#{saleController.cartItems}" var="item"
-                                                emptyMessage="No items in cart"
+                                                emptyMessage="No hay productos en el carrito"
                                                 paginator="false">
-                                        <p:column headerText="Product">
+                                        <p:column headerText="Producto">
                                             <div class="product-info">
                                                 <span class="product-name">#{item.product.commercialName}</span>
                                                 <span class="product-details">#{item.product.brand} - #{item.product.manufacturer}</span>
                                             </div>
                                         </p:column>
-                                        <p:column headerText="Quantity" style="width: 100px; text-align: center;">
+                                        <p:column headerText="Cantidad" style="width: 100px; text-align: center;">
                                             <h:outputText value="#{item.quantity}" />
                                         </p:column>
-                                        <p:column headerText="Unit Price" style="width: 120px; text-align: right;">
+                                        <p:column headerText="Precio Unitario" style="width: 120px; text-align: right;">
                                             <h:outputText value="#{saleController.formatCurrency(item.unitPrice)}" />
                                         </p:column>
-                                        <p:column headerText="Line Total" style="width: 120px; text-align: right;">
+                                        <p:column headerText="Total Línea" style="width: 120px; text-align: right;">
                                             <h:outputText value="#{saleController.formatCurrency(item.lineTotal)}" />
                                         </p:column>
-                                        <p:column headerText="Prescription" style="width: 100px; text-align: center;">
-                                            <p:tag value="Required" severity="warning" rendered="#{item.requiresPrescription}" />
+                                        <p:column headerText="Receta" style="width: 100px; text-align: center;">
+                                            <p:tag value="Requerida" severity="warning" rendered="#{item.requiresPrescription}" />
                                         </p:column>
                                         <p:column style="width: 80px; text-align: center;">
                                             <p:commandButton icon="pi pi-trash" styleClass="p-button-danger p-button-text"
                                                             action="#{saleController.removeFromCart(item)}"
                                                             update="cart-table totals-panel messages">
-                                                <p:confirm header="Confirm" message="Remove this product from cart?" icon="pi pi-exclamation-triangle" />
+                                                <p:confirm header="Confirmar" message="¿Eliminar este producto del carrito?" icon="pi pi-exclamation-triangle" />
                                             </p:commandButton>
                                         </p:column>
                                     </p:dataTable>
@@ -163,7 +163,7 @@
                             <!-- Right Column: Customer Info, Payment, and Totals -->
                             <div class="p-col-12 p-md-4">
                                 <!-- Customer Information -->
-                                <p:panel id="customer-panel" header="Customer Information" styleClass="p-mb-3">
+                                <p:panel id="customer-panel" header="Información del Cliente" styleClass="p-mb-3">
                                     <div class="p-fluid">
                                         <div class="p-field">
                                             <p:outputLabel for="customerNit" value="NIT" />
@@ -174,42 +174,42 @@
                                         </div>
                                         <div class="p-field">
                                             <p:outputLabel for="customerName">
-                                                <h:outputText value="Name" />
+                                                <h:outputText value="Nombre" />
                                                 <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
                                             </p:outputLabel>
                                             <p:inputText id="customerName"
                                                         value="#{saleController.customerName}"
                                                         required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="Customer name is required when NIT is provided" />
+                                                        requiredMessage="El nombre del cliente es requerido cuando se proporciona NIT" />
                                             <p:message for="customerName" />
                                         </div>
                                         <div class="p-field">
                                             <p:outputLabel for="customerAddress">
-                                                <h:outputText value="Address" />
+                                                <h:outputText value="Dirección" />
                                                 <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
                                             </p:outputLabel>
                                             <p:inputText id="customerAddress"
                                                         value="#{saleController.customerAddress}"
                                                         required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="Customer address is required when NIT is provided" />
+                                                        requiredMessage="La dirección del cliente es requerida cuando se proporciona NIT" />
                                             <p:message for="customerAddress" />
                                         </div>
                                         <div class="p-field">
                                             <p:outputLabel for="customerPhone">
-                                                <h:outputText value="Phone" />
+                                                <h:outputText value="Teléfono" />
                                                 <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
                                             </p:outputLabel>
                                             <p:inputText id="customerPhone"
                                                         value="#{saleController.customerPhone}"
                                                         required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="Customer phone is required when NIT is provided" />
+                                                        requiredMessage="El teléfono del cliente es requerido cuando se proporciona NIT" />
                                             <p:message for="customerPhone" />
                                         </div>
                                     </div>
                                 </p:panel>
 
                                 <!-- Totals -->
-                                <p:panel id="totals-panel" header="Sale Totals" styleClass="totals-panel p-mb-3">
+                                <p:panel id="totals-panel" header="Totales de la Venta" styleClass="totals-panel p-mb-3">
                                     <div class="p-grid">
                                         <div class="p-col-6">
                                             <strong>Subtotal:</strong>
@@ -228,10 +228,10 @@
                                 </p:panel>
 
                                 <!-- Payment -->
-                                <p:panel id="payment-panel" header="Payment" styleClass="p-mb-3">
+                                <p:panel id="payment-panel" header="Pago" styleClass="p-mb-3">
                                     <div class="p-fluid">
                                         <div class="p-field">
-                                            <p:outputLabel for="cashReceived" value="Cash Received *" />
+                                            <p:outputLabel for="cashReceived" value="Efectivo Recibido *" />
                                             <p:inputNumber id="cashReceived" value="#{saleController.cashReceived}"
                                                           decimalPlaces="2" minValue="0" symbol="Q ">
                                                 <p:ajax event="change" listener="#{saleController.calculateChange}"
@@ -239,7 +239,7 @@
                                             </p:inputNumber>
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel value="Change:" />
+                                            <p:outputLabel value="Cambio:" />
                                             <h:outputText value="#{saleController.formatCurrency(saleController.changeGiven)}"
                                                          style="font-size: 1.2em; font-weight: bold; color: #007bff;" />
                                         </div>
@@ -247,39 +247,39 @@
                                 </p:panel>
 
                                 <!-- Process Sale Button -->
-                                <p:commandButton value="Process Sale" icon="pi pi-check"
+                                <p:commandButton value="Procesar Venta" icon="pi pi-check"
                                                 action="#{saleController.processSale}"
                                                 update="form"
                                                 styleClass="p-button-success p-button-lg"
                                                 style="width: 100%;">
-                                    <p:confirm header="Confirm Sale" message="Process this sale?" icon="pi pi-question-circle" />
+                                    <p:confirm header="Confirmar Venta" message="¿Procesar esta venta?" icon="pi pi-question-circle" />
                                 </p:commandButton>
                             </div>
                         </div>
                     </p:tab>
 
                     <!-- TAB 2: Sales History -->
-                    <p:tab title="Sales History">
+                    <p:tab title="Historial de Ventas">
                         <p:dataTable id="sales-history" value="#{saleController.salesHistory}" var="sale"
                                     paginator="true" rows="15"
                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                                     rowsPerPageTemplate="10,15,25,50"
-                                    emptyMessage="No sales found">
+                                    emptyMessage="No se encontraron ventas">
 
-                            <p:column headerText="Sale No." sortBy="#{sale.saleNumber}" filterBy="#{sale.saleNumber}">
+                            <p:column headerText="No. de Venta" sortBy="#{sale.saleNumber}" filterBy="#{sale.saleNumber}">
                                 <h:outputText value="#{sale.saleNumber}" />
                             </p:column>
 
-                            <p:column headerText="Date" sortBy="#{sale.saleDate}">
+                            <p:column headerText="Fecha" sortBy="#{sale.saleDate}">
                                 <h:outputText value="#{saleController.formatDate(sale.saleDate)}" />
                             </p:column>
 
-                            <p:column headerText="Customer">
+                            <p:column headerText="Cliente">
                                 <h:outputText value="#{sale.customerName}" rendered="#{sale.customerName != null and sale.customerName != ''}" />
                                 <h:outputText value="#{sale.customerNit}" rendered="#{sale.customerName == null or sale.customerName == ''}" />
                             </p:column>
 
-                            <p:column headerText="Cashier">
+                            <p:column headerText="Cajero">
                                 <h:outputText value="#{sale.user.firstName} #{sale.user.lastName}" />
                             </p:column>
 
@@ -287,7 +287,7 @@
                                 <h:outputText value="#{saleController.formatCurrency(sale.totalAmount)}" />
                             </p:column>
 
-                            <p:column headerText="Status" style="width: 120px; text-align: center;">
+                            <p:column headerText="Estado" style="width: 120px; text-align: center;">
                                 <p:tag value="#{saleController.getStatusLabel(sale.saleStatus)}"
                                       severity="#{saleController.getStatusSeverity(sale.saleStatus)}" />
                             </p:column>
@@ -303,8 +303,8 @@
                                                 rendered="#{saleController.canCancelSale(sale)}"
                                                 action="#{saleController.cancelSale(sale)}"
                                                 update="sales-history messages">
-                                    <p:confirm header="Confirm Cancellation"
-                                              message="Cancel this sale? Inventory will be restored."
+                                    <p:confirm header="Confirmar Cancelación"
+                                              message="¿Cancelar esta venta? El inventario será restaurado."
                                               icon="pi pi-exclamation-triangle" />
                                 </p:commandButton>
                             </p:column>
@@ -313,27 +313,27 @@
                 </p:tabView>
 
                 <!-- Sale Detail Dialog -->
-                <p:dialog id="sale-detail-dialog" header="Sale Details" widgetVar="saleDetailDialog"
+                <p:dialog id="sale-detail-dialog" header="Detalles de la Venta" widgetVar="saleDetailDialog"
                          modal="true" width="800" responsive="true">
                     <h:panelGroup rendered="#{saleController.selectedSale != null}">
                         <div class="p-grid">
                             <div class="p-col-6">
-                                <strong>Sale Number:</strong> #{saleController.selectedSale.saleNumber}
+                                <strong>No. de Venta:</strong> #{saleController.selectedSale.saleNumber}
                             </div>
                             <div class="p-col-6">
-                                <strong>Date:</strong> #{saleController.formatDate(saleController.selectedSale.saleDate)}
+                                <strong>Fecha:</strong> #{saleController.formatDate(saleController.selectedSale.saleDate)}
                             </div>
                             <div class="p-col-6">
-                                <strong>Customer:</strong> #{saleController.selectedSale.customerName}
+                                <strong>Cliente:</strong> #{saleController.selectedSale.customerName}
                             </div>
                             <div class="p-col-6">
                                 <strong>NIT:</strong> #{saleController.selectedSale.customerNit}
                             </div>
                             <div class="p-col-6">
-                                <strong>Cashier:</strong> #{saleController.selectedSale.user.firstName} #{saleController.selectedSale.user.lastName}
+                                <strong>Cajero:</strong> #{saleController.selectedSale.user.firstName} #{saleController.selectedSale.user.lastName}
                             </div>
                             <div class="p-col-6">
-                                <strong>Status:</strong>
+                                <strong>Estado:</strong>
                                 <p:tag value="#{saleController.getStatusLabel(saleController.selectedSale.saleStatus)}"
                                       severity="#{saleController.getStatusSeverity(saleController.selectedSale.saleStatus)}" />
                             </div>
@@ -342,14 +342,14 @@
                         <p:divider />
 
                         <p:dataTable value="#{saleController.selectedSale.saleDetails}" var="detail"
-                                    emptyMessage="No details">
-                            <p:column headerText="Product">
+                                    emptyMessage="No hay detalles">
+                            <p:column headerText="Producto">
                                 <h:outputText value="#{detail.product.commercialName}" />
                             </p:column>
-                            <p:column headerText="Quantity" style="width: 100px; text-align: center;">
+                            <p:column headerText="Cantidad" style="width: 100px; text-align: center;">
                                 <h:outputText value="#{detail.quantity}" />
                             </p:column>
-                            <p:column headerText="Unit Price" style="width: 120px; text-align: right;">
+                            <p:column headerText="Precio Unitario" style="width: 120px; text-align: right;">
                                 <h:outputText value="#{saleController.formatCurrency(detail.unitPrice)}" />
                             </p:column>
                             <p:column headerText="Total" style="width: 120px; text-align: right;">
@@ -373,13 +373,13 @@
                                 #{saleController.formatCurrency(saleController.selectedSale.totalAmount)}
                             </div>
                             <div class="p-col-6">
-                                <strong>Cash Received:</strong>
+                                <strong>Efectivo Recibido:</strong>
                             </div>
                             <div class="p-col-6" style="text-align: right;">
                                 #{saleController.formatCurrency(saleController.selectedSale.cashReceived)}
                             </div>
                             <div class="p-col-6">
-                                <strong>Change Given:</strong>
+                                <strong>Cambio Entregado:</strong>
                             </div>
                             <div class="p-col-6" style="text-align: right;">
                                 #{saleController.formatCurrency(saleController.selectedSale.changeGiven)}
@@ -390,7 +390,7 @@
 
                 <!-- Confirmation Dialogs -->
                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-                    <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes p-button-success" />
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes p-button-success" />
                     <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no p-button-danger" />
                 </p:confirmDialog>
             </h:form>
