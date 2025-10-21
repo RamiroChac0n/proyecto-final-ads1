@@ -33,12 +33,12 @@
                                        rendered="#{userController.isAdmin()}" />
 
                             <!-- Product Management - ADMIN only -->
-                            <p:submenu label="Gestión de Productos"
-                                       icon="pi pi-fw pi-shopping-cart"
+                            <p:submenu label="Inventario"
+                                       icon="pi pi-fw pi-warehouse"
                                        rendered="#{userController.isAdmin()}">
                                 <p:menuitem value="Productos"
                                            outcome="products"
-                                           icon="pi pi-fw pi-tag" />
+                                           icon="pi pi-fw pi-tags" />
                                 <p:menuitem value="Proveedores"
                                            outcome="suppliers"
                                            icon="pi pi-fw pi-truck" />
@@ -47,7 +47,7 @@
                             <!-- Cash Register - ADMIN only -->
                             <p:menuitem value="Caja Registradora"
                                        outcome="cash-register"
-                                       icon="pi pi-fw pi-money-bill"
+                                       icon="pi pi-fw pi-calculator"
                                        rendered="#{userController.isAdmin()}" />
 
                             <!-- Sales - ADMIN and CASHIER -->
