@@ -117,6 +117,7 @@
 
                                             <!-- FECHA Column -->
                                             <p:column sortBy="#{row.movement.movementDate}"
+                                                      sortOrder="ASCENDING"
                                                       filterBy="#{productKardexController.formatMovementDate(row.movement)}"
                                                       filterMatchMode="contains">
                                                 <h:outputText value="#{productKardexController.formatMovementDate(row.movement)}" />

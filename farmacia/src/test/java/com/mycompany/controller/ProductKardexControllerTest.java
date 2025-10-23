@@ -130,15 +130,15 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        // Newest first - verify quantities
-        assertEquals(45, kardexRows.get(0).getBalanceQuantity()); // 10 + 20 + 15
-        assertEquals(30, kardexRows.get(1).getBalanceQuantity()); // 10 + 20
-        assertEquals(10, kardexRows.get(2).getBalanceQuantity()); // 10
+        // Oldest first - verify quantities in chronological order
+        assertEquals(10, kardexRows.get(0).getBalanceQuantity()); // First movement: 10
+        assertEquals(30, kardexRows.get(1).getBalanceQuantity()); // After second: 10 + 20 = 30
+        assertEquals(45, kardexRows.get(2).getBalanceQuantity()); // After third: 30 + 15 = 45
 
-        // Verify ENTRADAS are populated correctly
-        assertEquals(15, kardexRows.get(0).getInputQuantity());
+        // Verify ENTRADAS are populated correctly (chronological order)
+        assertEquals(10, kardexRows.get(0).getInputQuantity());
         assertEquals(20, kardexRows.get(1).getInputQuantity());
-        assertEquals(10, kardexRows.get(2).getInputQuantity());
+        assertEquals(15, kardexRows.get(2).getInputQuantity());
 
         // Verify SALIDAS are null for IN movements
         assertNull(kardexRows.get(0).getOutputQuantity());
@@ -169,20 +169,20 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        // Newest first - verify quantities
-        assertEquals(25, kardexRows.get(0).getBalanceQuantity()); // 50 - 15 - 10
-        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // 50 - 15
-        assertEquals(50, kardexRows.get(2).getBalanceQuantity()); // 50
+        // Oldest first - verify quantities in chronological order
+        assertEquals(50, kardexRows.get(0).getBalanceQuantity()); // First IN: 50
+        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // After OUT 15: 50 - 15 = 35
+        assertEquals(25, kardexRows.get(2).getBalanceQuantity()); // After OUT 10: 35 - 10 = 25
+
+        // Verify ENTRADAS are populated correctly for IN movement (first)
+        assertEquals(50, kardexRows.get(0).getInputQuantity());
 
         // Verify SALIDAS are populated correctly for OUT movements
-        assertEquals(10, kardexRows.get(0).getOutputQuantity());
         assertEquals(15, kardexRows.get(1).getOutputQuantity());
-
-        // Verify ENTRADAS are populated correctly for IN movement
-        assertEquals(50, kardexRows.get(2).getInputQuantity());
+        assertEquals(10, kardexRows.get(2).getOutputQuantity());
 
         // Verify SALIDAS are null for IN movement
-        assertNull(kardexRows.get(2).getOutputQuantity());
+        assertNull(kardexRows.get(0).getOutputQuantity());
     }
 
     @Test
@@ -208,17 +208,18 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        assertEquals(32, kardexRows.get(0).getBalanceQuantity()); // 30 + 5 - 3
-        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // 30 + 5
-        assertEquals(30, kardexRows.get(2).getBalanceQuantity()); // 30
+        // Oldest first - chronological order
+        assertEquals(30, kardexRows.get(0).getBalanceQuantity()); // First IN: 30
+        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // After ADJ +5: 30 + 5 = 35
+        assertEquals(32, kardexRows.get(2).getBalanceQuantity()); // After ADJ -3: 35 - 3 = 32
 
-        // Verify positive ADJUSTMENT goes to ENTRADAS
+        // Verify positive ADJUSTMENT goes to ENTRADAS (index 1)
         assertEquals(5, kardexRows.get(1).getInputQuantity());
         assertNull(kardexRows.get(1).getOutputQuantity());
 
-        // Verify negative ADJUSTMENT goes to SALIDAS
-        assertEquals(3, kardexRows.get(0).getOutputQuantity());
-        assertNull(kardexRows.get(0).getInputQuantity());
+        // Verify negative ADJUSTMENT goes to SALIDAS (index 2)
+        assertEquals(3, kardexRows.get(2).getOutputQuantity());
+        assertNull(kardexRows.get(2).getInputQuantity());
     }
 
     @Test
@@ -245,14 +246,15 @@ public class ProductKardexControllerTest {
         controller.init();
         List<ProductKardexController.KardexRow> kardexRows = controller.getKardexRows();
 
-        // Then - Verify progressive balance calculation
+        // Then - Verify progressive balance calculation in chronological order
         assertEquals(6, kardexRows.size());
-        assertEquals(80, kardexRows.get(0).getBalanceQuantity());  // Final: 100 - 25 + 50 - 30 - 5 - 10 = 80
-        assertEquals(90, kardexRows.get(1).getBalanceQuantity());  // After adjustment: 100 - 25 + 50 - 30 - 5 = 90
-        assertEquals(95, kardexRows.get(2).getBalanceQuantity());  // After OUT 30: 100 - 25 + 50 - 30 = 95
-        assertEquals(125, kardexRows.get(3).getBalanceQuantity()); // After IN 50: 100 - 25 + 50 = 125
-        assertEquals(75, kardexRows.get(4).getBalanceQuantity());  // After OUT 25: 100 - 25 = 75
-        assertEquals(100, kardexRows.get(5).getBalanceQuantity()); // Initial IN: 100
+        // Oldest first
+        assertEquals(100, kardexRows.get(0).getBalanceQuantity()); // m1: IN 100 = 100
+        assertEquals(75, kardexRows.get(1).getBalanceQuantity());  // m2: OUT 25 = 100 - 25 = 75
+        assertEquals(125, kardexRows.get(2).getBalanceQuantity()); // m3: IN 50 = 75 + 50 = 125
+        assertEquals(95, kardexRows.get(3).getBalanceQuantity());  // m4: OUT 30 = 125 - 30 = 95
+        assertEquals(90, kardexRows.get(4).getBalanceQuantity());  // m5: ADJ -5 = 95 - 5 = 90
+        assertEquals(80, kardexRows.get(5).getBalanceQuantity());  // m6: OUT 10 = 90 - 10 = 80 (final)
     }
 
     @Test
@@ -276,8 +278,8 @@ public class ProductKardexControllerTest {
     }
 
     @Test
-    @DisplayName("Should display newest movements first in kardex")
-    void testCalculateKardex_OrdersNewestFirst() {
+    @DisplayName("Should display oldest movements first in kardex (chronological order)")
+    void testCalculateKardex_OrdersOldestFirst() {
         // Given
         Product product = createTestProduct(1L);
         InventoryMovement oldest = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(3), new BigDecimal("10.00"));
@@ -296,10 +298,10 @@ public class ProductKardexControllerTest {
         controller.init();
         List<ProductKardexController.KardexRow> kardexRows = controller.getKardexRows();
 
-        // Then - Verify order (newest first)
-        assertEquals(30, kardexRows.get(0).getMovement().getQuantity());
-        assertEquals(20, kardexRows.get(1).getMovement().getQuantity());
-        assertEquals(10, kardexRows.get(2).getMovement().getQuantity());
+        // Then - Verify order (oldest first - chronological order)
+        assertEquals(10, kardexRows.get(0).getMovement().getQuantity()); // oldest
+        assertEquals(20, kardexRows.get(1).getMovement().getQuantity()); // middle
+        assertEquals(30, kardexRows.get(2).getMovement().getQuantity()); // newest
     }
 
     @Test

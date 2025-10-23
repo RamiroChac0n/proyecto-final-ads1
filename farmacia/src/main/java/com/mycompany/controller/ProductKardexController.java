@@ -194,8 +194,8 @@ public class ProductKardexController implements Serializable {
             kardexRows.add(row);
         }
 
-        // Reverse back to show most recent first
-        java.util.Collections.reverse(kardexRows);
+        // Keep chronological order (oldest first)
+        // User can change order by clicking on FECHA column header
     }
 
     /**
