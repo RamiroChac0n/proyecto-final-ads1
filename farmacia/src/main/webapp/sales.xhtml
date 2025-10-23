@@ -167,43 +167,46 @@
                                     <div class="p-fluid">
                                         <div class="p-field">
                                             <p:outputLabel for="customerNit" value="NIT" />
-                                            <p:inputText id="customerNit" value="#{saleController.customerNit}">
-                                                <p:ajax event="blur" update="customer-panel" />
-                                            </p:inputText>
+                                            <div class="p-inputgroup">
+                                                <p:inputText id="customerNit" value="#{saleController.customerNit}">
+                                                    <p:ajax event="blur" listener="#{saleController.searchCustomerByNit}"
+                                                           update="customer-panel messages" />
+                                                </p:inputText>
+                                                <p:commandButton icon="pi pi-user-plus"
+                                                                styleClass="p-button-success"
+                                                                action="#{saleController.openNewCustomerDialog}"
+                                                                update=":form:new-customer-dialog"
+                                                                oncomplete="PF('newCustomerDialog').show()"
+                                                                disabled="#{saleController.customerFound or saleController.customerNit == null or saleController.customerNit == '' or saleController.customerNit == 'C/F'}"
+                                                                title="Agregar nuevo cliente">
+                                                    <p:tooltip for="@this" value="Agregar nuevo cliente" />
+                                                </p:commandButton>
+                                            </div>
                                             <p:message for="customerNit" />
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel for="customerName">
-                                                <h:outputText value="Nombre" />
-                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
-                                            </p:outputLabel>
+                                            <p:outputLabel for="customerName" value="Nombre" />
                                             <p:inputText id="customerName"
                                                         value="#{saleController.customerName}"
-                                                        required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="El nombre del cliente es requerido cuando se proporciona NIT" />
-                                            <p:message for="customerName" />
+                                                        readonly="true" />
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel for="customerAddress">
-                                                <h:outputText value="Dirección" />
-                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
-                                            </p:outputLabel>
+                                            <p:outputLabel for="customerAddress" value="Dirección" />
                                             <p:inputText id="customerAddress"
                                                         value="#{saleController.customerAddress}"
-                                                        required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="La dirección del cliente es requerida cuando se proporciona NIT" />
-                                            <p:message for="customerAddress" />
+                                                        readonly="true" />
                                         </div>
                                         <div class="p-field">
-                                            <p:outputLabel for="customerPhone">
-                                                <h:outputText value="Teléfono" />
-                                                <h:outputText value=" *" style="color: red;" rendered="#{saleController.customerInfoRequired}" />
-                                            </p:outputLabel>
+                                            <p:outputLabel for="customerPhone" value="Teléfono" />
                                             <p:inputText id="customerPhone"
                                                         value="#{saleController.customerPhone}"
-                                                        required="#{saleController.customerInfoRequired}"
-                                                        requiredMessage="El teléfono del cliente es requerido cuando se proporciona NIT" />
-                                            <p:message for="customerPhone" />
+                                                        readonly="true" />
+                                        </div>
+
+                                        <!-- Customer status indicator -->
+                                        <div class="p-field" style="text-align: center;">
+                                            <p:tag value="Cliente registrado" severity="success"
+                                                  icon="pi pi-check-circle" rendered="#{saleController.customerFound}" />
                                         </div>
                                     </div>
                                 </p:panel>
@@ -261,7 +264,7 @@
                     <!-- TAB 2: Sales History -->
                     <p:tab title="Historial de Ventas">
                         <p:dataTable id="sales-history" value="#{saleController.salesHistory}" var="sale"
-                                    paginator="true" rows="15"
+                                    paginator="true" rows="15" lazy="false"
                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                                     rowsPerPageTemplate="10,15,25,50"
                                     emptyMessage="No se encontraron ventas">
@@ -384,6 +387,48 @@
                             <div class="p-col-6" style="text-align: right;">
                                 #{saleController.formatCurrency(saleController.selectedSale.changeGiven)}
                             </div>
+                        </div>
+                    </h:panelGroup>
+                </p:dialog>
+
+                <!-- New Customer Dialog -->
+                <p:dialog id="new-customer-dialog" header="Agregar Nuevo Cliente" widgetVar="newCustomerDialog"
+                         modal="true" width="500" responsive="true" showEffect="fade" hideEffect="fade">
+                    <h:panelGroup rendered="#{saleController.newCustomer != null}">
+                        <div class="p-fluid">
+                            <div class="p-field">
+                                <p:outputLabel for="newCustomerNit" value="NIT *" />
+                                <p:inputText id="newCustomerNit" value="#{saleController.newCustomer.taxId}"
+                                            required="true" requiredMessage="NIT es requerido" />
+                                <p:message for="newCustomerNit" />
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="newCustomerName" value="Nombre *" />
+                                <p:inputText id="newCustomerName" value="#{saleController.newCustomer.customerName}"
+                                            required="true" requiredMessage="Nombre es requerido" />
+                                <p:message for="newCustomerName" />
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="newCustomerAddress" value="Dirección" />
+                                <p:inputText id="newCustomerAddress" value="#{saleController.newCustomer.address}" />
+                            </div>
+                            <div class="p-field">
+                                <p:outputLabel for="newCustomerPhone" value="Teléfono" />
+                                <p:inputText id="newCustomerPhone" value="#{saleController.newCustomer.phone}" />
+                            </div>
+                        </div>
+
+                        <p:divider />
+
+                        <div style="text-align: right;">
+                            <p:commandButton value="Cancelar" icon="pi pi-times"
+                                            action="#{saleController.cancelNewCustomer}"
+                                            styleClass="p-button-secondary"
+                                            style="margin-right: 10px;" />
+                            <p:commandButton value="Guardar Cliente" icon="pi pi-save"
+                                            action="#{saleController.saveNewCustomer}"
+                                            update=":form:customer-panel :form:messages"
+                                            styleClass="p-button-success" />
                         </div>
                     </h:panelGroup>
                 </p:dialog>

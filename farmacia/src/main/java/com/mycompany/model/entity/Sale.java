@@ -53,14 +53,18 @@ public class Sale {
     @JoinColumn(name = "branch_id", referencedColumnName = "branch_id")
     private Branch branch;
 
-    // Customer data
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
+    private Customer customer;
+
+    // Customer data (denormalized for backup/reporting)
     @Size(max = 100)
     @Column(name = "customer_name", length = 100)
     private String customerName;
 
     @Builder.Default
     @Size(max = 20)
-    @Column(name = "customer_nit", length = 20)
+    @Column(name = "customer_tax_id", length = 20)
     private String customerNit = "C/F";
 
     @Size(max = 200)

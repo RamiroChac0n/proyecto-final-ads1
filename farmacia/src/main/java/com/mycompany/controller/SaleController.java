@@ -5,6 +5,7 @@ import com.mycompany.model.entity.*;
 import com.mycompany.model.entity.enums.SaleStatus;
 import com.mycompany.repository.BranchRepository;
 import com.mycompany.service.ICashRegisterService;
+import com.mycompany.service.ICustomerService;
 import com.mycompany.service.IProductService;
 import com.mycompany.service.ISaleService;
 import jakarta.annotation.PostConstruct;
@@ -49,6 +50,9 @@ public class SaleController implements Serializable {
     @EJB
     private BranchRepository branchRepository;
 
+    @EJB
+    private ICustomerService customerService;
+
     @Inject
     private UserController userController;
 
@@ -66,10 +70,13 @@ public class SaleController implements Serializable {
     private Sale selectedSale;
 
     // Customer information
+    private Customer selectedCustomer;
+    private Customer newCustomer;
     private String customerName;
     private String customerNit;
     private String customerAddress;
     private String customerPhone;
+    private boolean customerFound;
 
     // Payment
     private BigDecimal cashReceived;
@@ -307,6 +314,7 @@ public class SaleController implements Serializable {
                 .cashRegister(cashRegister)
                 .user(userController.getCurrentUser())
                 .branch(branch)
+                .customer(selectedCustomer) // Associate customer if found
                 .customerName(customerName != null && !customerName.trim().isEmpty() ? customerName : null)
                 .customerNit(customerNit != null && !customerNit.trim().isEmpty() ? customerNit : "C/F")
                 .customerAddress(customerAddress != null && !customerAddress.trim().isEmpty() ? customerAddress : null)
@@ -558,5 +566,196 @@ public class SaleController implements Serializable {
      */
     public boolean hasOpenCashRegister() {
         return getOpenCashRegister() != null;
+    }
+
+    // ==================== CUSTOMER MANAGEMENT METHODS ====================
+
+    /**
+     * Search customer by NIT (Tax ID)
+     * Auto-fills customer information if found
+     */
+    public void searchCustomerByNit() {
+        try {
+            // Clear previous customer data
+            clearCustomerDataExceptNit();
+
+            if (customerNit == null || customerNit.trim().isEmpty() || "C/F".equalsIgnoreCase(customerNit.trim())) {
+                // Default consumer
+                selectedCustomer = null;
+                customerFound = false;
+                return;
+            }
+
+            // Search for customer
+            selectedCustomer = customerService.findByTaxId(customerNit.trim());
+
+            if (selectedCustomer != null) {
+                // Customer found - auto-fill information
+                customerName = selectedCustomer.getCustomerName();
+                customerAddress = selectedCustomer.getAddress();
+                customerPhone = selectedCustomer.getPhone();
+                customerFound = true;
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "Cliente encontrado",
+                        "Información del cliente cargada automáticamente"));
+
+                PrimeFaces.current().ajax().update("form:customer-panel");
+            } else {
+                // Customer not found
+                customerFound = false;
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                        "Cliente no encontrado",
+                        "No existe un cliente con el NIT: " + customerNit + ". Puede agregarlo haciendo clic en 'Agregar Cliente'."));
+
+                PrimeFaces.current().ajax().update("form:customer-panel", "form:messages");
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error al buscar cliente", e.getMessage()));
+        }
+    }
+
+    /**
+     * Search customer by phone
+     * Auto-fills customer information if found
+     */
+    public void searchCustomerByPhone() {
+        try {
+            if (customerPhone == null || customerPhone.trim().isEmpty()) {
+                return;
+            }
+
+            // Search for customer
+            Customer customer = customerService.findByPhone(customerPhone.trim());
+
+            if (customer != null) {
+                // Customer found - auto-fill all information
+                selectedCustomer = customer;
+                customerNit = customer.getTaxId();
+                customerName = customer.getCustomerName();
+                customerAddress = customer.getAddress();
+                customerFound = true;
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "Cliente encontrado",
+                        "Información del cliente cargada automáticamente"));
+
+                PrimeFaces.current().ajax().update("form:customer-panel");
+            } else {
+                // Customer not found
+                customerFound = false;
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                        "Cliente no encontrado",
+                        "No existe un cliente con el teléfono: " + customerPhone));
+
+                PrimeFaces.current().ajax().update("form:messages");
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error al buscar cliente", e.getMessage()));
+        }
+    }
+
+    /**
+     * Open dialog to add new customer
+     */
+    public void openNewCustomerDialog() {
+        // Initialize new customer with data from form
+        newCustomer = Customer.builder()
+            .taxId(customerNit != null && !"C/F".equalsIgnoreCase(customerNit) ? customerNit : "")
+            .customerName(customerName != null ? customerName : "")
+            .address(customerAddress != null ? customerAddress : "")
+            .phone(customerPhone != null ? customerPhone : "")
+            .isActive(true)
+            .build();
+        // Note: Dialog is shown via oncomplete in XHTML
+    }
+
+    /**
+     * Save new customer and associate with current sale
+     */
+    public void saveNewCustomer() {
+        try {
+            // Validate required fields
+            if (newCustomer.getTaxId() == null || newCustomer.getTaxId().trim().isEmpty()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                        "NIT requerido", "Debe ingresar el NIT del cliente"));
+                return;
+            }
+
+            if (newCustomer.getCustomerName() == null || newCustomer.getCustomerName().trim().isEmpty()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                        "Nombre requerido", "Debe ingresar el nombre del cliente"));
+                return;
+            }
+
+            // Save customer
+            Customer savedCustomer = customerService.save(newCustomer);
+
+            // Auto-fill sale form with new customer data
+            selectedCustomer = savedCustomer;
+            customerNit = savedCustomer.getTaxId();
+            customerName = savedCustomer.getCustomerName();
+            customerAddress = savedCustomer.getAddress();
+            customerPhone = savedCustomer.getPhone();
+            customerFound = true;
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO,
+                    "Cliente creado",
+                    "Cliente agregado exitosamente: " + savedCustomer.getCustomerName()));
+
+            PrimeFaces.current().executeScript("PF('newCustomerDialog').hide();");
+            PrimeFaces.current().ajax().update("form:customer-panel", "form:messages");
+
+        } catch (IllegalArgumentException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error de validación", e.getMessage()));
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error al guardar cliente", e.getMessage()));
+        }
+    }
+
+    /**
+     * Cancel new customer creation
+     */
+    public void cancelNewCustomer() {
+        newCustomer = null;
+        PrimeFaces.current().executeScript("PF('newCustomerDialog').hide();");
+    }
+
+    /**
+     * Clear customer data except NIT
+     */
+    private void clearCustomerDataExceptNit() {
+        selectedCustomer = null;
+        customerName = "";
+        customerAddress = "";
+        customerPhone = "";
+        customerFound = false;
+    }
+
+    /**
+     * Clear all customer data
+     */
+    public void clearCustomerData() {
+        selectedCustomer = null;
+        customerNit = "C/F";
+        customerName = "";
+        customerAddress = "";
+        customerPhone = "";
+        customerFound = false;
     }
 }
