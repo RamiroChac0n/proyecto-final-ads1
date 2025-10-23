@@ -91,21 +91,41 @@
                                                      filteredValue="#{productKardexController.filteredKardexRows}"
                                                      sortMode="multiple">
 
-                                            <!-- Movement Date -->
-                                            <p:column headerText="Fecha/Hora"
-                                                      sortBy="#{row.movement.movementDate}"
+                                            <!-- Grouped Header Row -->
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column headerText="FECHA" rowspan="2" style="width: 150px;" />
+                                                    <p:column headerText="TIPO" rowspan="2" style="width: 140px;" />
+                                                    <p:column headerText="ENTRADAS" colspan="3" style="text-align: center; background-color: #E8F5E9;" />
+                                                    <p:column headerText="SALIDAS" colspan="3" style="text-align: center; background-color: #FFEBEE;" />
+                                                    <p:column headerText="SALDOS" colspan="2" style="text-align: center; background-color: #E3F2FD;" />
+                                                </p:row>
+                                                <p:row>
+                                                    <!-- ENTRADAS sub-columns -->
+                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Cu" style="text-align: center; width: 100px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="CT" style="text-align: center; width: 120px; background-color: #E8F5E9;" />
+                                                    <!-- SALIDAS sub-columns -->
+                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Cu" style="text-align: center; width: 100px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="CT" style="text-align: center; width: 120px; background-color: #FFEBEE;" />
+                                                    <!-- SALDOS sub-columns -->
+                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #E3F2FD;" />
+                                                    <p:column headerText="CT" style="text-align: center; width: 130px; background-color: #E3F2FD;" />
+                                                </p:row>
+                                            </p:columnGroup>
+
+                                            <!-- FECHA Column -->
+                                            <p:column sortBy="#{row.movement.movementDate}"
                                                       filterBy="#{productKardexController.formatMovementDate(row.movement)}"
-                                                      filterMatchMode="contains"
-                                                      style="width: 180px;">
+                                                      filterMatchMode="contains">
                                                 <h:outputText value="#{productKardexController.formatMovementDate(row.movement)}" />
                                             </p:column>
 
-                                            <!-- Movement Type -->
-                                            <p:column headerText="Tipo"
-                                                      sortBy="#{row.movement.movementType}"
+                                            <!-- TIPO Column -->
+                                            <p:column sortBy="#{row.movement.movementType}"
                                                       filterBy="#{row.movement.movementType}"
-                                                      filterMatchMode="equals"
-                                                      style="width: 140px;">
+                                                      filterMatchMode="equals">
                                                 <f:facet name="filter">
                                                     <p:selectOneMenu onchange="PF('dtKardex').filter()" styleClass="w-full">
                                                         <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
@@ -121,60 +141,75 @@
                                                 </div>
                                             </p:column>
 
-                                            <!-- Batch Number -->
-                                            <p:column headerText="Lote"
-                                                      filterBy="#{productKardexController.getBatchNumber(row.movement)}"
-                                                      filterMatchMode="contains"
-                                                      style="width: 140px;">
-                                                <h:outputText value="#{productKardexController.getBatchNumber(row.movement)}" />
-                                            </p:column>
-
-                                            <!-- Branch -->
-                                            <p:column headerText="Sucursal"
-                                                      filterBy="#{productKardexController.getBranchName(row.movement)}"
-                                                      filterMatchMode="contains"
-                                                      style="width: 150px;">
-                                                <h:outputText value="#{productKardexController.getBranchName(row.movement)}" />
-                                            </p:column>
-
-                                            <!-- Quantity (Effective) -->
-                                            <p:column headerText="Cantidad"
-                                                      sortBy="#{row.effectiveQuantity}"
-                                                      style="width: 100px; text-align: right;">
-                                                <h:outputText value="#{row.effectiveQuantity}"
-                                                              styleClass="#{row.effectiveQuantity >= 0 ? 'text-success' : 'text-danger'} font-bold">
+                                            <!-- ENTRADAS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputQuantity}"
+                                                              rendered="#{row.inputQuantity != null}">
                                                     <f:convertNumber type="number" groupingUsed="true" />
                                                 </h:outputText>
                                             </p:column>
 
-                                            <!-- Running Balance -->
-                                            <p:column headerText="Saldo"
-                                                      sortBy="#{row.runningBalance}"
-                                                      style="width: 120px; text-align: right;">
-                                                <h:outputText value="#{row.runningBalance}"
-                                                              styleClass="font-bold text-primary"
-                                                              style="font-size: 1.1rem;">
+                                            <!-- ENTRADAS: Costo Unitario -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputUnitCost}"
+                                                              rendered="#{row.inputUnitCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- ENTRADAS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputTotalCost}"
+                                                              rendered="#{row.inputTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALIDAS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputQuantity}"
+                                                              rendered="#{row.outputQuantity != null}">
                                                     <f:convertNumber type="number" groupingUsed="true" />
                                                 </h:outputText>
                                             </p:column>
 
-                                            <!-- User -->
-                                            <p:column headerText="Usuario"
-                                                      filterBy="#{productKardexController.getUserName(row.movement)}"
-                                                      filterMatchMode="contains"
-                                                      style="width: 150px;">
-                                                <h:outputText value="#{productKardexController.getUserName(row.movement)}" />
+                                            <!-- SALIDAS: Costo Unitario -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputUnitCost}"
+                                                              rendered="#{row.outputUnitCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
                                             </p:column>
 
-                                            <!-- Reason -->
-                                            <p:column headerText="Motivo"
-                                                      filterBy="#{row.movement.reason}"
-                                                      filterMatchMode="contains">
-                                                <h:outputText value="#{row.movement.reason}"
-                                                              rendered="#{not empty row.movement.reason}" />
-                                                <h:outputText value="N/A"
-                                                              rendered="#{empty row.movement.reason}"
-                                                              styleClass="text-muted" />
+                                            <!-- SALIDAS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputTotalCost}"
+                                                              rendered="#{row.outputTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALDOS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #E3F2FD;">
+                                                <h:outputText value="#{row.balanceQuantity}"
+                                                              styleClass="font-bold"
+                                                              rendered="#{row.balanceQuantity != null}">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALDOS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #E3F2FD;">
+                                                <h:outputText value="#{row.balanceTotalCost}"
+                                                              styleClass="font-bold"
+                                                              rendered="#{row.balanceTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
                                             </p:column>
 
                                         </p:dataTable>

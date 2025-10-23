@@ -6,6 +6,7 @@ import com.mycompany.service.IInventoryMovementService;
 import com.mycompany.service.IProductService;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -111,9 +112,9 @@ public class ProductKardexControllerTest {
     void testCalculateKardex_WithINMovements_IncreasesBalance() {
         // Given
         Product product = createTestProduct(1L);
-        InventoryMovement movement1 = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(2));
-        InventoryMovement movement2 = createMovement(product, MovementType.IN, 20, LocalDateTime.now().minusDays(1));
-        InventoryMovement movement3 = createMovement(product, MovementType.IN, 15, LocalDateTime.now());
+        InventoryMovement movement1 = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement movement2 = createMovement(product, MovementType.IN, 20, LocalDateTime.now().minusDays(1), new BigDecimal("12.00"));
+        InventoryMovement movement3 = createMovement(product, MovementType.IN, 15, LocalDateTime.now(), new BigDecimal("15.00"));
 
         List<InventoryMovement> movements = Arrays.asList(movement3, movement2, movement1);
 
@@ -129,10 +130,20 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        // Newest first
-        assertEquals(45, kardexRows.get(0).getRunningBalance()); // 10 + 20 + 15
-        assertEquals(30, kardexRows.get(1).getRunningBalance()); // 10 + 20
-        assertEquals(10, kardexRows.get(2).getRunningBalance()); // 10
+        // Newest first - verify quantities
+        assertEquals(45, kardexRows.get(0).getBalanceQuantity()); // 10 + 20 + 15
+        assertEquals(30, kardexRows.get(1).getBalanceQuantity()); // 10 + 20
+        assertEquals(10, kardexRows.get(2).getBalanceQuantity()); // 10
+
+        // Verify ENTRADAS are populated correctly
+        assertEquals(15, kardexRows.get(0).getInputQuantity());
+        assertEquals(20, kardexRows.get(1).getInputQuantity());
+        assertEquals(10, kardexRows.get(2).getInputQuantity());
+
+        // Verify SALIDAS are null for IN movements
+        assertNull(kardexRows.get(0).getOutputQuantity());
+        assertNull(kardexRows.get(1).getOutputQuantity());
+        assertNull(kardexRows.get(2).getOutputQuantity());
     }
 
     @Test
@@ -140,9 +151,9 @@ public class ProductKardexControllerTest {
     void testCalculateKardex_WithOUTMovements_DecreasesBalance() {
         // Given
         Product product = createTestProduct(1L);
-        InventoryMovement movement1 = createMovement(product, MovementType.IN, 50, LocalDateTime.now().minusDays(3));
-        InventoryMovement movement2 = createMovement(product, MovementType.OUT, 15, LocalDateTime.now().minusDays(2));
-        InventoryMovement movement3 = createMovement(product, MovementType.OUT, 10, LocalDateTime.now().minusDays(1));
+        InventoryMovement movement1 = createMovement(product, MovementType.IN, 50, LocalDateTime.now().minusDays(3), new BigDecimal("10.00"));
+        InventoryMovement movement2 = createMovement(product, MovementType.OUT, 15, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement movement3 = createMovement(product, MovementType.OUT, 10, LocalDateTime.now().minusDays(1), new BigDecimal("10.00"));
 
         List<InventoryMovement> movements = Arrays.asList(movement3, movement2, movement1);
 
@@ -158,10 +169,20 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        // Newest first
-        assertEquals(25, kardexRows.get(0).getRunningBalance()); // 50 - 15 - 10
-        assertEquals(35, kardexRows.get(1).getRunningBalance()); // 50 - 15
-        assertEquals(50, kardexRows.get(2).getRunningBalance()); // 50
+        // Newest first - verify quantities
+        assertEquals(25, kardexRows.get(0).getBalanceQuantity()); // 50 - 15 - 10
+        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // 50 - 15
+        assertEquals(50, kardexRows.get(2).getBalanceQuantity()); // 50
+
+        // Verify SALIDAS are populated correctly for OUT movements
+        assertEquals(10, kardexRows.get(0).getOutputQuantity());
+        assertEquals(15, kardexRows.get(1).getOutputQuantity());
+
+        // Verify ENTRADAS are populated correctly for IN movement
+        assertEquals(50, kardexRows.get(2).getInputQuantity());
+
+        // Verify SALIDAS are null for IN movement
+        assertNull(kardexRows.get(2).getOutputQuantity());
     }
 
     @Test
@@ -169,9 +190,9 @@ public class ProductKardexControllerTest {
     void testCalculateKardex_WithADJUSTMENTMovements_AdjustsBalance() {
         // Given
         Product product = createTestProduct(1L);
-        InventoryMovement movement1 = createMovement(product, MovementType.IN, 30, LocalDateTime.now().minusDays(2));
-        InventoryMovement movement2 = createMovement(product, MovementType.ADJUSTMENT, 5, LocalDateTime.now().minusDays(1));
-        InventoryMovement movement3 = createMovement(product, MovementType.ADJUSTMENT, -3, LocalDateTime.now());
+        InventoryMovement movement1 = createMovement(product, MovementType.IN, 30, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement movement2 = createMovement(product, MovementType.ADJUSTMENT, 5, LocalDateTime.now().minusDays(1), new BigDecimal("10.00"));
+        InventoryMovement movement3 = createMovement(product, MovementType.ADJUSTMENT, -3, LocalDateTime.now(), new BigDecimal("10.00"));
 
         List<InventoryMovement> movements = Arrays.asList(movement3, movement2, movement1);
 
@@ -187,9 +208,17 @@ public class ProductKardexControllerTest {
 
         // Then
         assertEquals(3, kardexRows.size());
-        assertEquals(32, kardexRows.get(0).getRunningBalance()); // 30 + 5 - 3
-        assertEquals(35, kardexRows.get(1).getRunningBalance()); // 30 + 5
-        assertEquals(30, kardexRows.get(2).getRunningBalance()); // 30
+        assertEquals(32, kardexRows.get(0).getBalanceQuantity()); // 30 + 5 - 3
+        assertEquals(35, kardexRows.get(1).getBalanceQuantity()); // 30 + 5
+        assertEquals(30, kardexRows.get(2).getBalanceQuantity()); // 30
+
+        // Verify positive ADJUSTMENT goes to ENTRADAS
+        assertEquals(5, kardexRows.get(1).getInputQuantity());
+        assertNull(kardexRows.get(1).getOutputQuantity());
+
+        // Verify negative ADJUSTMENT goes to SALIDAS
+        assertEquals(3, kardexRows.get(0).getOutputQuantity());
+        assertNull(kardexRows.get(0).getInputQuantity());
     }
 
     @Test
@@ -197,12 +226,12 @@ public class ProductKardexControllerTest {
     void testCalculateKardex_MixedMovements_CalculatesCorrectRunningBalance() {
         // Given - Realistic scenario
         Product product = createTestProduct(1L);
-        InventoryMovement m1 = createMovement(product, MovementType.IN, 100, LocalDateTime.now().minusDays(5));
-        InventoryMovement m2 = createMovement(product, MovementType.OUT, 25, LocalDateTime.now().minusDays(4));
-        InventoryMovement m3 = createMovement(product, MovementType.IN, 50, LocalDateTime.now().minusDays(3));
-        InventoryMovement m4 = createMovement(product, MovementType.OUT, 30, LocalDateTime.now().minusDays(2));
-        InventoryMovement m5 = createMovement(product, MovementType.ADJUSTMENT, -5, LocalDateTime.now().minusDays(1));
-        InventoryMovement m6 = createMovement(product, MovementType.OUT, 10, LocalDateTime.now());
+        InventoryMovement m1 = createMovement(product, MovementType.IN, 100, LocalDateTime.now().minusDays(5), new BigDecimal("10.00"));
+        InventoryMovement m2 = createMovement(product, MovementType.OUT, 25, LocalDateTime.now().minusDays(4), new BigDecimal("10.00"));
+        InventoryMovement m3 = createMovement(product, MovementType.IN, 50, LocalDateTime.now().minusDays(3), new BigDecimal("12.00"));
+        InventoryMovement m4 = createMovement(product, MovementType.OUT, 30, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement m5 = createMovement(product, MovementType.ADJUSTMENT, -5, LocalDateTime.now().minusDays(1), new BigDecimal("10.00"));
+        InventoryMovement m6 = createMovement(product, MovementType.OUT, 10, LocalDateTime.now(), new BigDecimal("10.00"));
 
         List<InventoryMovement> movements = Arrays.asList(m6, m5, m4, m3, m2, m1);
 
@@ -218,12 +247,12 @@ public class ProductKardexControllerTest {
 
         // Then - Verify progressive balance calculation
         assertEquals(6, kardexRows.size());
-        assertEquals(80, kardexRows.get(0).getRunningBalance());  // Final: 100 - 25 + 50 - 30 - 5 - 10 = 80
-        assertEquals(90, kardexRows.get(1).getRunningBalance());  // After adjustment: 100 - 25 + 50 - 30 - 5 = 90
-        assertEquals(95, kardexRows.get(2).getRunningBalance());  // After OUT 30: 100 - 25 + 50 - 30 = 95
-        assertEquals(125, kardexRows.get(3).getRunningBalance()); // After IN 50: 100 - 25 + 50 = 125
-        assertEquals(75, kardexRows.get(4).getRunningBalance());  // After OUT 25: 100 - 25 = 75
-        assertEquals(100, kardexRows.get(5).getRunningBalance()); // Initial IN: 100
+        assertEquals(80, kardexRows.get(0).getBalanceQuantity());  // Final: 100 - 25 + 50 - 30 - 5 - 10 = 80
+        assertEquals(90, kardexRows.get(1).getBalanceQuantity());  // After adjustment: 100 - 25 + 50 - 30 - 5 = 90
+        assertEquals(95, kardexRows.get(2).getBalanceQuantity());  // After OUT 30: 100 - 25 + 50 - 30 = 95
+        assertEquals(125, kardexRows.get(3).getBalanceQuantity()); // After IN 50: 100 - 25 + 50 = 125
+        assertEquals(75, kardexRows.get(4).getBalanceQuantity());  // After OUT 25: 100 - 25 = 75
+        assertEquals(100, kardexRows.get(5).getBalanceQuantity()); // Initial IN: 100
     }
 
     @Test
@@ -251,9 +280,9 @@ public class ProductKardexControllerTest {
     void testCalculateKardex_OrdersNewestFirst() {
         // Given
         Product product = createTestProduct(1L);
-        InventoryMovement oldest = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(3));
-        InventoryMovement middle = createMovement(product, MovementType.IN, 20, LocalDateTime.now().minusDays(2));
-        InventoryMovement newest = createMovement(product, MovementType.IN, 30, LocalDateTime.now());
+        InventoryMovement oldest = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(3), new BigDecimal("10.00"));
+        InventoryMovement middle = createMovement(product, MovementType.IN, 20, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement newest = createMovement(product, MovementType.IN, 30, LocalDateTime.now(), new BigDecimal("10.00"));
 
         List<InventoryMovement> movements = Arrays.asList(newest, middle, oldest);
 
@@ -421,22 +450,68 @@ public class ProductKardexControllerTest {
     }
 
     @Test
-    @DisplayName("Should calculate effective quantity correctly for KardexRow")
-    void testKardexRow_CalculatesEffectiveQuantity() {
+    @DisplayName("Should populate KardexRow fields correctly for ENTRADAS")
+    void testKardexRow_PopulatesEntradasFields() {
         // Given
         ProductKardexController.KardexRow row = new ProductKardexController.KardexRow();
 
-        // Test IN movement
-        row.setEffectiveQuantity(10);
-        assertEquals(10, row.getEffectiveQuantity());
+        // When - Set ENTRADAS fields
+        row.setInputQuantity(10);
+        row.setInputUnitCost(new BigDecimal("15.50"));
+        row.setInputTotalCost(new BigDecimal("155.00"));
+        row.setBalanceQuantity(10);
+        row.setBalanceTotalCost(new BigDecimal("155.00"));
 
-        // Test OUT movement
-        row.setEffectiveQuantity(-15);
-        assertEquals(-15, row.getEffectiveQuantity());
+        // Then
+        assertEquals(10, row.getInputQuantity());
+        assertEquals(new BigDecimal("15.50"), row.getInputUnitCost());
+        assertEquals(new BigDecimal("155.00"), row.getInputTotalCost());
+        assertNull(row.getOutputQuantity());
+        assertNull(row.getOutputUnitCost());
+        assertNull(row.getOutputTotalCost());
+    }
 
-        // Test ADJUSTMENT movement
-        row.setEffectiveQuantity(5);
-        assertEquals(5, row.getEffectiveQuantity());
+    @Test
+    @DisplayName("Should populate KardexRow fields correctly for SALIDAS")
+    void testKardexRow_PopulatesSalidasFields() {
+        // Given
+        ProductKardexController.KardexRow row = new ProductKardexController.KardexRow();
+
+        // When - Set SALIDAS fields
+        row.setOutputQuantity(5);
+        row.setOutputUnitCost(new BigDecimal("15.50"));
+        row.setOutputTotalCost(new BigDecimal("77.50"));
+        row.setBalanceQuantity(5);
+        row.setBalanceTotalCost(new BigDecimal("77.50"));
+
+        // Then
+        assertNull(row.getInputQuantity());
+        assertNull(row.getInputUnitCost());
+        assertNull(row.getInputTotalCost());
+        assertEquals(5, row.getOutputQuantity());
+        assertEquals(new BigDecimal("15.50"), row.getOutputUnitCost());
+        assertEquals(new BigDecimal("77.50"), row.getOutputTotalCost());
+    }
+
+    @Test
+    @DisplayName("Should format currency correctly with null value")
+    void testFormatCurrency_WithNull() {
+        String result = controller.formatCurrency(null);
+        assertEquals("Q 0.00", result);
+    }
+
+    @Test
+    @DisplayName("Should format currency correctly with valid amount")
+    void testFormatCurrency_WithValidAmount() {
+        String result = controller.formatCurrency(new BigDecimal("1234.56"));
+        assertEquals("Q 1,234.56", result);
+    }
+
+    @Test
+    @DisplayName("Should format currency with thousands separator")
+    void testFormatCurrency_WithThousandsSeparator() {
+        String result = controller.formatCurrency(new BigDecimal("1234567.89"));
+        assertEquals("Q 1,234,567.89", result);
     }
 
     // Helper methods
@@ -463,16 +538,23 @@ public class ProductKardexControllerTest {
     }
 
     private List<InventoryMovement> createTestMovements(Product product) {
-        InventoryMovement m1 = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(2));
-        InventoryMovement m2 = createMovement(product, MovementType.OUT, 5, LocalDateTime.now().minusDays(1));
-        InventoryMovement m3 = createMovement(product, MovementType.IN, 15, LocalDateTime.now());
+        InventoryMovement m1 = createMovement(product, MovementType.IN, 10, LocalDateTime.now().minusDays(2), new BigDecimal("10.00"));
+        InventoryMovement m2 = createMovement(product, MovementType.OUT, 5, LocalDateTime.now().minusDays(1), new BigDecimal("10.00"));
+        InventoryMovement m3 = createMovement(product, MovementType.IN, 15, LocalDateTime.now(), new BigDecimal("12.00"));
 
         return Arrays.asList(m3, m2, m1);
     }
 
-    private InventoryMovement createMovement(Product product, MovementType type, int quantity, LocalDateTime date) {
+    private InventoryMovement createMovement(Product product, MovementType type, int quantity, LocalDateTime date, BigDecimal unitCost) {
+        ProductBatch batch = ProductBatch.builder()
+                .batchNumber("BATCH-" + System.currentTimeMillis())
+                .unitCost(unitCost)
+                .salePrice(unitCost.multiply(new BigDecimal("1.3")))
+                .build();
+
         return InventoryMovement.builder()
                 .product(product)
+                .batch(batch)
                 .movementType(type)
                 .quantity(quantity)
                 .movementDate(date)

@@ -13,6 +13,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class ProductKardexController implements Serializable {
     private Long productId;
     private List<InventoryMovement> movements;
     private List<KardexRow> kardexRows;
+    private List<KardexRow> filteredKardexRows;
 
     @PostConstruct
     public void init() {
@@ -123,7 +125,7 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Calculate KARDEX with running balance
+     * Calculate KARDEX with running balance (traditional accounting format)
      */
     private void calculateKardex() {
         kardexRows = new ArrayList<>();
@@ -136,25 +138,59 @@ public class ProductKardexController implements Serializable {
         List<InventoryMovement> reversedMovements = new ArrayList<>(movements);
         java.util.Collections.reverse(reversedMovements);
 
-        int runningBalance = 0;
+        // Running balance trackers
+        int runningBalanceQuantity = 0;
+        BigDecimal runningBalanceTotalCost = BigDecimal.ZERO;
 
         for (InventoryMovement movement : reversedMovements) {
-            // Calculate movement effect based on type
-            int effectiveQuantity = 0;
-            if (movement.getMovementType() == MovementType.IN) {
-                effectiveQuantity = movement.getQuantity();
-            } else if (movement.getMovementType() == MovementType.OUT) {
-                effectiveQuantity = -Math.abs(movement.getQuantity());
-            } else { // ADJUSTMENT
-                effectiveQuantity = movement.getQuantity();
-            }
-
-            runningBalance += effectiveQuantity;
-
             KardexRow row = new KardexRow();
             row.setMovement(movement);
-            row.setEffectiveQuantity(effectiveQuantity);
-            row.setRunningBalance(runningBalance);
+
+            // Get unit cost from batch (default to 0 if no batch)
+            BigDecimal unitCost = BigDecimal.ZERO;
+            if (movement.getBatch() != null && movement.getBatch().getUnitCost() != null) {
+                unitCost = movement.getBatch().getUnitCost();
+            }
+
+            int quantity = Math.abs(movement.getQuantity());
+            BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantity));
+
+            // Determine if this is an INPUT or OUTPUT movement
+            boolean isInput = false;
+            if (movement.getMovementType() == MovementType.IN) {
+                isInput = true;
+            } else if (movement.getMovementType() == MovementType.OUT) {
+                isInput = false;
+            } else { // ADJUSTMENT
+                // Positive adjustments are inputs, negative are outputs
+                isInput = movement.getQuantity() >= 0;
+            }
+
+            // Populate ENTRADAS or SALIDAS columns
+            if (isInput) {
+                // ENTRADAS (Inputs)
+                row.setInputQuantity(quantity);
+                row.setInputUnitCost(unitCost);
+                row.setInputTotalCost(totalCost);
+
+                // Update running balance (add)
+                runningBalanceQuantity += quantity;
+                runningBalanceTotalCost = runningBalanceTotalCost.add(totalCost);
+            } else {
+                // SALIDAS (Outputs)
+                row.setOutputQuantity(quantity);
+                row.setOutputUnitCost(unitCost);
+                row.setOutputTotalCost(totalCost);
+
+                // Update running balance (subtract)
+                runningBalanceQuantity -= quantity;
+                runningBalanceTotalCost = runningBalanceTotalCost.subtract(totalCost);
+            }
+
+            // Set SALDOS (Balance)
+            row.setBalanceQuantity(runningBalanceQuantity);
+            row.setBalanceTotalCost(runningBalanceTotalCost);
+
             kardexRows.add(row);
         }
 
@@ -257,12 +293,34 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
+     * Format currency with thousands separator and 2 decimal places
+     */
+    public String formatCurrency(BigDecimal amount) {
+        if (amount == null) {
+            return "Q 0.00";
+        }
+        return String.format("Q %,.2f", amount);
+    }
+
+    /**
      * Inner class to represent a KARDEX row with calculated balance
      */
     @Data
     public static class KardexRow implements Serializable {
         private InventoryMovement movement;
-        private int effectiveQuantity;
-        private int runningBalance;
+
+        // ENTRADAS (Inputs)
+        private Integer inputQuantity;
+        private BigDecimal inputUnitCost;
+        private BigDecimal inputTotalCost;
+
+        // SALIDAS (Outputs)
+        private Integer outputQuantity;
+        private BigDecimal outputUnitCost;
+        private BigDecimal outputTotalCost;
+
+        // SALDOS (Balance)
+        private Integer balanceQuantity;
+        private BigDecimal balanceTotalCost;
     }
 }
