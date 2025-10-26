@@ -1,0 +1,316 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check - ADMIN only -->
+    <f:event type="preRenderView" listener="#{purchaseOrderController.checkAdminAccess}" />
+    <f:event type="preRenderView" listener="#{purchaseOrderController.initForm}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">
+            #{purchaseOrderController.currentOrder.orderId == null ? 'Nueva Solicitud de Compra' : 'Editar Solicitud de Compra'}
+        </ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+                        <h:form id="form">
+                            <!-- Breadcrumb -->
+                            <div class="mb-3">
+                                <p:breadCrumb>
+                                    <p:menuitem value="Inicio" url="home.xhtml" />
+                                    <p:menuitem value="Solicitudes de Compra" url="purchase-orders.xhtml" />
+                                    <p:menuitem value="#{purchaseOrderController.currentOrder.orderId == null ? 'Nueva Solicitud' : 'Editar Solicitud'}" />
+                                </p:breadCrumb>
+                            </div>
+
+                            <!-- Page Title -->
+                            <div class="mb-4">
+                                <h2>
+                                    <i class="pi pi-shopping-cart"></i>
+                                    #{purchaseOrderController.currentOrder.orderId == null ? 'Nueva Solicitud de Compra' : 'Editar Solicitud de Compra'}
+                                </h2>
+                            </div>
+
+                            <p:growl id="messages" showDetail="true" />
+
+                            <div class="grid">
+                                <!-- Left Column: Order Information and Products -->
+                                <div class="col-12 md:col-8">
+                                    <!-- Order Information Panel -->
+                                    <p:panel header="Información de la Orden" styleClass="mb-3">
+                                        <div class="grid">
+                                            <!-- Supplier -->
+                                            <div class="col-12 md:col-6">
+                                                <div class="field">
+                                                    <p:outputLabel for="supplier" value="Proveedor *" />
+                                                    <p:selectOneMenu id="supplier"
+                                                                     value="#{purchaseOrderController.currentOrder.supplier}"
+                                                                     converter="omnifaces.SelectItemsConverter"
+                                                                     required="true"
+                                                                     filter="true"
+                                                                     filterMatchMode="contains"
+                                                                     requiredMessage="Debe seleccionar un proveedor">
+                                                        <f:selectItem itemLabel="Seleccione un proveedor" itemValue="#{null}" />
+                                                        <f:selectItems value="#{purchaseOrderController.suppliers}"
+                                                                       var="sup"
+                                                                       itemLabel="#{sup.businessName}"
+                                                                       itemValue="#{sup}" />
+                                                    </p:selectOneMenu>
+                                                </div>
+                                            </div>
+
+                                            <!-- Branch -->
+                                            <div class="col-12 md:col-6">
+                                                <div class="field">
+                                                    <p:outputLabel for="branch" value="Sucursal *" />
+                                                    <p:selectOneMenu id="branch"
+                                                                     value="#{purchaseOrderController.currentOrder.branch}"
+                                                                     converter="omnifaces.SelectItemsConverter"
+                                                                     required="true"
+                                                                     requiredMessage="Debe seleccionar una sucursal">
+                                                        <f:selectItem itemLabel="Seleccione una sucursal" itemValue="#{null}" />
+                                                        <f:selectItems value="#{purchaseOrderController.branches}"
+                                                                       var="br"
+                                                                       itemLabel="#{br.branchName}"
+                                                                       itemValue="#{br}" />
+                                                    </p:selectOneMenu>
+                                                </div>
+                                            </div>
+
+                                            <!-- Shipping Cost -->
+                                            <div class="col-12 md:col-6">
+                                                <div class="field">
+                                                    <p:outputLabel for="shippingCost" value="Costo de Envío (opcional)" />
+                                                    <p:inputNumber id="shippingCost"
+                                                                   value="#{purchaseOrderController.currentOrder.shippingCost}"
+                                                                   symbol="Q "
+                                                                   decimalSeparator="."
+                                                                   thousandSeparator=","
+                                                                   minValue="0">
+                                                        <p:ajax event="change" update="totalsPanel" />
+                                                    </p:inputNumber>
+                                                </div>
+                                            </div>
+
+                                            <!-- Notes -->
+                                            <div class="col-12">
+                                                <div class="field">
+                                                    <p:outputLabel for="notes" value="Notas" />
+                                                    <p:inputTextarea id="notes"
+                                                                     value="#{purchaseOrderController.currentOrder.notes}"
+                                                                     rows="3"
+                                                                     maxlength="5000" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </p:panel>
+
+                                    <!-- Add Product Panel -->
+                                    <p:panel header="Agregar Productos" styleClass="mb-3">
+                                        <div class="grid">
+                                            <div class="col-12 md:col-4">
+                                                <div class="field">
+                                                    <p:outputLabel for="product" value="Producto" />
+                                                    <p:selectOneMenu id="product"
+                                                                     value="#{purchaseOrderController.selectedProduct}"
+                                                                     converter="omnifaces.SelectItemsConverter"
+                                                                     filter="true"
+                                                                     filterMatchMode="contains">
+                                                        <f:selectItem itemLabel="Seleccione un producto" itemValue="#{null}" />
+                                                        <f:selectItems value="#{purchaseOrderController.products}"
+                                                                       var="prod"
+                                                                       itemLabel="#{prod.commercialName}"
+                                                                       itemValue="#{prod}" />
+                                                    </p:selectOneMenu>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 md:col-2">
+                                                <div class="field">
+                                                    <p:outputLabel for="quantity" value="Cantidad" />
+                                                    <p:inputNumber id="quantity"
+                                                                   value="#{purchaseOrderController.newDetail.quantityOrdered}"
+                                                                   decimalPlaces="0"
+                                                                   minValue="1" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 md:col-2">
+                                                <div class="field">
+                                                    <p:outputLabel for="unitCost" value="Costo Unit." />
+                                                    <p:inputNumber id="unitCost"
+                                                                   value="#{purchaseOrderController.newDetail.unitCost}"
+                                                                   symbol="Q "
+                                                                   decimalSeparator="."
+                                                                   thousandSeparator=","
+                                                                   minValue="0" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 md:col-2">
+                                                <div class="field">
+                                                    <p:outputLabel for="salePrice" value="Precio Venta" />
+                                                    <p:inputNumber id="salePrice"
+                                                                   value="#{purchaseOrderController.newDetail.expectedSalePrice}"
+                                                                   symbol="Q "
+                                                                   decimalSeparator="."
+                                                                   thousandSeparator=","
+                                                                   minValue="0" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 md:col-2">
+                                                <div class="field">
+                                                    <p:outputLabel value=" " />
+                                                    <p:commandButton value="Agregar"
+                                                                     icon="pi pi-plus"
+                                                                     styleClass="ui-button-success w-full"
+                                                                     action="#{purchaseOrderController.addProductToOrder()}"
+                                                                     update="form"
+                                                                     process="@this,product,quantity,unitCost,salePrice" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Products Table -->
+                                        <p:dataTable id="detailsTable"
+                                                     value="#{purchaseOrderController.currentDetails}"
+                                                     var="detail"
+                                                     emptyMessage="No hay productos agregados"
+                                                     styleClass="mt-3">
+
+                                            <p:column headerText="Producto">
+                                                <h:outputText value="#{detail.product.commercialName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Cantidad" style="width: 120px">
+                                                <p:inputNumber value="#{detail.quantityOrdered}"
+                                                               decimalPlaces="0"
+                                                               minValue="1">
+                                                    <p:ajax event="change"
+                                                            listener="#{purchaseOrderController.recalculateDetailSubtotal(detail)}"
+                                                            update="detailsTable,totalsPanel" />
+                                                </p:inputNumber>
+                                            </p:column>
+
+                                            <p:column headerText="Costo Unit." style="width: 140px">
+                                                <p:inputNumber value="#{detail.unitCost}"
+                                                               symbol="Q "
+                                                               decimalSeparator="."
+                                                               thousandSeparator=","
+                                                               minValue="0">
+                                                    <p:ajax event="change"
+                                                            listener="#{purchaseOrderController.recalculateDetailSubtotal(detail)}"
+                                                            update="detailsTable,totalsPanel" />
+                                                </p:inputNumber>
+                                            </p:column>
+
+                                            <p:column headerText="Subtotal" style="width: 120px; text-align: right">
+                                                <h:outputText value="#{detail.subtotal}">
+                                                    <f:convertNumber type="currency"
+                                                                    currencySymbol="Q "
+                                                                    minFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="" style="width: 60px">
+                                                <p:commandButton icon="pi pi-trash"
+                                                                 styleClass="ui-button-danger"
+                                                                 action="#{purchaseOrderController.removeProductFromOrder(detail)}"
+                                                                 update="form"
+                                                                 process="@this" />
+                                            </p:column>
+
+                                        </p:dataTable>
+                                    </p:panel>
+                                </div>
+
+                                <!-- Right Column: Totals Panel -->
+                                <div class="col-12 md:col-4">
+                                    <p:panel id="totalsPanel" header="Resumen de la Orden" styleClass="mb-3" style="background: #f8f9fa">
+                                        <div class="grid">
+                                            <div class="col-12">
+                                                <div class="field grid">
+                                                    <label class="col-6">Subtotal:</label>
+                                                    <div class="col-6" style="text-align: right">
+                                                        <h:outputText value="#{purchaseOrderController.calculateSubtotal()}">
+                                                            <f:convertNumber type="currency"
+                                                                            currencySymbol="Q "
+                                                                            minFractionDigits="2" />
+                                                        </h:outputText>
+                                                    </div>
+                                                </div>
+                                                <div class="field grid">
+                                                    <label class="col-6">IVA (12%):</label>
+                                                    <div class="col-6" style="text-align: right">
+                                                        <h:outputText value="#{purchaseOrderController.calculateTax()}">
+                                                            <f:convertNumber type="currency"
+                                                                            currencySymbol="Q "
+                                                                            minFractionDigits="2" />
+                                                        </h:outputText>
+                                                    </div>
+                                                </div>
+                                                <div class="field grid">
+                                                    <label class="col-6">Envío:</label>
+                                                    <div class="col-6" style="text-align: right">
+                                                        <h:outputText value="#{purchaseOrderController.currentOrder.shippingCost}">
+                                                            <f:convertNumber type="currency"
+                                                                            currencySymbol="Q "
+                                                                            minFractionDigits="2" />
+                                                        </h:outputText>
+                                                    </div>
+                                                </div>
+                                                <p:divider />
+                                                <div class="field grid" style="font-weight: bold; font-size: 1.2em">
+                                                    <label class="col-6">TOTAL:</label>
+                                                    <div class="col-6" style="text-align: right; color: #28a745">
+                                                        <h:outputText value="#{purchaseOrderController.calculateTotal()}">
+                                                            <f:convertNumber type="currency"
+                                                                            currencySymbol="Q "
+                                                                            minFractionDigits="2" />
+                                                        </h:outputText>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </p:panel>
+
+                                    <!-- Action Buttons -->
+                                    <div class="grid">
+                                        <div class="col-12">
+                                            <p:commandButton value="Guardar Orden"
+                                                             icon="pi pi-check"
+                                                             styleClass="ui-button-success w-full mb-2"
+                                                             action="#{purchaseOrderController.save()}"
+                                                             update="messages"
+                                                             process="@form" />
+                                        </div>
+                                        <div class="col-12">
+                                            <p:commandButton value="Cancelar"
+                                                             icon="pi pi-times"
+                                                             styleClass="ui-button-secondary w-full"
+                                                             action="#{purchaseOrderController.returnToList()}"
+                                                             immediate="true" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+        </ui:define>
+    </ui:composition>
+</html>

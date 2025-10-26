@@ -116,154 +116,193 @@
                                               modal="true"
                                               widgetVar="dlgSupplierRegister"
                                               responsive="true"
-                                              width="800">
+                                              width="1200">
                                         <p:outputPanel id="panel-content" class="ui-fluid">
                                             <p:outputPanel rendered="#{supplierController.supplier != null}">
 
-                                                <div class="grid">
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="supplierCode">Código de Proveedor</p:outputLabel>
-                                                            <p:inputText id="supplierCode" value="#{supplierController.supplier.supplierCode}" required="true"
-                                                                         placeholder="Ingrese código"
-                                                                         validatorMessage="El código no puede estar vacío y debe tener 20 caracteres o menos"
-                                                                         maxlength="20">
-                                                                <f:validateLength maximum="20" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
+                                                <p:wizard id="supplierWizard" widgetVar="wizSupplier"
+                                                          nextLabel="Siguiente"
+                                                          backLabel="Anterior">
 
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="taxId">NIT</p:outputLabel>
-                                                            <p:inputText id="taxId" value="#{supplierController.supplier.taxId}" required="true"
-                                                                         placeholder="Ingrese NIT"
-                                                                         validatorMessage="El NIT no puede estar vacío y debe tener 50 caracteres o menos"
-                                                                         maxlength="50">
-                                                                <f:validateLength maximum="50" />
-                                                            </p:inputText>
+                                                    <!-- Step 1: Basic Information -->
+                                                    <p:tab id="basicInfo" title="Información Básica">
+                                                        <div class="text-center mb-4">
+                                                            <h4 class="text-primary mb-2">
+                                                                <i class="pi pi-building mr-2"></i> Información Básica del Proveedor
+                                                            </h4>
+                                                            <p class="text-muted">Ingrese los datos básicos de identificación</p>
                                                         </div>
-                                                    </div>
 
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <p:outputLabel for="businessName">Nombre Oficial</p:outputLabel>
-                                                            <p:inputText id="businessName" value="#{supplierController.supplier.businessName}" required="true"
-                                                                         placeholder="Ingrese nombre oficial"
-                                                                         validatorMessage="El nombre oficial no puede estar vacía y debe tener 200 caracteres o menos"
-                                                                         maxlength="200">
-                                                                <f:validateLength maximum="200" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
+                                                        <div class="grid">
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="supplierCode">Código de Proveedor *</p:outputLabel>
+                                                                    <p:inputText id="supplierCode" value="#{supplierController.supplier.supplierCode}" required="true"
+                                                                                 placeholder="Ingrese código"
+                                                                                 validatorMessage="El código no puede estar vacío y debe tener 20 caracteres o menos"
+                                                                                 maxlength="20">
+                                                                        <f:validateLength maximum="20" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
 
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <p:outputLabel for="tradeName">Nombre Comercial</p:outputLabel>
-                                                            <p:inputText id="tradeName" value="#{supplierController.supplier.tradeName}"
-                                                                         placeholder="Ingrese nombre comercial (opcional)"
-                                                                         maxlength="200">
-                                                                <f:validateLength maximum="200" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="taxId">NIT *</p:outputLabel>
+                                                                    <p:inputText id="taxId" value="#{supplierController.supplier.taxId}" required="true"
+                                                                                 placeholder="Ingrese NIT"
+                                                                                 validatorMessage="El NIT no puede estar vacío y debe tener 50 caracteres o menos"
+                                                                                 maxlength="50">
+                                                                        <f:validateLength maximum="50" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
 
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="contactPerson">Persona de Contacto</p:outputLabel>
-                                                            <p:inputText id="contactPerson" value="#{supplierController.supplier.contactPerson}"
-                                                                         placeholder="Ingrese nombre del contacto"
-                                                                         maxlength="100">
-                                                                <f:validateLength maximum="100" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="businessName">Nombre Oficial *</p:outputLabel>
+                                                                    <p:inputText id="businessName" value="#{supplierController.supplier.businessName}" required="true"
+                                                                                 placeholder="Ingrese nombre oficial"
+                                                                                 validatorMessage="El nombre oficial no puede estar vacía y debe tener 200 caracteres o menos"
+                                                                                 maxlength="200">
+                                                                        <f:validateLength maximum="200" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
 
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="phone">Teléfono</p:outputLabel>
-                                                            <p:inputText id="phone" value="#{supplierController.supplier.phone}"
-                                                                         placeholder="Ingrese teléfono"
-                                                                         maxlength="20">
-                                                                <f:validateLength maximum="20" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <p:outputLabel for="email">Correo Electrónico</p:outputLabel>
-                                                            <p:inputText id="email" value="#{supplierController.supplier.email}" required="true"
-                                                                         placeholder="Ingrese correo electrónico"
-                                                                         validatorMessage="Por favor ingrese una dirección de correo válida"
-                                                                         maxlength="100">
-                                                                <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <p:outputLabel for="address">Dirección</p:outputLabel>
-                                                            <p:inputTextarea id="address" value="#{supplierController.supplier.address}"
-                                                                             rows="3"
-                                                                             placeholder="Ingrese dirección completa" />
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="city">Ciudad</p:outputLabel>
-                                                            <p:inputText id="city" value="#{supplierController.supplier.city}"
-                                                                         placeholder="Ingrese ciudad"
-                                                                         maxlength="100">
-                                                                <f:validateLength maximum="100" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12 md:col-6">
-                                                        <div class="field">
-                                                            <p:outputLabel for="country">País</p:outputLabel>
-                                                            <p:inputText id="country" value="#{supplierController.supplier.country}"
-                                                                         placeholder="Guatemala"
-                                                                         maxlength="50">
-                                                                <f:validateLength maximum="50" />
-                                                            </p:inputText>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <p:outputLabel for="notes">Notas</p:outputLabel>
-                                                            <p:inputTextarea id="notes" value="#{supplierController.supplier.notes}"
-                                                                             rows="3"
-                                                                             placeholder="Notas adicionales (opcional)" />
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-12">
-                                                        <div class="field">
-                                                            <div class="field-checkbox">
-                                                                <p:selectBooleanCheckbox id="isActive" value="#{supplierController.supplier.isActive}" />
-                                                                <p:outputLabel for="isActive">Proveedor Activo</p:outputLabel>
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="tradeName">Nombre Comercial</p:outputLabel>
+                                                                    <p:inputText id="tradeName" value="#{supplierController.supplier.tradeName}"
+                                                                                 placeholder="Ingrese nombre comercial (opcional)"
+                                                                                 maxlength="200">
+                                                                        <f:validateLength maximum="200" />
+                                                                    </p:inputText>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
+                                                    </p:tab>
+
+                                                    <!-- Step 2: Contact Information -->
+                                                    <p:tab id="contactInfo" title="Información de Contacto">
+                                                        <div class="text-center mb-4">
+                                                            <h4 class="text-primary mb-2">
+                                                                <i class="pi pi-phone mr-2"></i> Información de Contacto
+                                                            </h4>
+                                                            <p class="text-muted">Ingrese los datos de contacto del proveedor</p>
+                                                        </div>
+
+                                                        <div class="grid">
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="contactPerson">Persona de Contacto</p:outputLabel>
+                                                                    <p:inputText id="contactPerson" value="#{supplierController.supplier.contactPerson}"
+                                                                                 placeholder="Ingrese nombre del contacto"
+                                                                                 maxlength="100">
+                                                                        <f:validateLength maximum="100" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="phone">Teléfono</p:outputLabel>
+                                                                    <p:inputText id="phone" value="#{supplierController.supplier.phone}"
+                                                                                 placeholder="Ingrese teléfono"
+                                                                                 maxlength="20">
+                                                                        <f:validateLength maximum="20" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="email">Correo Electrónico *</p:outputLabel>
+                                                                    <p:inputText id="email" value="#{supplierController.supplier.email}" required="true"
+                                                                                 placeholder="Ingrese correo electrónico"
+                                                                                 validatorMessage="Por favor ingrese una dirección de correo válida"
+                                                                                 maxlength="100">
+                                                                        <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </p:tab>
+
+                                                    <!-- Step 3: Address and Other Information -->
+                                                    <p:tab id="addressInfo" title="Dirección y Otros">
+                                                        <div class="text-center mb-4">
+                                                            <h4 class="text-primary mb-2">
+                                                                <i class="pi pi-map-marker mr-2"></i> Dirección y Otros Datos
+                                                            </h4>
+                                                            <p class="text-muted">Complete la dirección y notas adicionales</p>
+                                                        </div>
+
+                                                        <div class="grid">
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="address">Dirección</p:outputLabel>
+                                                                    <p:inputTextarea id="address" value="#{supplierController.supplier.address}"
+                                                                                     rows="3"
+                                                                                     placeholder="Ingrese dirección completa" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="city">Ciudad</p:outputLabel>
+                                                                    <p:inputText id="city" value="#{supplierController.supplier.city}"
+                                                                                 placeholder="Ingrese ciudad"
+                                                                                 maxlength="100">
+                                                                        <f:validateLength maximum="100" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 md:col-6">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="country">País</p:outputLabel>
+                                                                    <p:inputText id="country" value="#{supplierController.supplier.country}"
+                                                                                 placeholder="Guatemala"
+                                                                                 maxlength="50">
+                                                                        <f:validateLength maximum="50" />
+                                                                    </p:inputText>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <p:outputLabel for="notes">Notas</p:outputLabel>
+                                                                    <p:inputTextarea id="notes" value="#{supplierController.supplier.notes}"
+                                                                                     rows="3"
+                                                                                     placeholder="Notas adicionales (opcional)" />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12">
+                                                                <div class="field">
+                                                                    <div class="field-checkbox">
+                                                                        <p:selectBooleanCheckbox id="isActive" value="#{supplierController.supplier.isActive}" />
+                                                                        <p:outputLabel for="isActive">Proveedor Activo</p:outputLabel>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </p:tab>
+                                                </p:wizard>
 
                                             </p:outputPanel>
                                         </p:outputPanel>
 
                                         <f:facet name="footer">
-                                            <p:commandButton value="Guardar" icon="pi pi-check"
+                                            <p:commandButton value="Guardar Proveedor" icon="pi pi-check"
                                                              actionListener="#{supplierController.save()}"
                                                              update="panel-content :form:dt-suppliers :form:messages"
                                                              process="panel-content @this"
                                                              styleClass="ui-button-success"
                                                              oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgSupplierRegister').hide()" />
                                             <p:commandButton value="Cancelar" icon="pi pi-times"
-                                                             onclick="PF('dlgSupplierRegister').hide()"
+                                                             onclick="PF('dlgSupplierRegister').hide(); PF('wizSupplier').reset();"
                                                              styleClass="ui-button-secondary"
                                                              type="button" />
                                         </f:facet>
