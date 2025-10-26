@@ -137,8 +137,8 @@
                                                              styleClass="ui-button-primary rounded-button"
                                                              title="Confirmar Orden"
                                                              actionListener="#{purchaseOrderController.prepareConfirm(order)}"
-                                                             update=":confirmDialog"
-                                                             oncomplete="PF('confirmDialog').show()"
+                                                             update=":confirmForm:confirmOrderDialog"
+                                                             oncomplete="PF('confirmOrderDialogVar').show()"
                                                              rendered="#{purchaseOrderController.canConfirm(order)}"
                                                              style="margin-right: .5rem" />
 
@@ -147,7 +147,7 @@
                                                              styleClass="ui-button-danger rounded-button"
                                                              title="Cancelar Orden"
                                                              actionListener="#{purchaseOrderController.prepareCancel(order)}"
-                                                             update=":cancelDialog"
+                                                             update=":cancelForm:cancelDialog"
                                                              oncomplete="PF('cancelDialog').show()"
                                                              rendered="#{purchaseOrderController.canCancel(order)}"
                                                              style="margin-right: .5rem" />
@@ -187,19 +187,20 @@
                 </div>
             </div>
 
-            <!-- Confirm Dialog -->
-            <p:dialog id="confirmDialog"
-                      header="Confirmar Orden"
-                      widgetVar="confirmDialog"
-                      modal="true"
-                      showEffect="fade"
-                      width="500">
-                <h:form>
+            <!-- Confirm Order Dialog -->
+            <h:form id="confirmForm">
+                <p:dialog id="confirmOrderDialog"
+                          header="Confirmar Orden"
+                          widgetVar="confirmOrderDialogVar"
+                          modal="true"
+                          showEffect="fade"
+                          width="500">
                     <div class="field">
                         <p:outputLabel for="confirmNumber" value="Número de Confirmación del Proveedor (opcional)" />
                         <p:inputText id="confirmNumber"
                                      value="#{purchaseOrderController.supplierConfirmationNumber}"
-                                     maxlength="50" />
+                                     maxlength="50"
+                                     styleClass="w-full" />
                     </div>
 
                     <f:facet name="footer">
@@ -207,31 +208,35 @@
                                          icon="pi pi-check"
                                          styleClass="ui-button-success"
                                          action="#{purchaseOrderController.confirmOrder()}"
-                                         update=":form:dt-orders,:form:messages" />
+                                         update=":form:dt-orders,:form:messages"
+                                         process="@form"
+                                         oncomplete="PF('confirmOrderDialogVar').hide()" />
                         <p:commandButton value="Cancelar"
                                          icon="pi pi-times"
                                          styleClass="ui-button-secondary"
-                                         onclick="PF('confirmDialog').hide()"
+                                         onclick="PF('confirmOrderDialogVar').hide()"
                                          type="button" />
                     </f:facet>
-                </h:form>
-            </p:dialog>
+                </p:dialog>
+            </h:form>
 
             <!-- Cancel Dialog -->
-            <p:dialog id="cancelDialog"
-                      header="Cancelar Orden"
-                      widgetVar="cancelDialog"
-                      modal="true"
-                      showEffect="fade"
-                      width="500">
-                <h:form>
+            <h:form id="cancelForm">
+                <p:dialog id="cancelDialog"
+                          header="Cancelar Orden"
+                          widgetVar="cancelDialog"
+                          modal="true"
+                          showEffect="fade"
+                          width="500">
                     <div class="field">
                         <p:outputLabel for="cancelReason" value="Motivo de Cancelación *" />
                         <p:inputTextarea id="cancelReason"
                                          value="#{purchaseOrderController.cancellationReason}"
                                          rows="4"
                                          required="true"
-                                         requiredMessage="Debe proporcionar un motivo de cancelación" />
+                                         requiredMessage="Debe proporcionar un motivo de cancelación"
+                                         styleClass="w-full" />
+                        <p:message for="cancelReason" />
                     </div>
 
                     <f:facet name="footer">
@@ -239,15 +244,17 @@
                                          icon="pi pi-times"
                                          styleClass="ui-button-danger"
                                          action="#{purchaseOrderController.cancelOrder()}"
-                                         update=":form:dt-orders,:form:messages" />
+                                         update=":form:dt-orders,:form:messages"
+                                         process="@form"
+                                         oncomplete="PF('cancelDialog').hide()" />
                         <p:commandButton value="Cerrar"
                                          icon="pi pi-times"
                                          styleClass="ui-button-secondary"
                                          onclick="PF('cancelDialog').hide()"
                                          type="button" />
                     </f:facet>
-                </h:form>
-            </p:dialog>
+                </p:dialog>
+            </h:form>
 
         </ui:define>
     </ui:composition>

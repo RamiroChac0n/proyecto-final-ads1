@@ -453,7 +453,7 @@ public class PurchaseOrderController implements Serializable {
             );
             showSuccessMessage("Orden confirmada exitosamente");
             loadPurchaseOrders();
-            closeDialog("confirmDialog");
+            closeDialog("confirmOrderDialogVar");
 
         } catch (Exception e) {
             showErrorMessage("Error al confirmar la orden: " + e.getMessage());

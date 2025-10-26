@@ -100,7 +100,8 @@ public class PurchaseOrderServiceImpl implements IPurchaseOrderService {
 
     @Override
     public List<PurchaseOrder> list() {
-        return purchaseOrderRepository.findAll();
+        // Use findAllWithDetails to eagerly fetch orderDetails and avoid LazyInitializationException
+        return purchaseOrderRepository.findAllWithDetails();
     }
 
     @Override
