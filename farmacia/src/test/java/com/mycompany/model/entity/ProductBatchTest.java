@@ -76,6 +76,15 @@ public class ProductBatchTest {
         
         Field inventoryMovementsField = productBatchClass.getDeclaredField("inventoryMovements");
         assertEquals(List.class, inventoryMovementsField.getType());
+
+        Field supplierField = productBatchClass.getDeclaredField("supplier");
+        assertEquals(Supplier.class, supplierField.getType());
+
+        Field purchaseOrderField = productBatchClass.getDeclaredField("purchaseOrder");
+        assertEquals(PurchaseOrder.class, purchaseOrderField.getType());
+
+        Field purchaseReceiptField = productBatchClass.getDeclaredField("purchaseReceipt");
+        assertEquals(PurchaseReceipt.class, purchaseReceiptField.getType());
     }
     
     @Test
@@ -91,18 +100,21 @@ public class ProductBatchTest {
             Integer.class,      // quantityAvailable
             BigDecimal.class,   // unitCost
             BigDecimal.class,   // salePrice
-            Date.class,    // manufactureDate
-            Date.class,    // expirationDate
-            Date.class,    // receivedDate
+            Date.class,         // manufactureDate
+            Date.class,         // expirationDate
+            Date.class,         // receivedDate
             Boolean.class,      // isActive
             Boolean.class,      // isExpired
             Integer.class,      // daysUntilExpiration
-            Date.class, // createdAt
+            Date.class,         // createdAt
+            Supplier.class,     // supplier
+            PurchaseOrder.class,    // purchaseOrder
+            PurchaseReceipt.class,  // purchaseReceipt
             List.class          // inventoryMovements
         );
-        
+
         assertNotNull(constructor);
-        assertEquals(15, constructor.getParameterCount());
+        assertEquals(18, constructor.getParameterCount());
     }
 
     @Test
@@ -126,7 +138,10 @@ public class ProductBatchTest {
         assertNotNull(productBatchClass.getMethod("getDaysUntilExpiration"));
         assertNotNull(productBatchClass.getMethod("getCreatedAt"));
         assertNotNull(productBatchClass.getMethod("getInventoryMovements"));
-        
+        assertNotNull(productBatchClass.getMethod("getSupplier"));
+        assertNotNull(productBatchClass.getMethod("getPurchaseOrder"));
+        assertNotNull(productBatchClass.getMethod("getPurchaseReceipt"));
+
         // Test key setters
         assertNotNull(productBatchClass.getMethod("setBatchId", Integer.class));
         assertNotNull(productBatchClass.getMethod("setProduct", Product.class));
@@ -136,7 +151,10 @@ public class ProductBatchTest {
         assertNotNull(productBatchClass.getMethod("setUnitCost", BigDecimal.class));
         assertNotNull(productBatchClass.getMethod("setSalePrice", BigDecimal.class));
         assertNotNull(productBatchClass.getMethod("setExpirationDate", Date.class));
-        
+        assertNotNull(productBatchClass.getMethod("setSupplier", Supplier.class));
+        assertNotNull(productBatchClass.getMethod("setPurchaseOrder", PurchaseOrder.class));
+        assertNotNull(productBatchClass.getMethod("setPurchaseReceipt", PurchaseReceipt.class));
+
         // equals, hashCode, toString
         assertNotNull(productBatchClass.getMethod("equals", Object.class));
         assertNotNull(productBatchClass.getMethod("hashCode"));
