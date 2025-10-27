@@ -149,42 +149,6 @@
                                                       styleClass="font-bold text-green-700" />
                                     </p:column>
 
-                                    <!-- Unit Cost (Editable) -->
-                                    <p:column headerText="Costo Unit. *" style="width: 120px;">
-                                        <p:cellEditor>
-                                            <f:facet name="output">
-                                                <h:outputText value="#{detail.unitCost}">
-                                                    <f:convertNumber type="currency" currencySymbol="Q " />
-                                                </h:outputText>
-                                            </f:facet>
-                                            <f:facet name="input">
-                                                <p:inputNumber value="#{detail.unitCost}"
-                                                               symbol="Q "
-                                                               decimalPlaces="2"
-                                                               minValue="0"
-                                                               style="width:100%" />
-                                            </f:facet>
-                                        </p:cellEditor>
-                                    </p:column>
-
-                                    <!-- Sale Price (Editable) -->
-                                    <p:column headerText="Precio Venta *" style="width: 120px;">
-                                        <p:cellEditor>
-                                            <f:facet name="output">
-                                                <h:outputText value="#{detail.salePrice}">
-                                                    <f:convertNumber type="currency" currencySymbol="Q " />
-                                                </h:outputText>
-                                            </f:facet>
-                                            <f:facet name="input">
-                                                <p:inputNumber value="#{detail.salePrice}"
-                                                               symbol="Q "
-                                                               decimalPlaces="2"
-                                                               minValue="0"
-                                                               style="width:100%" />
-                                            </f:facet>
-                                        </p:cellEditor>
-                                    </p:column>
-
                                     <!-- Manufacture Date (Editable) -->
                                     <p:column headerText="Fecha Fab." style="width: 130px;">
                                         <p:cellEditor>
