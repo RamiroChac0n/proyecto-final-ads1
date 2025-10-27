@@ -157,9 +157,13 @@ public class PurchaseOrderRepository extends PharmacyRepository<PurchaseOrder> {
      */
     public PurchaseOrder findByIdWithDetails(Integer orderId) {
         try {
+            // Use DISTINCT to avoid duplicates from JOIN FETCHes
+            // Note: JPA does not allow aliases in FETCH joins
             TypedQuery<PurchaseOrder> query = em.createQuery(
-                "SELECT po FROM PurchaseOrder po " +
+                "SELECT DISTINCT po FROM PurchaseOrder po " +
                 "LEFT JOIN FETCH po.orderDetails " +
+                "LEFT JOIN FETCH po.supplier " +
+                "LEFT JOIN FETCH po.branch " +
                 "WHERE po.orderId = :orderId",
                 PurchaseOrder.class
             );

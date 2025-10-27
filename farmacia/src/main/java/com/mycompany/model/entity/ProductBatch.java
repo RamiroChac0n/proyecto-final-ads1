@@ -29,6 +29,8 @@ public class ProductBatch {
     @Column(name = "batch_id")
     private Integer batchId;
     
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
@@ -81,10 +83,40 @@ public class ProductBatch {
     @Builder.Default
     @Column(name = "days_until_expiration")
     private Integer daysUntilExpiration = 0;
-    
+
     @Column(name = "created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+    /**
+     * Supplier who provided this batch.
+     * Optional - tracks product source for quality/recall purposes.
+     */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
+    /**
+     * Purchase order this batch came from.
+     * Optional - links to original purchase request.
+     */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private PurchaseOrder purchaseOrder;
+
+    /**
+     * Purchase receipt when this batch was received.
+     * Optional - tracks when/how batch entered inventory.
+     */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receipt_id")
+    private PurchaseReceipt purchaseReceipt;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

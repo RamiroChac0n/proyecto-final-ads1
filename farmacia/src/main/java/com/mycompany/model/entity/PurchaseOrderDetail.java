@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -42,6 +44,8 @@ public class PurchaseOrderDetail implements Serializable {
      * Required - detail cannot exist without an order.
      * When order is deleted, details are also deleted (CASCADE).
      */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @NotNull(message = "La orden de compra es requerida")

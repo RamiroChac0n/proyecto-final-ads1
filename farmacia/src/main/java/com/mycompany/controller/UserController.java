@@ -103,6 +103,14 @@ public class UserController implements Serializable {
                 Role.CASHIER.equals(currentUser.getRole()));
     }
 
+    // Check if current user is admin or storekeeper
+    public boolean isAdminOrStorekeeper() {
+        User currentUser = getCurrentUser();
+        return currentUser != null &&
+               (Role.ADMIN.equals(currentUser.getRole()) ||
+                Role.STOREKEEPER.equals(currentUser.getRole()));
+    }
+
     // Page access check for admin-only pages
     public void checkAdminAccess() {
         if (!isLoggedIn()) {

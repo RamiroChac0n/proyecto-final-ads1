@@ -142,6 +142,16 @@
                                                              rendered="#{purchaseOrderController.canConfirm(order)}"
                                                              style="margin-right: .5rem" />
 
+                                            <!-- Start Receipt (CONFIRMED/IN_TRANSIT/RECEIVING - for STOREKEEPER) -->
+                                            <p:button icon="pi pi-inbox"
+                                                      styleClass="ui-button-help rounded-button"
+                                                      title="Iniciar Recepción"
+                                                      outcome="/purchase-receipt-form.xhtml"
+                                                      rendered="#{(order.status.name() == 'CONFIRMED' or order.status.name() == 'IN_TRANSIT' or order.status.name() == 'RECEIVING') and userController.adminOrStorekeeper}"
+                                                      style="margin-right: .5rem">
+                                                <f:param name="orderId" value="#{order.orderId}" />
+                                            </p:button>
+
                                             <!-- Cancel -->
                                             <p:commandButton icon="pi pi-times"
                                                              styleClass="ui-button-danger rounded-button"

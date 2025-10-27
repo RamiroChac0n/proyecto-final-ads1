@@ -45,6 +45,10 @@
                                 <p:menuitem value="Compras"
                                            outcome="purchase-orders"
                                            icon="pi pi-fw pi-shopping-cart" />
+                                <p:menuitem value="Recepciones"
+                                           outcome="purchase-receipts"
+                                           icon="pi pi-fw pi-inbox"
+                                           rendered="#{userController.isAdminOrStorekeeper()}" />
                             </p:submenu>
 
                             <!-- Cash Register - ADMIN only -->

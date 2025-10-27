@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -215,6 +217,8 @@ public class PurchaseOrder implements Serializable {
      * Cascade all operations to details.
      * Orphan removal: if detail is removed from list, delete from DB.
      */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL,
                fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
