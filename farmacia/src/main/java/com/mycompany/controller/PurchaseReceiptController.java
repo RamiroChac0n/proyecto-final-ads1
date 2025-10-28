@@ -130,6 +130,7 @@ public class PurchaseReceiptController implements Serializable {
                     // Pre-create receipt details for each product in the order
                     for (PurchaseOrderDetail orderDetail : orderProducts) {
                         PurchaseReceiptDetail receiptDetail = PurchaseReceiptDetail.builder()
+                                .purchaseReceipt(currentReceipt) // Set parent relationship
                                 .product(orderDetail.getProduct())
                                 .purchaseOrderDetail(orderDetail)
                                 .quantityReceived(0) // Initialize to 0, user will fill
@@ -232,6 +233,7 @@ public class PurchaseReceiptController implements Serializable {
             // Pre-create receipt details for each product in the order
             for (PurchaseOrderDetail orderDetail : orderProducts) {
                 PurchaseReceiptDetail receiptDetail = PurchaseReceiptDetail.builder()
+                        .purchaseReceipt(currentReceipt) // Set parent relationship
                         .product(orderDetail.getProduct())
                         .purchaseOrderDetail(orderDetail)
                         .quantityReceived(0) // Initialize to 0, user will fill
@@ -369,6 +371,18 @@ public class PurchaseReceiptController implements Serializable {
     }
 
     /**
+     * Filter and return only valid details (with quantity received > 0).
+     * This helper method ensures consistent filtering logic across save and complete operations.
+     *
+     * @return List of valid details ready to be persisted
+     */
+    private List<PurchaseReceiptDetail> filterValidDetails() {
+        return currentDetails.stream()
+                .filter(detail -> detail.getQuantityReceived() != null && detail.getQuantityReceived() > 0)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Save the current receipt as draft.
      */
     public String saveDraft() {
@@ -393,13 +407,11 @@ public class PurchaseReceiptController implements Serializable {
                 return null;
             }
 
-            // Clear existing details and add only valid ones (with data filled)
+            // Clear existing details and add only valid ones (using helper method)
             currentReceipt.getReceiptDetails().clear();
-            for (PurchaseReceiptDetail detail : currentDetails) {
-                // Only add details that have been at least partially filled
-                if (detail.getQuantityReceived() != null && detail.getQuantityReceived() > 0) {
-                    currentReceipt.addDetail(detail);
-                }
+            List<PurchaseReceiptDetail> validDetails = filterValidDetails();
+            for (PurchaseReceiptDetail detail : validDetails) {
+                currentReceipt.addDetail(detail);
             }
 
             // Save or update
@@ -468,12 +480,11 @@ public class PurchaseReceiptController implements Serializable {
                 return null;
             }
 
-            // First save the details (only those with quantity received > 0)
+            // First save the details (only valid ones using helper method)
             currentReceipt.getReceiptDetails().clear();
-            for (PurchaseReceiptDetail detail : currentDetails) {
-                if (detail.getQuantityReceived() != null && detail.getQuantityReceived() > 0) {
-                    currentReceipt.addDetail(detail);
-                }
+            List<PurchaseReceiptDetail> validDetails = filterValidDetails();
+            for (PurchaseReceiptDetail detail : validDetails) {
+                currentReceipt.addDetail(detail);
             }
 
             if (currentReceipt.getReceiptId() == null) {
@@ -546,6 +557,7 @@ public class PurchaseReceiptController implements Serializable {
                 } else {
                     // Create new pre-filled detail for this product
                     PurchaseReceiptDetail newDetail = PurchaseReceiptDetail.builder()
+                            .purchaseReceipt(currentReceipt) // Set parent relationship
                             .product(orderDetail.getProduct())
                             .purchaseOrderDetail(orderDetail)
                             .quantityReceived(0) // Initialize to 0, user will fill
@@ -621,6 +633,16 @@ public class PurchaseReceiptController implements Serializable {
 
     public Integer getTotalQuantityAvailable() {
         return getTotalQuantityReceived() - getTotalQuantityDamaged();
+    }
+
+    public Integer getTotalQuantityMissing() {
+        if (currentDetails == null || currentDetails.isEmpty()) {
+            return 0;
+        }
+        return currentDetails.stream()
+                .filter(d -> d.getQuantityMissing() != null)
+                .mapToInt(d -> d.getQuantityMissing())
+                .sum();
     }
 
     /**

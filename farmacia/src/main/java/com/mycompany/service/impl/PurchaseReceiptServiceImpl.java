@@ -39,6 +39,9 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
     private InventoryMovementRepository movementRepository;
 
     @EJB
+    private UserRepository userRepository;
+
+    @EJB
     private IPurchaseOrderService orderService;
 
     @Override
@@ -98,7 +101,14 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
         if (!canEdit(receipt)) {
             throw new IllegalStateException("Solo se pueden guardar recepciones en estado BORRADOR");
         }
-        return receiptRepository.save(receipt);
+
+        // If receipt has an ID, it's an existing entity - use update (merge)
+        // If receipt has no ID, it's a new entity - use save (persist)
+        if (receipt.getReceiptId() != null) {
+            return receiptRepository.update(receipt);
+        } else {
+            return receiptRepository.save(receipt);
+        }
     }
 
     @Override
@@ -180,65 +190,80 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
     @Override
     public PurchaseReceipt completeReceipt(Integer receiptId, String completedBy,
                                             Boolean isFinal, String notes) {
-        // Load receipt with details
-        PurchaseReceipt receipt = findByIdWithDetails(receiptId);
-        if (receipt == null) {
-            throw new IllegalArgumentException("Recepción no encontrada");
+        try {
+            // Load receipt with details
+            PurchaseReceipt receipt = findByIdWithDetails(receiptId);
+            if (receipt == null) {
+                throw new IllegalArgumentException("Recepción no encontrada");
+            }
+
+            // Validate receipt
+            if (!validateReceipt(receipt)) {
+                throw new IllegalStateException("La recepción no es válida para completar");
+            }
+
+            if (!canComplete(receipt)) {
+                throw new IllegalStateException("La recepción no puede ser completada");
+            }
+
+            // Get associated order
+            PurchaseOrder order = receipt.getPurchaseOrder();
+
+            // Calculate if this should be marked as final
+            boolean shouldBeFinal = determineFinalStatus(receipt, isFinal);
+
+            // Process each detail: create batches and inventory movements
+            // Wrap in try-catch to provide better error messages
+            for (PurchaseReceiptDetail detail : receipt.getReceiptDetails()) {
+                try {
+                    processReceiptDetail(receipt, detail, order);
+                } catch (Exception e) {
+                    // Rethrow with context about which product failed
+                    throw new RuntimeException(
+                        "Error al procesar producto '" + detail.getProduct().getCommercialName() +
+                        "' (lote: " + detail.getBatchNumber() + "): " + e.getMessage(), e);
+                }
+            }
+
+            // Update receipt status
+            receipt.setStatus(PurchaseReceiptStatus.COMPLETE);
+            receipt.setCompletedDate(new Date());
+            receipt.setCompletedBy(completedBy);
+            receipt.setIsFinal(shouldBeFinal);
+
+            // Add completion note
+            String completionNote = String.format(
+                "Completado el %s: %d unidades recibidas (%d dañadas). %s",
+                new Date(),
+                receipt.getTotalQuantityReceived(),
+                receipt.getTotalQuantityDamaged(),
+                shouldBeFinal ? "RECEPCIÓN FINAL" : "RECEPCIÓN PARCIAL"
+            );
+            if (notes != null && !notes.trim().isEmpty()) {
+                completionNote += " - " + notes;
+            }
+            receipt.setNotes(completionNote);
+
+            // Save updated receipt
+            PurchaseReceipt completedReceipt = receiptRepository.update(receipt);
+
+            // Update order status
+            if (shouldBeFinal) {
+                order.setStatus(PurchaseOrderStatus.RECEIVED);
+                order.setReceivedDate(new Date());
+            } else {
+                // Keep in RECEIVING status for partial receipts
+                order.setStatus(PurchaseOrderStatus.RECEIVING);
+            }
+            orderRepository.update(order);
+
+            return completedReceipt;
+
+        } catch (Exception e) {
+            // Let the exception propagate to trigger JTA transaction rollback
+            // The container will automatically rollback the entire transaction
+            throw new RuntimeException("Error al completar recepción: " + e.getMessage(), e);
         }
-
-        // Validate receipt
-        if (!validateReceipt(receipt)) {
-            throw new IllegalStateException("La recepción no es válida para completar");
-        }
-
-        if (!canComplete(receipt)) {
-            throw new IllegalStateException("La recepción no puede ser completada");
-        }
-
-        // Get associated order
-        PurchaseOrder order = receipt.getPurchaseOrder();
-
-        // Calculate if this should be marked as final
-        boolean shouldBeFinal = determineFinalStatus(receipt, isFinal);
-
-        // Process each detail: create batches and inventory movements
-        for (PurchaseReceiptDetail detail : receipt.getReceiptDetails()) {
-            processReceiptDetail(receipt, detail, order);
-        }
-
-        // Update receipt status
-        receipt.setStatus(PurchaseReceiptStatus.COMPLETE);
-        receipt.setCompletedDate(new Date());
-        receipt.setCompletedBy(completedBy);
-        receipt.setIsFinal(shouldBeFinal);
-
-        // Add completion note
-        String completionNote = String.format(
-            "Completado el %s: %d unidades recibidas (%d dañadas). %s",
-            new Date(),
-            receipt.getTotalQuantityReceived(),
-            receipt.getTotalQuantityDamaged(),
-            shouldBeFinal ? "RECEPCIÓN FINAL" : "RECEPCIÓN PARCIAL"
-        );
-        if (notes != null && !notes.trim().isEmpty()) {
-            completionNote += " - " + notes;
-        }
-        receipt.setNotes(completionNote);
-
-        // Save updated receipt
-        PurchaseReceipt completedReceipt = receiptRepository.update(receipt);
-
-        // Update order status
-        if (shouldBeFinal) {
-            order.setStatus(PurchaseOrderStatus.RECEIVED);
-            order.setReceivedDate(new Date());
-        } else {
-            // Keep in RECEIVING status for partial receipts
-            order.setStatus(PurchaseOrderStatus.RECEIVING);
-        }
-        orderRepository.update(order);
-
-        return completedReceipt;
     }
 
     /**
@@ -269,8 +294,11 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
 
         ProductBatch savedBatch = batchRepository.save(batch);
 
-        // Create User reference (JPA will handle the relationship without loading full entity)
-        User userRef = User.builder().id(receipt.getReceivedBy()).build();
+        // Validate and get User reference - ensure the user exists
+        User userRef = userRepository.findById(receipt.getReceivedBy());
+        if (userRef == null) {
+            throw new IllegalStateException("Usuario no encontrado: " + receipt.getReceivedBy());
+        }
 
         // Create inventory movement for good products (IN)
         if (quantityAvailable > 0) {
@@ -331,10 +359,8 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
                 .mapToInt(PurchaseReceiptDetail::getQuantityReceived)
                 .sum();
 
-        // Add current receipt's quantities
-        totalReceived += receipt.getReceiptDetails().stream()
-                .mapToInt(PurchaseReceiptDetail::getQuantityReceived)
-                .sum();
+        // Note: Current receipt is already included in the stream above (filtered by receiptId)
+        // DO NOT add it again to avoid double-counting
 
         // If we've received all or more than ordered, it's final
         return totalReceived >= totalOrdered;
@@ -368,8 +394,8 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
                 return false;
             }
 
-            // Must have valid quantities
-            if (detail.getQuantityReceived() == null || detail.getQuantityReceived() < 0) {
+            // Must have valid quantities (at least 1 unit)
+            if (detail.getQuantityReceived() == null || detail.getQuantityReceived() < 1) {
                 return false;
             }
 
@@ -378,14 +404,53 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
                 return false;
             }
 
-            // Must have expiration date
+            // Must have expiration date (and it must be in the future)
             if (detail.getExpirationDate() == null) {
                 return false;
+            }
+
+            if (detail.getExpirationDate().isBefore(LocalDate.now())) {
+                return false; // Cannot receive already expired products
             }
 
             // Must have valid prices
             if (detail.getUnitCost() == null || detail.getSalePrice() == null) {
                 return false;
+            }
+        }
+
+        // Validate no duplicate product+batch combinations
+        if (!validateNoDuplicateBatches(receipt)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate that there are no duplicate product+batch combinations in the receipt.
+     * This prevents creating multiple batches with the same batch number for the same product.
+     *
+     * @param receipt the receipt to validate
+     * @return true if no duplicates, false if duplicates found
+     */
+    private boolean validateNoDuplicateBatches(PurchaseReceipt receipt) {
+        if (receipt.getReceiptDetails() == null || receipt.getReceiptDetails().isEmpty()) {
+            return true;
+        }
+
+        // Track product+batch combinations
+        java.util.Set<String> seenCombinations = new java.util.HashSet<>();
+
+        for (PurchaseReceiptDetail detail : receipt.getReceiptDetails()) {
+            if (detail.getProduct() != null && detail.getBatchNumber() != null) {
+                String combination = detail.getProduct().getProductId() + "|" + detail.getBatchNumber().trim();
+
+                if (seenCombinations.contains(combination)) {
+                    return false; // Duplicate found
+                }
+
+                seenCombinations.add(combination);
             }
         }
 
@@ -423,7 +488,10 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
     }
 
     @Override
-    public String generateReceiptNumber(Integer orderId) {
+    public synchronized String generateReceiptNumber(Integer orderId) {
+        // SYNCHRONIZED: Prevents race condition when multiple threads generate numbers concurrently
+        // This ensures only one thread can generate a receipt number at a time
+
         // Count existing complete receipts for this order
         List<PurchaseReceipt> existingReceipts = receiptRepository.findByOrderId(orderId);
         long completedCount = existingReceipts.stream()

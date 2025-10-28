@@ -74,11 +74,11 @@ public class PurchaseReceiptDetail implements Serializable {
 
     /**
      * Quantity of this product received (including damaged items).
-     * Must be >= 0.
+     * Must be >= 1 (cannot receive zero units).
      */
     @Column(name = "quantity_received", nullable = false)
     @NotNull(message = "La cantidad recibida es requerida")
-    @Min(value = 0, message = "La cantidad recibida debe ser mayor o igual a 0")
+    @Min(value = 1, message = "La cantidad recibida debe ser al menos 1 unidad")
     private Integer quantityReceived;
 
     /**
@@ -119,9 +119,11 @@ public class PurchaseReceiptDetail implements Serializable {
     /**
      * Date when this batch expires.
      * Required - critical for pharmacy inventory management.
+     * Must be a future date (cannot accept already expired products).
      */
     @Column(name = "expiration_date", nullable = false)
     @NotNull(message = "La fecha de vencimiento es requerida")
+    @Future(message = "La fecha de vencimiento debe ser una fecha futura")
     private LocalDate expirationDate;
 
     /**
@@ -157,17 +159,45 @@ public class PurchaseReceiptDetail implements Serializable {
         if (quantityDamaged > quantityReceived) {
             throw new IllegalStateException("La cantidad dañada no puede ser mayor a la cantidad recibida");
         }
+
+        // Validate manufacture date < expiration date
+        if (manufactureDate != null && expirationDate != null) {
+            if (manufactureDate.isAfter(expirationDate) || manufactureDate.isEqual(expirationDate)) {
+                throw new IllegalStateException("La fecha de fabricación debe ser anterior a la fecha de vencimiento");
+            }
+        }
+
+        // Validate sale price >= unit cost (prevent selling at a loss)
+        if (unitCost != null && salePrice != null) {
+            if (salePrice.compareTo(unitCost) < 0) {
+                throw new IllegalStateException("El precio de venta no puede ser menor al costo unitario (venta con pérdida)");
+            }
+        }
     }
 
     /**
      * Lifecycle callback - executed before updating entity.
-     * Validates damaged quantity constraint.
+     * Validates damaged quantity constraint and date logic.
      */
     @PreUpdate
     protected void onUpdate() {
         // Validate damaged <= received
         if (quantityDamaged != null && quantityReceived != null && quantityDamaged > quantityReceived) {
             throw new IllegalStateException("La cantidad dañada no puede ser mayor a la cantidad recibida");
+        }
+
+        // Validate manufacture date < expiration date
+        if (manufactureDate != null && expirationDate != null) {
+            if (manufactureDate.isAfter(expirationDate) || manufactureDate.isEqual(expirationDate)) {
+                throw new IllegalStateException("La fecha de fabricación debe ser anterior a la fecha de vencimiento");
+            }
+        }
+
+        // Validate sale price >= unit cost (prevent selling at a loss)
+        if (unitCost != null && salePrice != null) {
+            if (salePrice.compareTo(unitCost) < 0) {
+                throw new IllegalStateException("El precio de venta no puede ser menor al costo unitario (venta con pérdida)");
+            }
         }
     }
 
@@ -237,5 +267,20 @@ public class PurchaseReceiptDetail implements Serializable {
             return null;
         }
         return quantityReceived - purchaseOrderDetail.getQuantityOrdered();
+    }
+
+    /**
+     * Calculate the missing quantity (quantity still pending to receive from the order).
+     * Formula: quantityOrdered - quantityReceived
+     *
+     * @return missing quantity (0 or positive), or null if no order detail
+     */
+    public Integer getQuantityMissing() {
+        if (purchaseOrderDetail == null) {
+            return null;
+        }
+        int received = (quantityReceived != null) ? quantityReceived : 0;
+        int missing = purchaseOrderDetail.getQuantityOrdered() - received;
+        return Math.max(0, missing); // Return 0 if received >= ordered
     }
 }

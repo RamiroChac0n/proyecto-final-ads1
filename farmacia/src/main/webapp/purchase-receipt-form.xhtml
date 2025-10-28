@@ -143,10 +143,10 @@
                                         </p:cellEditor>
                                     </p:column>
 
-                                    <!-- Available Quantity (Calculated) -->
-                                    <p:column headerText="Disponible" style="width: 90px;">
-                                        <h:outputText value="#{detail.quantityAvailable}"
-                                                      styleClass="font-bold text-green-700" />
+                                    <!-- Missing Quantity (Calculated) -->
+                                    <p:column headerText="Faltante" style="width: 90px;">
+                                        <h:outputText value="#{detail.quantityMissing}"
+                                                      styleClass="font-bold #{detail.quantityMissing != null and detail.quantityMissing > 0 ? 'text-red-600' : 'text-green-700'}" />
                                     </p:column>
 
                                     <!-- Manufacture Date (Editable) -->
@@ -231,10 +231,10 @@
                                     </div>
 
                                     <div class="col-12 md:col-4">
-                                        <div class="text-center p-3 border-round" style="background-color: #e8f5e9;">
-                                            <div class="text-900 font-medium mb-2">Total Disponible</div>
-                                            <div class="text-900 font-bold text-4xl text-green-600">
-                                                #{purchaseReceiptController.totalQuantityAvailable}
+                                        <div class="text-center p-3 border-round" style="background-color: #fff3e0;">
+                                            <div class="text-900 font-medium mb-2">Total Faltante</div>
+                                            <div class="text-900 font-bold text-4xl text-orange-600">
+                                                #{purchaseReceiptController.totalQuantityMissing}
                                             </div>
                                         </div>
                                     </div>
