@@ -68,7 +68,7 @@
                                 <p:panel header="Sucursal y Caja Registradora" styleClass="p-mb-3">
                                     <div class="p-fluid p-formgrid p-grid">
                                         <div class="p-field p-col-12 p-md-6">
-                                            <p:outputLabel for="branch" value="Sucursal *" />
+                                            <p:outputLabel for="branch" value="Sucursal" />
                                             <p:selectOneMenu id="branch" value="#{saleController.selectedBranchId}" required="true">
                                                 <f:selectItem itemLabel="Seleccione Sucursal" itemValue="#{null}" noSelectionOption="true" />
                                                 <f:selectItems value="#{saleController.branches}"
@@ -162,6 +162,25 @@
 
                             <!-- Right Column: Customer Info, Payment, and Totals -->
                             <div class="p-col-12 p-md-4">
+                                <!-- Totals -->
+                                <p:panel id="totals-panel" header="Totales de la Venta" styleClass="totals-panel p-mb-3">
+                                    <div class="p-grid">
+                                        <div class="p-col-6">
+                                            <strong>Subtotal:</strong>
+                                        </div>
+                                        <div class="p-col-6" style="text-align: right;">
+                                            <h:outputText value="#{saleController.formatCurrency(saleController.calculateSubtotal())}" />
+                                        </div>
+                                        <div class="p-col-12"><p:divider /></div>
+                                        <div class="p-col-6">
+                                            <strong>TOTAL:</strong>
+                                        </div>
+                                        <div class="p-col-6 total-amount" style="text-align: right;">
+                                            <h:outputText value="#{saleController.formatCurrency(saleController.calculateTotal())}" />
+                                        </div>
+                                    </div>
+                                </p:panel>
+
                                 <!-- Customer Information -->
                                 <p:panel id="customer-panel" header="Información del Cliente" styleClass="p-mb-3">
                                     <div class="p-fluid">
@@ -210,26 +229,7 @@
                                         </div>
                                     </div>
                                 </p:panel>
-
-                                <!-- Totals -->
-                                <p:panel id="totals-panel" header="Totales de la Venta" styleClass="totals-panel p-mb-3">
-                                    <div class="p-grid">
-                                        <div class="p-col-6">
-                                            <strong>Subtotal:</strong>
-                                        </div>
-                                        <div class="p-col-6" style="text-align: right;">
-                                            <h:outputText value="#{saleController.formatCurrency(saleController.calculateSubtotal())}" />
-                                        </div>
-                                        <div class="p-col-12"><p:divider /></div>
-                                        <div class="p-col-6">
-                                            <strong>TOTAL:</strong>
-                                        </div>
-                                        <div class="p-col-6 total-amount" style="text-align: right;">
-                                            <h:outputText value="#{saleController.formatCurrency(saleController.calculateTotal())}" />
-                                        </div>
-                                    </div>
-                                </p:panel>
-
+                                
                                 <!-- Payment -->
                                 <p:panel id="payment-panel" header="Pago" styleClass="p-mb-3">
                                     <div class="p-fluid">
