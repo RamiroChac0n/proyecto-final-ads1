@@ -601,7 +601,9 @@ public class SaleController implements Serializable {
                         "Cliente encontrado",
                         "Información del cliente cargada automáticamente"));
 
-                PrimeFaces.current().ajax().update("form:customer-panel");
+                PrimeFaces.current().ajax().update("form:customerName", "form:customerAddress",
+                                                   "form:customerPhone", "form:customer-status",
+                                                   "form:add-customer-btn");
             } else {
                 // Customer not found
                 customerFound = false;
@@ -610,7 +612,9 @@ public class SaleController implements Serializable {
                         "Cliente no encontrado",
                         "No existe un cliente con el NIT: " + customerNit + ". Puede agregarlo haciendo clic en 'Agregar Cliente'."));
 
-                PrimeFaces.current().ajax().update("form:customer-panel", "form:messages");
+                PrimeFaces.current().ajax().update("form:customerName", "form:customerAddress",
+                                                   "form:customerPhone", "form:customer-status",
+                                                   "form:add-customer-btn", "form:messages");
             }
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,

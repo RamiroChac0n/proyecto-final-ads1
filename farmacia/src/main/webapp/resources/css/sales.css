@@ -1,810 +1,357 @@
-/**
- * Sales Styles - Pharmacy Management System
- * Uses color palette defined in palette.css
+/*
+ * Sales Module Styles
+ * Integrates with palette.css for consistent color scheme
+ * Uses PrimeFlex utilities as base
  */
 
-/* Import palette variables */
-@import url('palette.css');
-
-
 /* ========================================
-   PAGE HEADER
+   PANEL HEADERS
    ======================================== */
 
-.sales-page-header {
-    background: linear-gradient(135deg, var(--indigo-dye) 0%, var(--paynes-gray) 100%);
-    color: var(--white);
-    padding: 1.5rem 2rem;
-    border-radius: var(--border-radius-lg);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-md);
-}
-
-.sales-page-header h1 {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.sales-page-header h1 .pi {
-    font-size: 2rem;
-}
-
-
-/* ========================================
-   3-ZONE LAYOUT STRUCTURE
-   ======================================== */
-
-/* ZONA 1: Configuration Initial - Branch & Customer */
-.p-grid > [class*="p-col"]:nth-child(1),
-.p-grid > [class*="p-col"]:nth-child(2) {
-    /* First two columns form Zone 1 */
-}
-
-/* ZONA 2: Sales Construction - Products & Cart */
-.cart-totals-section {
-    background: var(--color-bg-accent);
-    padding: 1.5rem;
-    border-radius: var(--border-radius-md);
-    margin-top: 1rem;
-    border-left: 4px solid var(--indigo-dye);
-}
-
-.cart-totals-section .p-grid {
-    margin: 0;
-}
-
-.cart-totals-section strong {
-    color: var(--indigo-dye);
-    font-size: 1.125rem;
-}
-
-/* ZONA 3: Finalization - Payment & Process Button */
-.process-sale-button-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 1.5rem 0;
-}
-
-.process-sale-button-container .p-button {
+.sales-panel-header {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
     font-size: 1.25rem;
-    padding: 1rem 2rem;
-    box-shadow: var(--shadow-lg);
-    transition: all var(--transition-normal);
-}
-
-.process-sale-button-container .p-button:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-xl);
-}
-
-/* Zone visual separators - Add subtle dividers between zones on desktop */
-@media (min-width: 992px) {
-    /* Add spacing after ZONA 1 (customer panel) */
-    .p-col-12.p-md-6:has(#customer-panel) {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 2px solid var(--color-border-light);
-    }
-
-    /* Add spacing after ZONA 2 (cart with totals) */
-    .p-col-12.p-lg-8:has(.cart-totals-section) {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 2px solid var(--color-border-light);
-    }
-}
-
-/* Payment panel enhancement */
-#payment-panel {
-    box-shadow: var(--shadow-lg);
-    border: 2px solid var(--indigo-dye);
-}
-
-#payment-panel .ui-panel-titlebar {
-    background: linear-gradient(135deg, var(--indigo-dye) 0%, var(--paynes-gray) 100%);
-}
-
-
-/* ========================================
-   TAB VIEW
-   ======================================== */
-
-.ui-tabs .ui-tabs-nav {
-    background: var(--color-bg-secondary);
-    border-bottom: 2px solid var(--indigo-dye);
-}
-
-.ui-tabs .ui-tabs-nav li {
-    border: none;
-}
-
-.ui-tabs .ui-tabs-nav li a {
-    color: var(--paynes-gray);
-    font-weight: 600;
-    padding: 1rem 1.5rem;
-    transition: all var(--transition-fast);
-}
-
-.ui-tabs .ui-tabs-nav li:hover a {
-    background: var(--color-bg-accent);
-    color: var(--indigo-dye);
-}
-
-/* Active tab with higher specificity to override PrimeFaces theme */
-.ui-tabs .ui-tabs-nav li.ui-state-active a,
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
-.ui-tabview .ui-tabview-nav li.ui-state-active a,
-.p-tabview .p-tabview-nav li.p-highlight a {
-    background: var(--indigo-dye) !important;
-    color: var(--white) !important;
-    border: none !important;
-}
-
-
-/* ========================================
-   PANELS & CARDS
-   ======================================== */
-
-.ui-panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    background: var(--white);
-    margin-bottom: 1.5rem;
-}
-
-.ui-panel .ui-panel-titlebar {
-    background: var(--paynes-gray);
-    color: var(--white);
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-    padding: 1rem 1.25rem;
-    font-weight: 600;
-    font-size: 1.125rem;
-    border: none;
-}
-
-.ui-panel .ui-panel-content {
-    padding: 1.5rem;
-    background: var(--white);
-}
-
-/* Totals Panel - Special Styling */
-.totals-panel .ui-panel-titlebar {
-    background: linear-gradient(135deg, var(--indigo-dye) 0%, var(--paynes-gray) 100%);
-}
-
-.totals-panel .ui-panel-content {
-    background-color: var(--color-bg-accent) !important;
-    padding: 1.5rem;
-}
-
-
-/* ========================================
-   PRODUCT SELECTION & CART
-   ======================================== */
-
-/* Product Info in Cart */
-.product-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.product-name {
-    font-weight: 700;
-    color: var(--indigo-dye);
-    font-size: 1rem;
-}
-
-.product-details {
-    font-size: 0.875rem;
-    color: var(--paynes-gray);
-    font-style: italic;
-}
-
-/* Stock Badge */
-.stock-badge {
-    margin-left: 0.75rem;
-}
-
-.stock-info-container {
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    background: var(--color-bg-accent);
-    border-radius: var(--border-radius-md);
-    border-left: 3px solid var(--ash-gray);
 }
 
+.sales-panel-header i {
+    color: var(--color-primary, #18455C);
+}
+
+.sales-section-title {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
 
 /* ========================================
-   DATA TABLES
+   SHOPPING CART BADGE
    ======================================== */
 
-.ui-datatable {
-    border-radius: var(--border-radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-}
-
-.ui-datatable .ui-datatable-thead > tr > th {
-    background: var(--paynes-gray);
-    color: var(--white);
-    padding: 0.875rem 1rem;
-    font-weight: 600;
-    text-align: left;
-    border: none;
-    border-bottom: 2px solid var(--indigo-dye);
-}
-
-.ui-datatable .ui-datatable-tbody > tr {
-    border-bottom: 1px solid var(--color-border-light);
-    transition: background-color var(--transition-fast);
-}
-
-.ui-datatable .ui-datatable-tbody > tr:hover {
-    background-color: var(--color-bg-accent);
-}
-
-.ui-datatable .ui-datatable-tbody > tr > td {
-    padding: 0.875rem 1rem;
-    color: var(--color-text-primary);
-}
-
-.ui-datatable .ui-datatable-tbody > tr:nth-child(even) {
-    background-color: #fafbfc;
-}
-
-.ui-datatable .ui-datatable-tbody > tr:nth-child(even):hover {
-    background-color: var(--color-bg-accent);
-}
-
-/* Empty message styling */
-.ui-datatable .ui-datatable-empty-message {
-    text-align: center;
-    padding: 2rem;
-    color: var(--color-text-muted);
-    font-style: italic;
-}
-
-
-/* ========================================
-   TOTALS & AMOUNTS
-   ======================================== */
-
-.total-amount {
-    font-size: 1.75rem !important;
-    font-weight: 700 !important;
-    color: var(--color-success) !important;
-    font-family: 'Courier New', monospace;
-}
-
-.subtotal-amount {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--indigo-dye);
-    font-family: 'Courier New', monospace;
-}
-
-.change-amount {
-    font-size: 1.375rem;
+.cart-badge {
+    background: var(--ash-gray, #9FC1C0) !important;
+    color: var(--indigo-dye, #18455C) !important;
     font-weight: 700;
-    color: var(--indigo-dye);
-    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
 }
-
-.currency-value {
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: var(--paynes-gray);
-}
-
 
 /* ========================================
-   STATUS TAGS
+   PANELS AND CARDS
    ======================================== */
 
-.ui-tag {
-    border-radius: var(--border-radius-md);
-    padding: 0.375rem 0.75rem;
+.sales-card {
+    background: var(--color-bg-primary, #FFFFFF);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border-light, #e9ecef);
+    transition: var(--transition-normal, 300ms ease-in-out);
+}
+
+.sales-card:hover {
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.totals-panel {
+    background: linear-gradient(135deg, var(--color-bg-accent, #e8f4f4) 0%, var(--white, #FFFFFF) 100%);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-primary, 0 4px 6px -1px rgba(24, 69, 92, 0.2));
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--ash-gray, #9FC1C0);
+}
+
+/* ========================================
+   TOTALS DISPLAY
+   ======================================== */
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.total-row:last-child {
+    border-bottom: none;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--indigo-dye, #18455C);
+}
+
+.total-label {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.total-value {
+    color: var(--color-text-primary, #212529);
     font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
 }
 
-.ui-tag.ui-tag-success {
-    background-color: var(--color-success-light);
-    color: var(--color-success-dark);
-    border: 1px solid var(--color-success);
+.total-row:last-child .total-label {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 700;
+    font-size: 1.125rem;
 }
 
-.ui-tag.ui-tag-danger {
-    background-color: var(--color-danger-light);
-    color: var(--color-danger-dark);
-    border: 1px solid var(--color-danger);
+.total-row:last-child .total-value {
+    color: var(--color-success, #28a745);
+    font-weight: 700;
+    font-size: 1.5rem;
 }
-
-.ui-tag.ui-tag-warning {
-    background-color: var(--color-warning-light);
-    color: var(--color-warning-dark);
-    border: 1px solid var(--color-warning);
-}
-
-.ui-tag.ui-tag-info {
-    background-color: var(--color-info-light);
-    color: var(--indigo-dye);
-    border: 1px solid var(--ash-gray);
-}
-
 
 /* ========================================
    BUTTONS
    ======================================== */
 
-/* Success Button (Process Sale, Add to Cart, Save) */
-.p-button-success,
-.ui-button-success {
-    background: var(--color-success);
-    border: 1px solid var(--color-success-dark);
-    color: var(--white);
+.sales-btn-add {
+    background: var(--indigo-dye, #18455C) !important;
+    border-color: var(--indigo-dye, #18455C) !important;
+    color: var(--white, #FFFFFF) !important;
     font-weight: 600;
-    padding: 0.625rem 1.25rem;
-    border-radius: var(--border-radius-md);
-    transition: all var(--transition-fast);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast, 150ms ease-in-out);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
 }
 
-.p-button-success:hover,
-.ui-button-success:hover {
-    background: var(--color-success-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+.sales-btn-add:hover {
+    background: var(--color-primary-light, #2a5f7f) !important;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    transform: translateY(-1px);
 }
 
-/* Large Button (Process Sale) */
-.p-button-lg {
+.sales-btn-process {
+    background: linear-gradient(135deg, var(--color-success, #28a745) 0%, var(--color-success-dark, #1e7e34) 100%) !important;
+    border: none !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 700;
     font-size: 1.125rem;
-    padding: 0.875rem 1.5rem;
-    font-weight: 700;
-}
-
-/* Danger Button (Delete, Cancel Sale) */
-.p-button-danger {
-    background: var(--color-danger);
-    border: 1px solid var(--color-danger-dark);
-    color: var(--white);
-}
-
-.p-button-danger:hover {
-    background: var(--color-danger-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Info Button (View Details) */
-.p-button-info {
-    background: var(--indigo-dye);
-    border: 1px solid var(--color-primary-dark);
-    color: var(--white);
-}
-
-.p-button-info:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Secondary Button (Cancel) */
-.p-button-secondary {
-    background: var(--paynes-gray);
-    border: 1px solid var(--color-secondary-dark);
-    color: var(--white);
-}
-
-.p-button-secondary:hover {
-    background: var(--color-secondary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Text Buttons */
-.p-button-text {
-    background: transparent;
-    border: none;
-    padding: 0.5rem;
-}
-
-.p-button-text:hover {
-    background: var(--color-bg-accent);
-    transform: none;
-}
-
-
-/* ========================================
-   FORM FIELDS
-   ======================================== */
-
-.p-field {
-    margin-bottom: 1.25rem;
-}
-
-.p-field label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--paynes-gray);
-    font-weight: 600;
-    font-size: 0.9375rem;
-}
-
-.ui-inputfield,
-.ui-inputtext,
-.ui-selectonemenu,
-.ui-inputtextarea,
-.ui-inputnumber-input {
+    padding: 0.875rem 2rem !important;
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    transition: var(--transition-normal, 300ms ease-in-out);
     width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: 1rem;
-    color: var(--color-text-primary);
-    transition: all var(--transition-fast);
-    background: var(--white);
 }
 
-.ui-inputfield:focus,
-.ui-inputtext:focus,
-.ui-selectonemenu:focus,
-.ui-inputtextarea:focus,
-.ui-inputnumber-input:focus {
-    outline: none;
-    border-color: var(--indigo-dye);
-    box-shadow: 0 0 0 3px rgba(24, 69, 92, 0.1);
+.sales-btn-process:hover {
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
 }
 
-.ui-inputfield[readonly],
-.ui-inputtext[readonly] {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-text-muted);
-    cursor: not-allowed;
+.sales-btn-danger {
+    background: var(--color-danger, #dc3545) !important;
+    border-color: var(--color-danger, #dc3545) !important;
+    transition: var(--transition-fast, 150ms ease-in-out);
 }
 
-/* Input Group Styling */
-.p-inputgroup {
-    display: flex;
+.sales-btn-danger:hover {
+    background: var(--color-danger-dark, #bd2130) !important;
+    transform: scale(1.05);
 }
-
-.p-inputgroup .ui-inputtext {
-    flex: 1;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.p-inputgroup .ui-button {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
 
 /* ========================================
-   DIALOGS
+   DATA TABLE CUSTOMIZATION
    ======================================== */
 
-.ui-dialog {
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--color-border);
+.sales-table .ui-datatable thead th {
+    background: var(--indigo-dye, #18455C) !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 600;
+    border-color: var(--color-primary-dark, #0f2e3d) !important;
 }
 
-.ui-dialog .ui-dialog-titlebar {
-    background: linear-gradient(135deg, var(--indigo-dye) 0%, var(--paynes-gray) 100%);
-    color: var(--white);
-    padding: 1.25rem 1.5rem;
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-    font-weight: 700;
-    font-size: 1.25rem;
-    border: none;
+.sales-table .ui-datatable tbody td {
+    vertical-align: middle;
+    border-color: var(--color-border-light, #e9ecef) !important;
 }
 
-.ui-dialog .ui-dialog-content {
-    padding: 1.5rem;
-    background: var(--white);
+.sales-table .ui-datatable tbody tr:hover {
+    background-color: var(--color-bg-accent, #e8f4f4) !important;
+    transition: var(--transition-fast, 150ms ease-in-out);
 }
 
-.ui-dialog .ui-dialog-footer {
-    background: var(--color-bg-secondary);
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--color-border);
-    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+/* ========================================
+   FORM INPUTS
+   ======================================== */
+
+.sales-input .ui-inputfield {
+    border-color: var(--color-border, #dee2e6);
+    border-radius: var(--border-radius-md, 0.375rem);
+    transition: var(--transition-fast, 150ms ease-in-out);
 }
 
+.sales-input .ui-inputfield:focus {
+    border-color: var(--indigo-dye, #18455C);
+    box-shadow: 0 0 0 0.2rem rgba(24, 69, 92, 0.25);
+}
+
+.sales-select .ui-selectonemenu {
+    border-radius: var(--border-radius-md, 0.375rem);
+}
+
+.sales-select .ui-selectonemenu-trigger {
+    background: var(--ash-gray, #9FC1C0);
+    color: var(--indigo-dye, #18455C);
+}
+
+/* ========================================
+   STATUS BADGES
+   ======================================== */
+
+.status-badge-completed {
+    background: var(--color-success-light, #d4edda) !important;
+    color: var(--color-success-dark, #1e7e34) !important;
+    border: 1px solid var(--color-success, #28a745);
+}
+
+.status-badge-pending {
+    background: var(--color-warning-light, #fff3cd) !important;
+    color: var(--color-warning-dark, #d39e00) !important;
+    border: 1px solid var(--color-warning, #ffc107);
+}
+
+.status-badge-cancelled {
+    background: var(--color-danger-light, #f8d7da) !important;
+    color: var(--color-danger-dark, #bd2130) !important;
+    border: 1px solid var(--color-danger, #dc3545);
+}
 
 /* ========================================
    CUSTOMER INFO SECTION
    ======================================== */
 
-.customer-status-indicator {
-    text-align: center;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.customer-found-badge {
-    background: var(--color-success-light);
-    color: var(--color-success-dark);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--border-radius-md);
-    font-weight: 600;
-    border: 1px solid var(--color-success);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-
-/* ========================================
-   SALE DETAILS VIEW
-   ======================================== */
-
-.sale-detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.sale-detail-grid strong {
-    color: var(--paynes-gray);
-    font-weight: 600;
-}
-
-.sale-summary-section {
-    background: var(--color-bg-accent);
-    padding: 1.5rem;
-    border-radius: var(--border-radius-md);
-    border-left: 4px solid var(--indigo-dye);
-    margin-top: 1rem;
-}
-
-
-/* ========================================
-   DIVIDERS
-   ======================================== */
-
-.ui-divider {
-    border-color: var(--color-border-light);
-    margin: 1.5rem 0;
-}
-
-
-/* ========================================
-   MESSAGES & GROWL
-   ======================================== */
-
-.ui-growl {
-    border-radius: var(--border-radius-md);
-}
-
-.ui-growl-item {
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-lg);
-}
-
-.ui-messages,
-.ui-message {
-    border-radius: var(--border-radius-md);
+.customer-info-field {
     margin-bottom: 1rem;
 }
 
+.customer-info-field label {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.375rem;
+    display: block;
+}
 
 /* ========================================
-   CONFIRM DIALOG
+   PAYMENT SECTION
    ======================================== */
 
-.ui-confirmdialog {
-    border-radius: var(--border-radius-lg);
+.payment-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.ui-confirmdialog .ui-dialog-titlebar {
-    background: var(--color-warning);
-    color: var(--color-warning-dark);
+.payment-field {
+    margin-bottom: 0.875rem;
 }
 
-.ui-confirmdialog-yes {
-    background: var(--color-success) !important;
-    border-color: var(--color-success-dark) !important;
+.payment-field label {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
-.ui-confirmdialog-no {
-    background: var(--color-danger) !important;
-    border-color: var(--color-danger-dark) !important;
-}
-
-
-/* ========================================
-   CASH REGISTER STATUS INDICATOR
-   ======================================== */
-
-.cash-register-status {
+.change-display {
+    background: var(--color-bg-accent, #e8f4f4);
     padding: 1rem;
-    background: var(--color-bg-secondary);
-    border-radius: var(--border-radius-md);
-    border-left: 4px solid var(--ash-gray);
+    border-radius: var(--border-radius-md, 0.375rem);
+    border-left: 4px solid var(--color-success, #28a745);
+    margin-top: 1rem;
 }
 
-.cash-register-status.status-open {
-    background: var(--color-success-light);
-    border-left-color: var(--color-success);
+.change-amount {
+    color: var(--color-success-dark, #1e7e34);
+    font-weight: 700;
+    font-size: 1.5rem;
 }
-
-.cash-register-status.status-closed {
-    background: var(--color-danger-light);
-    border-left-color: var(--color-danger);
-}
-
 
 /* ========================================
-   PAGINATION
+   HISTORY TABLE
    ======================================== */
 
-.ui-paginator {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    padding: 0.75rem 1rem;
+.history-filters {
+    background: var(--color-bg-secondary, #f8f9fa);
+    padding: 1.25rem;
+    border-radius: var(--border-radius-lg, 0.5rem);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border-light, #e9ecef);
 }
-
-.ui-paginator .ui-paginator-page {
-    color: var(--paynes-gray);
-    min-width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--border-radius-sm);
-    transition: all var(--transition-fast);
-}
-
-.ui-paginator .ui-paginator-page:hover {
-    background: var(--color-bg-accent);
-    color: var(--indigo-dye);
-}
-
-.ui-paginator .ui-paginator-page.ui-state-active {
-    background: var(--indigo-dye);
-    color: var(--white);
-}
-
 
 /* ========================================
-   RESPONSIVE DESIGN
+   RESPONSIVE ADJUSTMENTS
    ======================================== */
 
 @media (max-width: 768px) {
-    .sales-page-header h1 {
-        font-size: 1.5rem;
-    }
-
-    .ui-panel .ui-panel-titlebar {
-        font-size: 1rem;
-        padding: 0.875rem 1rem;
-    }
-
-    /* 3-Zone Layout: Mobile optimizations */
-    .cart-totals-section {
+    .sales-card {
         padding: 1rem;
-        margin-top: 0.75rem;
+        margin-bottom: 1rem;
     }
 
-    .process-sale-button-container {
-        padding: 1rem 0;
+    .totals-panel {
+        padding: 1rem;
+        margin-bottom: 1rem;
     }
 
-    .process-sale-button-container .p-button {
+    .sales-panel-header {
         font-size: 1.125rem;
-        padding: 0.875rem 1.5rem;
     }
 
-    .ui-datatable .ui-datatable-thead > tr > th,
-    .ui-datatable .ui-datatable-tbody > tr > td {
-        padding: 0.625rem 0.75rem;
-        font-size: 0.875rem;
+    .total-row:last-child .total-value {
+        font-size: 1.25rem;
     }
 
-    .total-amount {
-        font-size: 1.375rem !important;
-    }
-
-    .p-button-lg {
+    .sales-btn-process {
         font-size: 1rem;
-        padding: 0.75rem 1.25rem;
-    }
-
-    .sale-detail-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .ui-dialog {
-        width: 90% !important;
-        margin: 1rem;
+        padding: 0.75rem 1.5rem !important;
     }
 }
-
-@media (max-width: 480px) {
-    .ui-panel .ui-panel-content {
-        padding: 1rem;
-    }
-
-    .product-name {
-        font-size: 0.875rem;
-    }
-
-    .product-details {
-        font-size: 0.75rem;
-    }
-
-    .ui-dialog .ui-dialog-content {
-        padding: 1rem;
-    }
-
-    .total-amount {
-        font-size: 1.25rem !important;
-    }
-}
-
 
 /* ========================================
-   ACCESSIBILITY
+   UTILITY CLASSES
    ======================================== */
 
-.ui-button:focus,
-.p-button:focus {
-    outline: 2px solid var(--indigo-dye);
-    outline-offset: 2px;
+.w-6rem {
+    width: 6rem !important;
 }
 
-.ui-state-highlight {
-    background: var(--color-bg-accent) !important;
-    color: var(--indigo-dye) !important;
+.w-8rem {
+    width: 8rem !important;
 }
 
-/* High contrast for important elements */
-@media (prefers-contrast: high) {
-    .ui-panel .ui-panel-titlebar {
-        background: var(--indigo-dye);
-    }
-
-    .ui-tag {
-        font-weight: 700;
-        border-width: 2px;
-    }
-
-    .total-amount {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
+.w-10rem {
+    width: 10rem !important;
 }
 
+.w-12rem {
+    width: 12rem !important;
+}
 
-/* ========================================
-   PRINT STYLES
-   ======================================== */
+/* Empty cart state */
+.empty-cart-message {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--paynes-gray, #546A76);
+    font-size: 1.125rem;
+}
 
-@media print {
-    .ui-button,
-    .p-button,
-    .ui-paginator {
-        display: none;
-    }
-
-    .ui-panel {
-        box-shadow: none;
-        border: 1px solid #000;
-    }
-
-    .ui-dialog {
-        box-shadow: none;
-    }
+.empty-cart-message i {
+    font-size: 4rem;
+    color: var(--ash-gray, #9FC1C0);
+    margin-bottom: 1rem;
+    display: block;
 }
