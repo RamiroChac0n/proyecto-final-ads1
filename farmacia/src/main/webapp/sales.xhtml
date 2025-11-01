@@ -130,7 +130,13 @@
                                             </div>
                                         </p:column>
                                         <p:column headerText="Cantidad" styleClass="w-6rem text-center">
-                                            <h:outputText value="#{item.quantity}" />
+                                            <p:inputNumber id="itemQuantity" value="#{item.quantity}"
+                                                          decimalPlaces="0" minValue="1"
+                                                          styleClass="text-center">
+                                                <p:ajax event="change"
+                                                        listener="#{saleController.updateLineTotal(item)}"
+                                                        update="cart-table totals-panel" />
+                                            </p:inputNumber>
                                         </p:column>
                                         <p:column headerText="Precio Unitario" styleClass="w-8rem text-right">
                                             <h:outputText value="#{saleController.formatCurrency(item.unitPrice)}" />
@@ -161,8 +167,12 @@
                                         Totales de la Venta
                                     </h3>
                                     <div class="total-row">
-                                        <span class="total-label">Subtotal:</span>
-                                        <span class="total-value">#{saleController.formatCurrency(saleController.calculateSubtotal())}</span>
+                                        <span class="total-label">Subtotal (sin IVA):</span>
+                                        <span class="total-value">#{saleController.formatCurrency(saleController.calculateSubtotalWithoutTax())}</span>
+                                    </div>
+                                    <div class="total-row">
+                                        <span class="total-label">IVA (12%):</span>
+                                        <span class="total-value">#{saleController.formatCurrency(saleController.calculateTax())}</span>
                                     </div>
                                     <div class="total-row">
                                         <span class="total-label">TOTAL:</span>
@@ -200,8 +210,7 @@
                                         <div class="field" id="customer-name-field">
                                             <p:outputLabel for="customerName" value="Nombre" />
                                             <p:inputText id="customerName"
-                                                        value="#{saleController.customerName}"
-                                                        readonly="true" />
+                                                        value="#{saleController.customerName}" />
                                         </div>
                                         <div class="field" id="customer-address-field">
                                             <p:outputLabel for="customerAddress" value="Dirección" />

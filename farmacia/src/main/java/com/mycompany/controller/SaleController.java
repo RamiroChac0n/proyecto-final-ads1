@@ -283,9 +283,10 @@ public class SaleController implements Serializable {
                 return;
             }
 
-            // Calculate totals
-            BigDecimal subtotal = calculateSubtotal();
-            BigDecimal total = subtotal; // Add tax/discount logic here if needed
+            // Calculate totals with IVA
+            BigDecimal total = calculateTotal(); // Total with IVA included
+            BigDecimal subtotal = calculateSubtotalWithoutTax(); // Subtotal without IVA
+            BigDecimal taxAmount = calculateTax(); // IVA amount (12%)
 
             // Validate customer information based on NIT
             if (!validateCustomerInformation()) {
@@ -319,11 +320,11 @@ public class SaleController implements Serializable {
                 .customerNit(customerNit != null && !customerNit.trim().isEmpty() ? customerNit : "C/F")
                 .customerAddress(customerAddress != null && !customerAddress.trim().isEmpty() ? customerAddress : null)
                 .customerPhone(customerPhone != null && !customerPhone.trim().isEmpty() ? customerPhone : null)
-                .subtotal(subtotal)
+                .subtotal(subtotal) // Subtotal WITHOUT IVA
                 .discountPercentage(BigDecimal.ZERO)
                 .discountAmount(BigDecimal.ZERO)
-                .taxAmount(BigDecimal.ZERO)
-                .totalAmount(total)
+                .taxAmount(taxAmount) // IVA at 12%
+                .totalAmount(total) // Total WITH IVA
                 .cashReceived(cashReceived)
                 .changeGiven(changeGiven)
                 .saleStatus(SaleStatus.COMPLETED)
@@ -386,7 +387,27 @@ public class SaleController implements Serializable {
      * Calculate total (including tax/discounts if any)
      */
     public BigDecimal calculateTotal() {
-        return calculateSubtotal(); // Add tax/discount logic here if needed
+        return calculateSubtotal(); // Returns total with IVA included
+    }
+
+    /**
+     * Calculate subtotal WITHOUT IVA (prices include IVA)
+     * IVA = 12%, so to get subtotal without tax: Total / 1.12
+     */
+    public BigDecimal calculateSubtotalWithoutTax() {
+        BigDecimal total = calculateTotal();
+        BigDecimal taxDivisor = new BigDecimal("1.12"); // 1 + 0.12
+        return total.divide(taxDivisor, 2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calculate IVA amount (12%)
+     * IVA = Total - Subtotal without IVA
+     */
+    public BigDecimal calculateTax() {
+        BigDecimal total = calculateTotal();
+        BigDecimal subtotalWithoutTax = calculateSubtotalWithoutTax();
+        return total.subtract(subtotalWithoutTax);
     }
 
     /**
@@ -399,6 +420,43 @@ public class SaleController implements Serializable {
             changeGiven = cashReceived.subtract(total);
         } else {
             changeGiven = BigDecimal.ZERO;
+        }
+    }
+
+    /**
+     * Update line total when quantity changes in cart
+     * Validates stock availability and recalculates line total
+     */
+    public void updateLineTotal(SaleDetail item) {
+        try {
+            if (item != null && item.getQuantity() != null && item.getUnitPrice() != null) {
+                // Validate stock availability
+                if (!saleService.validateStockAvailability(item.getProduct(), item.getQuantity())) {
+                    Integer available = saleService.getTotalAvailableQuantity(item.getProduct());
+                    FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN,
+                            "Stock insuficiente",
+                            "Solo hay " + available + " unidades disponibles de " + item.getProduct().getCommercialName()));
+                    // Reset to previous valid quantity (or remove this line to keep the invalid value)
+                    return;
+                }
+
+                // Recalculate line total
+                BigDecimal discountAmount = item.getDiscountAmount() != null ? item.getDiscountAmount() : BigDecimal.ZERO;
+                BigDecimal lineTotal = item.getUnitPrice()
+                    .multiply(new BigDecimal(item.getQuantity()))
+                    .subtract(discountAmount);
+                item.setLineTotal(lineTotal);
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "Cantidad actualizada",
+                        "Total de línea recalculado"));
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Error al actualizar", e.getMessage()));
         }
     }
 
