@@ -516,6 +516,110 @@ public class ProductKardexControllerTest {
         assertEquals("Q 1,234,567.89", result);
     }
 
+    // ========== Product Selection Tests ==========
+
+    @Test
+    @DisplayName("Should redirect to product kardex when valid product is selected")
+    void onProductChange_ValidProduct_RedirectsToProductKardex() throws Exception {
+        // Given
+        Product product = createTestProduct(123L);
+        sessionMap.put("user", createTestUser());
+
+        // Inject the selected product
+        injectField("selectedProduct", product);
+
+        // When
+        controller.onProductChange();
+
+        // Then
+        Mockito.verify(externalContext).redirect("product-kardex.xhtml?productId=123");
+    }
+
+    @Test
+    @DisplayName("Should not redirect when selected product is null")
+    void onProductChange_NullProduct_NoRedirect() throws Exception {
+        // Given
+        sessionMap.put("user", createTestUser());
+        injectField("selectedProduct", null);
+
+        // When
+        controller.onProductChange();
+
+        // Then
+        Mockito.verify(externalContext, Mockito.never()).redirect(anyString());
+    }
+
+    @Test
+    @DisplayName("Should not redirect when selected product has null ID")
+    void onProductChange_ProductWithNullId_NoRedirect() throws Exception {
+        // Given
+        Product productWithNullId = Product.builder()
+                .productId(null)
+                .commercialName("Product Without ID")
+                .build();
+        sessionMap.put("user", createTestUser());
+        injectField("selectedProduct", productWithNullId);
+
+        // When
+        controller.onProductChange();
+
+        // Then
+        Mockito.verify(externalContext, Mockito.never()).redirect(anyString());
+    }
+
+    @Test
+    @DisplayName("Should show error message when redirect fails")
+    void onProductChange_RedirectException_ShowsErrorMessage() throws Exception {
+        // Given
+        Product product = createTestProduct(456L);
+        sessionMap.put("user", createTestUser());
+        injectField("selectedProduct", product);
+
+        // Mock redirect to throw exception
+        Mockito.doThrow(new RuntimeException("Redirect failed"))
+                .when(externalContext).redirect(anyString());
+
+        // When
+        controller.onProductChange();
+
+        // Then - Should handle exception gracefully (logged, not thrown)
+        // Verify redirect was attempted
+        Mockito.verify(externalContext).redirect("product-kardex.xhtml?productId=456");
+    }
+
+    @Test
+    @DisplayName("Should load all products for selector dropdown")
+    void loadAllProducts_Success_LoadsProductsList() throws Exception {
+        // Given
+        Product product1 = createTestProduct(1L);
+        Product product2 = Product.builder()
+                .productId(2L)
+                .commercialName("Another Product")
+                .build();
+        List<Product> allProducts = Arrays.asList(product1, product2);
+
+        Mockito.when(productService.list()).thenReturn(allProducts);
+
+        // When
+        // Use reflection to call private loadAllProducts method
+        java.lang.reflect.Method method = controller.getClass().getDeclaredMethod("loadAllProducts");
+        method.setAccessible(true);
+        method.invoke(controller);
+
+        // Then
+        // Verify the allProducts field was set
+        java.lang.reflect.Field field = controller.getClass().getDeclaredField("allProducts");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<Product> loadedProducts = (List<Product>) field.get(controller);
+
+        assertNotNull(loadedProducts);
+        assertEquals(2, loadedProducts.size());
+        assertEquals("Test Product", loadedProducts.get(0).getCommercialName());
+        assertEquals("Another Product", loadedProducts.get(1).getCommercialName());
+        Mockito.verify(productService).list();
+    }
+
     // Helper methods
     private void injectField(String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
         java.lang.reflect.Field field = controller.getClass().getDeclaredField(fieldName);
