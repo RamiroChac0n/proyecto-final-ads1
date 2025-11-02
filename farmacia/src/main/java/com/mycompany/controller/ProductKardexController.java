@@ -44,9 +44,16 @@ public class ProductKardexController implements Serializable {
     private List<KardexRow> kardexRows;
     private List<KardexRow> filteredKardexRows;
 
+    // Product selector fields
+    private List<Product> allProducts;
+    private Product selectedProduct;
+
     @PostConstruct
     public void init() {
         LOGGER.info("ProductKardexController.init() - Starting initialization");
+
+        // Load all products for selector dropdown
+        loadAllProducts();
 
         // Get productId from request parameter
         String productIdParam = FacesContext.getCurrentInstance().getExternalContext()
@@ -58,6 +65,9 @@ public class ProductKardexController implements Serializable {
                 loadProduct();
                 loadMovements();
                 calculateKardex();
+
+                // Synchronize selectedProduct with loaded product
+                selectedProduct = product;
             } catch (NumberFormatException e) {
                 LOGGER.severe("Invalid productId parameter: " + productIdParam);
                 redirectToProducts();
@@ -121,6 +131,32 @@ public class ProductKardexController implements Serializable {
         if (product != null) {
             movements = inventoryMovementService.findByProduct(product);
             LOGGER.info("Loaded " + movements.size() + " movements for product: " + product.getCommercialName());
+        }
+    }
+
+    /**
+     * Load all active products for the dropdown selector
+     */
+    private void loadAllProducts() {
+        allProducts = productService.list();
+        LOGGER.info("Loaded " + (allProducts != null ? allProducts.size() : 0) + " products for selector");
+    }
+
+    /**
+     * Handle product selection change from dropdown
+     * Redirects to KARDEX page with new product ID
+     */
+    public void onProductChange() {
+        if (selectedProduct != null && selectedProduct.getProductId() != null) {
+            try {
+                String url = "product-kardex.xhtml?productId=" + selectedProduct.getProductId();
+                FacesContext.getCurrentInstance().getExternalContext().redirect(url);
+                LOGGER.info("Redirecting to KARDEX for product: " + selectedProduct.getCommercialName());
+            } catch (Exception e) {
+                LOGGER.severe("Error redirecting to product KARDEX: " + e.getMessage());
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not load product KARDEX"));
+            }
         }
     }
 

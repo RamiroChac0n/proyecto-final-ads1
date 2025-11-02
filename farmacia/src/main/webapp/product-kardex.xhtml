@@ -26,15 +26,35 @@
                                 <h:form id="form">
                                     <p:growl id="messages" showDetail="true" />
 
-                                    <!-- Navigation breadcrumb -->
-                                    <p:breadCrumb styleClass="mb-3">
-                                        <p:menuitem value="Productos" outcome="products" />
-                                        <p:menuitem value="#{productKardexController.product.commercialName}"
-                                                    outcome="product-details">
-                                            <f:param name="productId" value="#{productKardexController.product.productId}" />
-                                        </p:menuitem>
-                                        <p:menuitem value="KARDEX" />
-                                    </p:breadCrumb>
+                                    <!-- Navigation breadcrumb with product selector -->
+                                    <div class="flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                        <!-- Breadcrumb -->
+                                        <p:breadCrumb>
+                                            <p:menuitem value="Productos" outcome="products" />
+                                            <p:menuitem value="#{productKardexController.product.commercialName}"
+                                                        outcome="product-details">
+                                                <f:param name="productId" value="#{productKardexController.product.productId}" />
+                                            </p:menuitem>
+                                            <p:menuitem value="KARDEX" />
+                                        </p:breadCrumb>
+
+                                        <!-- Product Selector -->
+                                        <div class="flex align-items-center gap-2">
+                                            <p:outputLabel value="Cambiar producto:" styleClass="font-semibold" />
+                                            <p:selectOneMenu value="#{productKardexController.selectedProduct}"
+                                                             converter="productConverter"
+                                                             filter="true"
+                                                             filterMatchMode="contains"
+                                                             style="min-width: 300px;">
+                                                <f:selectItem itemLabel="Seleccione un producto..." itemValue="#{null}" noSelectionOption="true" />
+                                                <f:selectItems value="#{productKardexController.allProducts}"
+                                                               var="prod"
+                                                               itemLabel="#{prod.commercialName}"
+                                                               itemValue="#{prod}" />
+                                                <p:ajax event="itemSelect" listener="#{productKardexController.onProductChange()}" />
+                                            </p:selectOneMenu>
+                                        </div>
+                                    </div>
 
                                     <!-- Product Information Header -->
                                     <p:panel header="Información del Producto" styleClass="mb-4">
