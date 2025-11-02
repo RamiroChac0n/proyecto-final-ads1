@@ -100,6 +100,17 @@ public class SaleController implements Serializable {
     }
 
     /**
+     * Custom getter for cartItems with null-safety
+     * Overrides Lombok-generated getter
+     */
+    public List<SaleDetail> getCartItems() {
+        if (cartItems == null) {
+            cartItems = new ArrayList<>();
+        }
+        return cartItems;
+    }
+
+    /**
      * Check if current user has access to sales (ADMIN or CASHIER only)
      */
     public void checkSalesAccess() {
@@ -217,6 +228,13 @@ public class SaleController implements Serializable {
 
             cartItems.add(detail);
 
+            // Debug logging
+            System.out.println("=== DEBUG addToCart ===");
+            System.out.println("Cart size: " + (cartItems != null ? cartItems.size() : "NULL"));
+            System.out.println("Added product: " + (detail != null ? detail.getProduct().getCommercialName() : "NULL"));
+            System.out.println("Line total: " + (detail != null ? detail.getLineTotal() : "NULL"));
+            System.out.println("======================");
+
             // Reset selection
             selectedProduct = null;
             selectedQuantity = 1;
@@ -225,7 +243,7 @@ public class SaleController implements Serializable {
                 new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Producto agregado", "Producto agregado al carrito"));
 
-            PrimeFaces.current().ajax().update("form:cart-table", "form:totals-panel", "form:messages");
+            PrimeFaces.current().ajax().update("@([id$=cart-table])", "@([id$=totals-panel])", "messages");
 
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -242,7 +260,7 @@ public class SaleController implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null,
             new FacesMessage(FacesMessage.SEVERITY_INFO,
                 "Producto eliminado", "Producto eliminado del carrito"));
-        PrimeFaces.current().ajax().update("form:cart-table", "form:totals-panel", "form:messages");
+        PrimeFaces.current().ajax().update("@([id$=cart-table])", "@([id$=totals-panel])", "messages");
     }
 
     /**
@@ -342,8 +360,8 @@ public class SaleController implements Serializable {
             initializeNewSale();
             loadSalesHistory();
 
-            PrimeFaces.current().ajax().update("form:cart-table", "form:totals-panel",
-                "form:customer-panel", "form:payment-panel", "form:messages");
+            PrimeFaces.current().ajax().update("@([id$=cart-table])", "@([id$=totals-panel])",
+                "@([id$=customer-panel])", "@([id$=payment-panel])", "messages");
 
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -365,7 +383,7 @@ public class SaleController implements Serializable {
                     "Venta cancelada", "La venta ha sido cancelada y el inventario restaurado"));
 
             loadSalesHistory();
-            PrimeFaces.current().ajax().update("form:sales-history", "form:messages");
+            PrimeFaces.current().ajax().update("@([id$=sales-history])", "messages");
 
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -378,6 +396,9 @@ public class SaleController implements Serializable {
      * Calculate subtotal from cart items
      */
     public BigDecimal calculateSubtotal() {
+        if (cartItems == null || cartItems.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
         return cartItems.stream()
             .map(SaleDetail::getLineTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -659,9 +680,9 @@ public class SaleController implements Serializable {
                         "Cliente encontrado",
                         "Información del cliente cargada automáticamente"));
 
-                PrimeFaces.current().ajax().update("form:customerName", "form:customerAddress",
-                                                   "form:customerPhone", "form:customer-status",
-                                                   "form:add-customer-btn");
+                PrimeFaces.current().ajax().update("@([id$=customerName])", "@([id$=customerAddress])",
+                                                   "@([id$=customerPhone])", "@([id$=customer-status])",
+                                                   "@([id$=add-customer-btn])");
             } else {
                 // Customer not found
                 customerFound = false;
@@ -670,9 +691,9 @@ public class SaleController implements Serializable {
                         "Cliente no encontrado",
                         "No existe un cliente con el NIT: " + customerNit + ". Puede agregarlo haciendo clic en 'Agregar Cliente'."));
 
-                PrimeFaces.current().ajax().update("form:customerName", "form:customerAddress",
-                                                   "form:customerPhone", "form:customer-status",
-                                                   "form:add-customer-btn", "form:messages");
+                PrimeFaces.current().ajax().update("@([id$=customerName])", "@([id$=customerAddress])",
+                                                   "@([id$=customerPhone])", "@([id$=customer-status])",
+                                                   "@([id$=add-customer-btn])", "messages");
             }
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -707,7 +728,7 @@ public class SaleController implements Serializable {
                         "Cliente encontrado",
                         "Información del cliente cargada automáticamente"));
 
-                PrimeFaces.current().ajax().update("form:customer-panel");
+                PrimeFaces.current().ajax().update("@([id$=customer-panel])");
             } else {
                 // Customer not found
                 customerFound = false;
@@ -716,7 +737,7 @@ public class SaleController implements Serializable {
                         "Cliente no encontrado",
                         "No existe un cliente con el teléfono: " + customerPhone));
 
-                PrimeFaces.current().ajax().update("form:messages");
+                PrimeFaces.current().ajax().update("messages");
             }
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -777,7 +798,7 @@ public class SaleController implements Serializable {
                     "Cliente agregado exitosamente: " + savedCustomer.getCustomerName()));
 
             PrimeFaces.current().executeScript("PF('newCustomerDialog').hide();");
-            PrimeFaces.current().ajax().update("form:customer-panel", "form:messages");
+            PrimeFaces.current().ajax().update("@([id$=customer-panel])", "messages");
 
         } catch (IllegalArgumentException e) {
             FacesContext.getCurrentInstance().addMessage(null,

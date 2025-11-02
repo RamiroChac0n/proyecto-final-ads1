@@ -99,7 +99,7 @@
                                         <div class="field col-12 md:col-3 flex align-items-end">
                                             <p:commandButton value="Agregar al Carrito" icon="pi pi-plus"
                                                             action="#{saleController.addToCart}"
-                                                            update="cart-table totals-panel messages"
+                                                            update="@([id$=cart-table]) @([id$=totals-panel]) messages"
                                                             styleClass="sales-btn-add w-full" />
                                         </div>
                                     </div>
@@ -118,7 +118,7 @@
                                             <i class="pi pi-shopping-cart"></i>
                                             Carrito de Compras
                                         </h3>
-                                        <p:badge value="#{saleController.cartItems.size()}" styleClass="cart-badge" rendered="#{saleController.cartItems.size() > 0}"/>
+                                        <p:badge value="#{saleController.cartItems.size()}" styleClass="cart-badge" rendered="#{saleController.cartItems != null and saleController.cartItems.size() > 0}"/>
                                     </div>
                                     <p:dataTable id="cart-table" value="#{saleController.cartItems}" var="item"
                                                 emptyMessage="No hay productos en el carrito"
@@ -135,7 +135,7 @@
                                                           styleClass="text-center">
                                                 <p:ajax event="change"
                                                         listener="#{saleController.updateLineTotal(item)}"
-                                                        update="cart-table totals-panel" />
+                                                        update="@([id$=cart-table]) @([id$=totals-panel]) messages" />
                                             </p:inputNumber>
                                         </p:column>
                                         <p:column headerText="Precio Unitario" styleClass="w-8rem text-right">
@@ -150,9 +150,9 @@
                                         <p:column styleClass="w-6rem text-center">
                                             <p:commandButton icon="pi pi-trash" styleClass="sales-btn-danger p-button-text"
                                                             action="#{saleController.removeFromCart(item)}"
-                                                            update="cart-table totals-panel messages">
+                                                            update="@([id$=cart-table]) @([id$=totals-panel]) messages">
                                                 <p:confirm header="Confirmar" message="¿Eliminar este producto del carrito?" icon="pi pi-exclamation-triangle" />
-                                            </p:commandButton>
+</p:commandButton>
                                         </p:column>
                                     </p:dataTable>
                                 </div>
