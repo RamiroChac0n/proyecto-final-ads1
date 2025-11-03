@@ -1,7 +1,9 @@
 package com.mycompany.service.impl;
 
 import com.mycompany.model.entity.*;
+import com.mycompany.model.entity.enums.Role;
 import com.mycompany.repository.ProductBatchRepository;
+import com.mycompany.service.IInventoryMovementService;
 import com.mycompany.service.IProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +39,12 @@ public class ProductBatchServiceImplTest {
     @Mock
     private IProductService productService;
 
+    @Mock
+    private IInventoryMovementService inventoryMovementService;
+
     private Product testProduct;
     private ProductBatch testBatch;
+    private User testUser;
 
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
@@ -47,9 +53,11 @@ public class ProductBatchServiceImplTest {
         // Use reflection to inject the mock dependencies
         injectMock(service, "productBatchRepository", productBatchRepository);
         injectMock(service, "productService", productService);
+        injectMock(service, "inventoryMovementService", inventoryMovementService);
 
         testProduct = createTestProduct();
         testBatch = createTestProductBatch();
+        testUser = createTestUser();
     }
 
     @Test
@@ -64,9 +72,10 @@ public class ProductBatchServiceImplTest {
         when(productService.findById(productId)).thenReturn(testProduct);
         when(productBatchRepository.existsByProductAndBatchNumber(testProduct, "BATCH002")).thenReturn(false);
         when(productBatchRepository.save(any(ProductBatch.class))).thenReturn(savedBatch);
+        when(inventoryMovementService.save(any(InventoryMovement.class))).thenReturn(null);
 
         // When
-        ProductBatch result = service.addBatchToExistingProduct(productId, batchToAdd);
+        ProductBatch result = service.addBatchToExistingProduct(productId, batchToAdd, testUser);
 
         // Then
         assertNotNull(result);
@@ -94,7 +103,7 @@ public class ProductBatchServiceImplTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> service.addBatchToExistingProduct(productId, batchToAdd));
+            () -> service.addBatchToExistingProduct(productId, batchToAdd, testUser));
 
         assertEquals("Product with ID 999 does not exist", exception.getMessage());
         verify(productService).findById(productId);
@@ -114,7 +123,7 @@ public class ProductBatchServiceImplTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> service.addBatchToExistingProduct(productId, batchToAdd));
+            () -> service.addBatchToExistingProduct(productId, batchToAdd, testUser));
 
         assertTrue(exception.getMessage().contains("already exists for product"));
         verify(productService).findById(productId);
@@ -135,7 +144,7 @@ public class ProductBatchServiceImplTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> service.addBatchToExistingProduct(productId, invalidBatch));
+            () -> service.addBatchToExistingProduct(productId, invalidBatch, testUser));
 
         assertEquals("Quantity received must be greater than or equal to 0", exception.getMessage());
         verify(productBatchRepository, never()).save(any());
@@ -155,7 +164,7 @@ public class ProductBatchServiceImplTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> service.addBatchToExistingProduct(productId, invalidBatch));
+            () -> service.addBatchToExistingProduct(productId, invalidBatch, testUser));
 
         assertEquals("Quantity available cannot be greater than quantity received", exception.getMessage());
         verify(productBatchRepository, never()).save(any());
@@ -176,7 +185,7 @@ public class ProductBatchServiceImplTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> service.addBatchToExistingProduct(productId, invalidBatch));
+            () -> service.addBatchToExistingProduct(productId, invalidBatch, testUser));
 
         assertEquals("Expiration date cannot be in the past", exception.getMessage());
         verify(productBatchRepository, never()).save(any());
@@ -434,6 +443,22 @@ public class ProductBatchServiceImplTest {
                 .isActive(true)
                 .isExpired(false)
                 .daysUntilExpiration(400)
+                .build();
+    }
+
+    /**
+     * Helper method to create a test User
+     */
+    private User createTestUser() {
+        return User.builder()
+                .id("1234567890123")
+                .firstName("Admin")
+                .lastName("User")
+                .userName("adminUser")
+                .email("admin@pharmacy.com")
+                .phoneNumber("12345678")
+                .password("hashedPassword")
+                .role(Role.ADMIN)
                 .build();
     }
 }
