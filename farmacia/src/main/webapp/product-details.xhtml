@@ -15,6 +15,12 @@
         <!-- Page title -->
         <ui:define name="title">Detalles del Producto</ui:define>
 
+        <!-- Custom CSS -->
+        <ui:define name="head">
+            <h:outputStylesheet name="css/sales.css" />
+            <h:outputStylesheet name="css/product-details.css" />
+        </ui:define>
+
         <!-- Page content -->
         <ui:define name="content">
             <div class="layout-wrapper">
@@ -26,14 +32,13 @@
                                 <h:form id="form">
                                     <p:growl id="messages" showDetail="true" />
 
-                                    <!-- Navigation breadcrumb -->
-                                    <p:breadCrumb styleClass="mb-3">
-                                        <p:menuitem value="Productos" outcome="products" />
-                                        <p:menuitem value="#{productDetailsController.product.commercialName}" />
-                                    </p:breadCrumb>
+                                    <!-- Breadcrumb and Actions Row -->
+                                    <div class="flex align-items-center justify-content-between mb-3">
+                                        <p:breadCrumb>
+                                            <p:menuitem value="Productos" outcome="products" />
+                                            <p:menuitem value="#{productDetailsController.product.commercialName}" />
+                                        </p:breadCrumb>
 
-                                    <!-- Action Buttons -->
-                                    <div class="mb-3">
                                         <p:button value="Ver KARDEX"
                                                   outcome="product-kardex"
                                                   icon="pi pi-chart-line"
@@ -41,10 +46,19 @@
                                             <f:param name="productId" value="#{productDetailsController.product.productId}" />
                                         </p:button>
                                     </div>
+                                    
+                                    <!-- Page Header -->
+                                    <div class="product-details-header">
+                                        <p class="subtitle">#{productDetailsController.product.commercialName}</p>
+                                    </div>                                    
 
-                                    <!-- Product Details Panel -->
-                                    <p:panel header="Información del Producto" styleClass="mb-4">
-                                        <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                    <!-- Basic Information Card -->
+                                    <div class="sales-card info-card">
+                                        <h3 class="sales-panel-header">
+                                            <i class="pi pi-info-circle"></i>
+                                            Información General
+                                        </h3>
+                                        <p:panelGrid columns="2" layout="grid" styleClass="ui-fluid">
                                             <p:outputLabel value="ID Producto:" styleClass="font-bold" />
                                             <h:outputText value="#{productDetailsController.product.productId}" />
 
@@ -60,7 +74,16 @@
 
                                             <p:outputLabel value="Fabricante:" styleClass="font-bold" />
                                             <h:outputText value="#{productDetailsController.product.manufacturer}" />
+                                        </p:panelGrid>
+                                    </div>
 
+                                    <!-- Pharmaceutical Information Card -->
+                                    <div class="sales-card info-card">
+                                        <h3 class="sales-panel-header">
+                                            <i class="pi pi-heart"></i>
+                                            Información Farmacéutica
+                                        </h3>
+                                        <p:panelGrid columns="2" layout="grid" styleClass="ui-fluid">
                                             <p:outputLabel value="Tipo de Producto:" styleClass="font-bold" />
                                             <h:outputText value="#{productDetailsController.product.productType.typeName}" />
 
@@ -77,8 +100,18 @@
                                             <h:outputText value="#{productDetailsController.product.dosageForm.formName}" />
 
                                             <p:outputLabel value="Requiere Receta:" styleClass="font-bold" />
-                                            <p:selectBooleanCheckbox value="#{productDetailsController.product.requiresPrescription}" disabled="true" />
+                                            <h:outputText value="#{productDetailsController.product.requiresPrescription ? 'Sí' : 'No'}"
+                                                          styleClass="#{productDetailsController.product.requiresPrescription ? 'status-badge requires-prescription' : 'status-badge'}" />
+                                        </p:panelGrid>
+                                    </div>
 
+                                    <!-- Inventory Information Card -->
+                                    <div class="sales-card info-card">
+                                        <h3 class="sales-panel-header">
+                                            <i class="pi pi-warehouse"></i>
+                                            Información de Inventario
+                                        </h3>
+                                        <p:panelGrid columns="2" layout="grid" styleClass="ui-fluid">
                                             <p:outputLabel value="Stock Mínimo:" styleClass="font-bold" />
                                             <h:outputText value="#{productDetailsController.product.minStock}" />
 
@@ -86,18 +119,55 @@
                                             <h:outputText value="#{productDetailsController.product.maxStock}" />
 
                                             <p:outputLabel value="Activo:" styleClass="font-bold" />
-                                            <p:selectBooleanCheckbox value="#{productDetailsController.product.isActive}" disabled="true" />
+                                            <h:outputText value="#{productDetailsController.product.isActive ? 'Sí' : 'No'}"
+                                                          styleClass="#{productDetailsController.product.isActive ? 'status-badge active' : 'status-badge inactive'}" />
 
                                             <p:outputLabel value="Creado:" styleClass="font-bold" />
                                             <h:outputText value="#{productDetailsController.product.createdAt}">
                                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
                                             </h:outputText>
                                         </p:panelGrid>
-                                    </p:panel>
+                                    </div>
+
+                                    <!-- Stock Summary Card -->
+                                    <div class="sales-card stock-summary-card">
+                                        <h3 class="sales-panel-header">
+                                            <i class="pi pi-chart-bar"></i>
+                                            Resumen de Stock
+                                        </h3>
+                                        <div class="grid">
+                                            <div class="col-12 md:col-4">
+                                                <div class="stock-stat">
+                                                    <span class="stat-label">Total Disponible</span>
+                                                    <span class="stat-value">#{productDetailsController.totalAvailableQuantity}</span>
+                                                    <span class="stat-unit">unidades</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 md:col-4">
+                                                <div class="stock-stat">
+                                                    <span class="stat-label">Lotes Activos</span>
+                                                    <span class="stat-value">#{productDetailsController.batches.size()}</span>
+                                                    <span class="stat-unit">lotes</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 md:col-4">
+                                                <div class="stock-stat warning">
+                                                    <span class="stat-label">Próximos a Vencer</span>
+                                                    <span class="stat-value">#{productDetailsController.expiringBatchesCount}</span>
+                                                    <span class="stat-unit">lotes</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <!-- Batches Section -->
-                                    <p:panel header="Lotes del Producto" styleClass="mb-4">
-                                        <p:toolbar>
+                                    <div class="sales-card">
+                                        <h3 class="sales-panel-header">
+                                            <i class="pi pi-list"></i>
+                                            Lotes del Producto
+                                        </h3>
+
+                                        <p:toolbar styleClass="batch-toolbar">
                                             <p:toolbarGroup>
                                                 <p:commandButton value="Agregar Nuevo Lote"
                                                                  icon="pi pi-plus"
@@ -119,16 +189,17 @@
                                             </p:toolbarGroup>
                                         </p:toolbar>
 
-                                        <p:dataTable id="dt-batches"
-                                                     widgetVar="dtBatches"
-                                                     var="batch"
-                                                     value="#{productDetailsController.batches}"
-                                                     reflow="true"
-                                                     styleClass="batches-table"
-                                                     paginator="true"
-                                                     rows="10"
-                                                     paginatorPosition="bottom"
-                                                     emptyMessage="No se encontraron lotes para este producto">
+                                        <div class="batch-table-wrapper">
+                                            <p:dataTable id="dt-batches"
+                                                         widgetVar="dtBatches"
+                                                         var="batch"
+                                                         value="#{productDetailsController.batches}"
+                                                         reflow="true"
+                                                         styleClass="sales-table"
+                                                         paginator="true"
+                                                         rows="10"
+                                                         paginatorPosition="bottom"
+                                                         emptyMessage="No se encontraron lotes para este producto">
 
                                             <p:column headerText="Número de Lote" sortBy="#{batch.batchNumber}" filterBy="#{batch.batchNumber}">
                                                 <h:outputText value="#{batch.batchNumber}" />
@@ -210,8 +281,9 @@
                                                 </p:commandButton>
                                             </p:column>
 
-                                        </p:dataTable>
-                                    </p:panel>
+                                            </p:dataTable>
+                                        </div>
+                                    </div>
 
                                 </h:form>
 

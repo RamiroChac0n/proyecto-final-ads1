@@ -615,4 +615,61 @@ public class ProductDetailsController implements Serializable {
                 return "text-success";
         }
     }
+
+    /**
+     * Calculates the total available stock quantity across all active batches.
+     * <p>
+     * This method sums the {@code quantityAvailable} field from all batches
+     * currently loaded in the controller (respecting the active/inactive filter).
+     * Used for displaying inventory summary statistics in the UI.
+     * </p>
+     *
+     * <h4>Calculation:</h4>
+     * <ul>
+     *   <li>Iterates through all batches in the current view</li>
+     *   <li>Sums quantityAvailable (treating null values as 0)</li>
+     *   <li>Returns total available units across all batches</li>
+     * </ul>
+     *
+     * @return Total available quantity across all batches (0 if no batches exist)
+     * @see ProductBatch#getQuantityAvailable()
+     */
+    public Integer getTotalAvailableQuantity() {
+        if (batches == null || batches.isEmpty()) {
+            return 0;
+        }
+        return batches.stream()
+                .mapToInt(batch -> batch.getQuantityAvailable() != null ? batch.getQuantityAvailable() : 0)
+                .sum();
+    }
+
+    /**
+     * Counts the number of batches expiring within 30 days.
+     * <p>
+     * This method identifies batches in the warning expiration status (≤ 30 days
+     * until expiration) that are not yet expired. Used for displaying inventory
+     * alert statistics in the UI to help prioritize batch usage.
+     * </p>
+     *
+     * <h4>Criteria:</h4>
+     * <ul>
+     *   <li>daysUntilExpiration is not null</li>
+     *   <li>daysUntilExpiration ≤ 30</li>
+     *   <li>isExpired is false (not already expired)</li>
+     * </ul>
+     *
+     * @return Count of batches expiring within 30 days (0 if no batches exist)
+     * @see ProductBatch#getDaysUntilExpiration()
+     * @see ProductBatch#getIsExpired()
+     */
+    public Integer getExpiringBatchesCount() {
+        if (batches == null || batches.isEmpty()) {
+            return 0;
+        }
+        return (int) batches.stream()
+                .filter(batch -> batch.getDaysUntilExpiration() != null &&
+                               batch.getDaysUntilExpiration() <= 30 &&
+                               !batch.getIsExpired())
+                .count();
+    }
 }
