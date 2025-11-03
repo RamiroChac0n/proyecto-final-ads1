@@ -24,11 +24,58 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * JSF Controller for Purchase Receipt management.
- * Handles receiving products from purchase orders and creating inventory batches.
- * Accessible by ADMIN and STOREKEEPER users.
+ * JSF Managed Bean controller for purchase receipt management (ADMIN and STOREKEEPER).
+ * <p>
+ * This view-scoped controller manages the complete purchase receipt workflow from starting
+ * a receipt based on a purchase order, registering received products with batch information,
+ * to completing the receipt which creates inventory batches and updates stock levels.
+ * </p>
+ *
+ * <h3>Purchase Receipt Workflow:</h3>
+ * <ol>
+ *   <li><strong>Start Receipt:</strong> Select an approved purchase order and create a DRAFT receipt</li>
+ *   <li><strong>Register Products:</strong> For each product received, enter:
+ *     <ul>
+ *       <li>Quantity received</li>
+ *       <li>Quantity damaged (if any)</li>
+ *       <li>Batch number (from supplier)</li>
+ *       <li>Manufacture and expiration dates</li>
+ *       <li>Unit cost and sale price</li>
+ *     </ul>
+ *   </li>
+ *   <li><strong>Save as Draft:</strong> Partially completed receipts can be saved and continued later</li>
+ *   <li><strong>Complete Receipt:</strong> Validates all data, creates product batches, and updates inventory</li>
+ * </ol>
+ *
+ * <h3>Key Features:</h3>
+ * <ul>
+ *   <li><strong>Multi-Product Reception:</strong> Receive multiple products from an order in one receipt</li>
+ *   <li><strong>Batch Creation:</strong> Automatically creates ProductBatch entities upon completion</li>
+ *   <li><strong>Discrepancy Tracking:</strong> Tracks quantity differences (received vs ordered)</li>
+ *   <li><strong>Damaged Goods:</strong> Separate tracking for damaged/defective items</li>
+ *   <li><strong>Invoice Linking:</strong> Optional supplier invoice number and date</li>
+ *   <li><strong>Draft Support:</strong> Save incomplete receipts for later completion</li>
+ *   <li><strong>Validation:</strong> Comprehensive validation before completing receipt</li>
+ * </ul>
+ *
+ * <h3>Receipt Status:</h3>
+ * <ul>
+ *   <li><strong>DRAFT:</strong> Being created/edited, batches not yet created</li>
+ *   <li><strong>COMPLETE:</strong> Finalized, batches created, inventory updated</li>
+ * </ul>
+ *
+ * <h3>Access Control:</h3>
+ * <p>
+ * Available to ADMIN and STOREKEEPER roles. Enforced via {@link #checkAccess()}.
+ * </p>
  *
  * @author ramir
+ * @version 1.0
+ * @see PurchaseReceipt
+ * @see PurchaseReceiptDetail
+ * @see ProductBatch
+ * @see PurchaseOrder
+ * @see IPurchaseReceiptService
  */
 @Data
 @Named(value = "purchaseReceiptController")
@@ -611,7 +658,13 @@ public class PurchaseReceiptController implements Serializable {
     }
 
     /**
-     * Calculate total quantities for display.
+     * Calculates the total quantity of products received across all receipt details.
+     * <p>
+     * This is a UI helper method that aggregates quantityReceived from all details
+     * in the current receipt for display in the summary section.
+     * </p>
+     *
+     * @return Total quantity received, or 0 if no details
      */
     public Integer getTotalQuantityReceived() {
         if (currentDetails == null || currentDetails.isEmpty()) {
@@ -622,6 +675,14 @@ public class PurchaseReceiptController implements Serializable {
                 .sum();
     }
 
+    /**
+     * Calculates the total quantity of damaged/defective products across all receipt details.
+     * <p>
+     * This helps track the total loss due to damaged goods received from the supplier.
+     * </p>
+     *
+     * @return Total quantity damaged, or 0 if no details or no damaged items
+     */
     public Integer getTotalQuantityDamaged() {
         if (currentDetails == null || currentDetails.isEmpty()) {
             return 0;
@@ -631,10 +692,28 @@ public class PurchaseReceiptController implements Serializable {
                 .sum();
     }
 
+    /**
+     * Calculates the total quantity available for sale (received minus damaged).
+     * <p>
+     * This represents the actual usable inventory that will be added to stock upon
+     * receipt completion.
+     * </p>
+     *
+     * @return Total available quantity (received - damaged)
+     */
     public Integer getTotalQuantityAvailable() {
         return getTotalQuantityReceived() - getTotalQuantityDamaged();
     }
 
+    /**
+     * Calculates the total quantity missing (ordered but not received).
+     * <p>
+     * This tracks discrepancies between what was ordered and what was actually
+     * received from the supplier.
+     * </p>
+     *
+     * @return Total quantity missing, or 0 if no missing items
+     */
     public Integer getTotalQuantityMissing() {
         if (currentDetails == null || currentDetails.isEmpty()) {
             return 0;
@@ -646,35 +725,77 @@ public class PurchaseReceiptController implements Serializable {
     }
 
     /**
-     * Check if current user can edit a receipt.
+     * Checks if a receipt can be edited based on its status.
+     * <p>
+     * Delegates to service layer. Only DRAFT receipts can be edited.
+     * </p>
+     *
+     * @param receipt The receipt to check
+     * @return {@code true} if receipt can be edited, {@code false} otherwise
+     * @see IPurchaseReceiptService#canEdit(PurchaseReceipt)
      */
     public boolean canEdit(PurchaseReceipt receipt) {
         return receiptService.canEdit(receipt);
     }
 
     /**
-     * Check if current user can delete a receipt.
+     * Checks if a receipt can be deleted based on its status.
+     * <p>
+     * Delegates to service layer. Typically only DRAFT receipts can be deleted.
+     * </p>
+     *
+     * @param receipt The receipt to check
+     * @return {@code true} if receipt can be deleted, {@code false} otherwise
+     * @see IPurchaseReceiptService#canDelete(PurchaseReceipt)
      */
     public boolean canDelete(PurchaseReceipt receipt) {
         return receiptService.canDelete(receipt);
     }
 
     /**
-     * Check if current user can complete a receipt.
+     * Checks if a receipt can be completed (finalized with batch creation).
+     * <p>
+     * Delegates to service layer. Only DRAFT receipts with valid details can be completed.
+     * </p>
+     *
+     * @param receipt The receipt to check
+     * @return {@code true} if receipt can be completed, {@code false} otherwise
+     * @see IPurchaseReceiptService#canComplete(PurchaseReceipt)
      */
     public boolean canComplete(PurchaseReceipt receipt) {
         return receiptService.canComplete(receipt);
     }
 
     /**
-     * Check if an order can have a receipt started.
+     * Checks if a purchase order can have a receipt started for it.
+     * <p>
+     * Delegates to service layer. Order must be APPROVED and not already have a receipt.
+     * </p>
+     *
+     * @param order The purchase order to check
+     * @return {@code true} if receipt can be started, {@code false} otherwise
+     * @see IPurchaseReceiptService#canStartReceiptForOrder(Integer)
      */
     public boolean canStartReceipt(PurchaseOrder order) {
         return order != null && receiptService.canStartReceiptForOrder(order.getOrderId());
     }
 
     /**
-     * Check if user is ADMIN or STOREKEEPER (required for this page).
+     * Enforces ADMIN or STOREKEEPER access requirement for purchase receipt pages.
+     * <p>
+     * This method should be called as a preRenderView event listener or in init() to
+     * prevent unauthorized users from accessing purchase receipt functionality. Users
+     * without proper role are redirected to the home page.
+     * </p>
+     *
+     * <h4>Allowed Roles:</h4>
+     * <ul>
+     *   <li>ADMIN - Full access</li>
+     *   <li>STOREKEEPER - Full access (their primary responsibility)</li>
+     * </ul>
+     *
+     * @see UserController#isAdmin()
+     * @see UserController#isAdminOrStorekeeper()
      */
     public void checkAccess() {
         if (userController != null) {
@@ -688,7 +809,16 @@ public class PurchaseReceiptController implements Serializable {
     }
 
     /**
-     * Navigate to form page for starting new receipt.
+     * Convenience method to start a new receipt for an order.
+     * <p>
+     * Combines {@link #prepareStartReceipt(PurchaseOrder)} and {@link #startReceipt()}
+     * into a single call for UI simplicity.
+     * </p>
+     *
+     * @param order The purchase order to create a receipt for
+     * @return Navigation outcome to receipt form page
+     * @see #prepareStartReceipt(PurchaseOrder)
+     * @see #startReceipt()
      */
     public String startNewReceipt(PurchaseOrder order) {
         prepareStartReceipt(order);
@@ -696,14 +826,22 @@ public class PurchaseReceiptController implements Serializable {
     }
 
     /**
-     * Return to purchase receipts list.
+     * Returns navigation outcome to the purchase receipts list page.
+     *
+     * @return Navigation string with redirect to purchase receipts list
      */
     public String returnToList() {
         return "purchase-receipts.xhtml?faces-redirect=true";
     }
 
     /**
-     * Close a PrimeFaces dialog.
+     * Closes a PrimeFaces dialog by executing JavaScript on the client side.
+     * <p>
+     * This method adds JavaScript to hide the specified dialog widget using
+     * PrimeFaces' client-side API.
+     * </p>
+     *
+     * @param dialogWidgetVar The PrimeFaces widget variable name of the dialog to close
      */
     private void closeDialog(String dialogWidgetVar) {
         FacesContext.getCurrentInstance()
@@ -712,22 +850,41 @@ public class PurchaseReceiptController implements Serializable {
                 .add("PF('" + dialogWidgetVar + "').hide();");
     }
 
-    // Utility methods for messages
+    /**
+     * Displays a success message to the user (green, info severity).
+     *
+     * @param message The success message text in Spanish
+     */
     private void showSuccessMessage(String message) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", message));
     }
 
+    /**
+     * Displays an informational message to the user (blue, info severity).
+     *
+     * @param message The informational message text in Spanish
+     */
     private void showInfoMessage(String message) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Información", message));
     }
 
+    /**
+     * Displays a warning message to the user (yellow/orange, warn severity).
+     *
+     * @param message The warning message text in Spanish
+     */
     private void showWarningMessage(String message) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_WARN, "Advertencia", message));
     }
 
+    /**
+     * Displays an error message to the user (red, error severity).
+     *
+     * @param message The error message text in Spanish
+     */
     private void showErrorMessage(String message) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", message));

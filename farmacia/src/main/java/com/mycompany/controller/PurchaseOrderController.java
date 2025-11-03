@@ -22,11 +22,61 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * JSF Controller for Purchase Order management.
- * Handles creating, editing, and managing purchase orders.
- * Only accessible by ADMIN users.
+ * JSF Managed Bean controller for purchase order management (ADMIN only).
+ * <p>
+ * This view-scoped controller manages the complete purchase order lifecycle from creation
+ * to approval, confirmation, and eventual receipt. Purchase orders represent formal requests
+ * to suppliers for products needed to restock inventory.
+ * </p>
+ *
+ * <h3>Purchase Order Workflow:</h3>
+ * <ol>
+ *   <li><strong>DRAFT:</strong> Order is being created/edited
+ *     <ul>
+ *       <li>Select supplier and branch</li>
+ *       <li>Add products with quantities and expected costs</li>
+ *       <li>Calculate totals (subtotal, tax, shipping, total)</li>
+ *     </ul>
+ *   </li>
+ *   <li><strong>PENDING:</strong> Submitted for approval (awaiting administrator review)</li>
+ *   <li><strong>APPROVED:</strong> Approved by administrator, ready to send to supplier</li>
+ *   <li><strong>CONFIRMED:</strong> Supplier confirmed order and provided confirmation number</li>
+ *   <li><strong>COMPLETED:</strong> Products received via PurchaseReceipt</li>
+ *   <li><strong>CANCELLED:</strong> Order cancelled with reason documented</li>
+ * </ol>
+ *
+ * <h3>Key Features:</h3>
+ * <ul>
+ *   <li><strong>Multi-Product Orders:</strong> Add multiple products to a single order</li>
+ *   <li><strong>Cost Estimation:</strong> Enter expected unit costs and sale prices</li>
+ *   <li><strong>Tax & Shipping:</strong> Calculate IVA (12%) and shipping costs</li>
+ *   <li><strong>Status Tracking:</strong> Complete status workflow from draft to completion</li>
+ *   <li><strong>Approval Process:</strong> Submit orders for admin approval</li>
+ *   <li><strong>Supplier Confirmation:</strong> Record supplier confirmation numbers</li>
+ *   <li><strong>Cancellation:</strong> Cancel orders with documented reasons</li>
+ *   <li><strong>Receipt Integration:</strong> Link to PurchaseReceiptController for receiving goods</li>
+ * </ul>
+ *
+ * <h3>Order Calculations:</h3>
+ * <ul>
+ *   <li><strong>Subtotal:</strong> Sum of (quantity × unit cost) for all order details</li>
+ *   <li><strong>Tax (IVA):</strong> 12% of subtotal</li>
+ *   <li><strong>Total:</strong> Subtotal + Tax + Shipping Cost</li>
+ * </ul>
+ *
+ * <h3>Access Control:</h3>
+ * <p>
+ * Only ADMIN users can create, edit, approve, and manage purchase orders.
+ * Enforced via {@link #checkAdminAccess()}.
+ * </p>
  *
  * @author ramir
+ * @version 1.0
+ * @see PurchaseOrder
+ * @see PurchaseOrderDetail
+ * @see PurchaseOrderStatus
+ * @see IPurchaseOrderService
+ * @see PurchaseReceiptController
  */
 @Data
 @Named(value = "purchaseOrderController")
