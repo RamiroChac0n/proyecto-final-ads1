@@ -21,8 +21,48 @@ import java.util.logging.Logger;
 import lombok.Data;
 
 /**
- * Controller for Product KARDEX (Inventory Movement History)
+ * JSF Managed Bean controller for displaying Product KARDEX (Inventory Movement History).
+ * <p>
+ * This view-scoped controller manages the traditional accounting KARDEX format that shows
+ * the complete inventory movement history for a single product. The KARDEX displays three
+ * main sections: ENTRADAS (inputs), SALIDAS (outputs), and SALDOS (running balance).
+ * </p>
+ *
+ * <h3>KARDEX Structure:</h3>
+ * <ul>
+ *   <li><strong>ENTRADAS (Inputs):</strong> Quantity, Unit Cost, Total Cost for incoming inventory</li>
+ *   <li><strong>SALIDAS (Outputs):</strong> Quantity, Unit Cost, Total Cost for outgoing inventory</li>
+ *   <li><strong>SALDOS (Balance):</strong> Running total of Quantity and Total Cost after each movement</li>
+ * </ul>
+ *
+ * <h3>Movement Type Classification:</h3>
+ * <ul>
+ *   <li><strong>IN:</strong> Treated as ENTRADAS (purchases, receipts)</li>
+ *   <li><strong>OUT:</strong> Treated as SALIDAS (sales, returns)</li>
+ *   <li><strong>ADJUSTMENT:</strong> Direction determined by sign (positive=ENTRADAS, negative=SALIDAS)</li>
+ * </ul>
+ *
+ * <h3>Features:</h3>
+ * <ul>
+ *   <li>Product selector dropdown to switch between product KARDEXes</li>
+ *   <li>Chronological display (oldest movements first)</li>
+ *   <li>Running balance calculation with quantity and total cost</li>
+ *   <li>Movement details: date, type, batch, branch, user, reason</li>
+ *   <li>Color-coded movement types (IN=green, OUT=red, ADJUSTMENT=yellow)</li>
+ *   <li>Currency formatting with thousands separator (Q #,###.##)</li>
+ * </ul>
+ *
+ * <h3>Access Control:</h3>
+ * <p>
+ * Authenticated users only. If no user is logged in, redirects to login page.
+ * Requires valid productId parameter in URL, otherwise redirects to products list.
+ * </p>
+ *
  * @author ramir
+ * @version 1.0
+ * @see InventoryMovement
+ * @see MovementType
+ * @see IInventoryMovementService
  */
 @Data
 @Named(value = "productKardexController")
@@ -48,14 +88,42 @@ public class ProductKardexController implements Serializable {
     private List<Product> allProducts;
     private Product selectedProduct;
 
+    /**
+     * Initializes the controller after dependency injection is complete.
+     * <p>
+     * This method performs the following initialization sequence:
+     * </p>
+     * <ol>
+     *   <li>Loads all active products for the product selector dropdown</li>
+     *   <li>Extracts productId from URL query parameter ("productId")</li>
+     *   <li>If productId is valid:
+     *     <ul>
+     *       <li>Loads the product entity from database</li>
+     *       <li>Loads all inventory movements for the product</li>
+     *       <li>Calculates KARDEX rows with running balance</li>
+     *       <li>Synchronizes selectedProduct with loaded product</li>
+     *     </ul>
+     *   </li>
+     *   <li>If productId is invalid or missing, redirects to products list page</li>
+     * </ol>
+     *
+     * <h4>Error Handling:</h4>
+     * <ul>
+     *   <li>NumberFormatException: Redirects to products list if productId is not a valid Long</li>
+     *   <li>Missing parameter: Redirects to products list if no productId provided</li>
+     * </ul>
+     *
+     * @see #loadAllProducts()
+     * @see #loadProduct()
+     * @see #loadMovements()
+     * @see #calculateKardex()
+     */
     @PostConstruct
     public void init() {
-        LOGGER.info("ProductKardexController.init() - Starting initialization");
+        // LOGGER.info("ProductKardexController.init() - Starting initialization");
 
-        // Load all products for selector dropdown
         loadAllProducts();
 
-        // Get productId from request parameter
         String productIdParam = FacesContext.getCurrentInstance().getExternalContext()
                 .getRequestParameterMap().get("productId");
 
@@ -66,7 +134,6 @@ public class ProductKardexController implements Serializable {
                 loadMovements();
                 calculateKardex();
 
-                // Synchronize selectedProduct with loaded product
                 selectedProduct = product;
             } catch (NumberFormatException e) {
                 LOGGER.severe("Invalid productId parameter: " + productIdParam);
@@ -77,11 +144,22 @@ public class ProductKardexController implements Serializable {
             redirectToProducts();
         }
 
-        LOGGER.info("ProductKardexController.init() - Initialization completed");
+        // LOGGER.info("ProductKardexController.init() - Initialization completed");
     }
 
     /**
-     * Check if user is logged in
+     * Verifies that a user is logged in before allowing access to KARDEX page.
+     * <p>
+     * This method should be called as a preRenderView event listener in the XHTML page
+     * to enforce authentication. If no user is logged in, redirects to the login page.
+     * </p>
+     *
+     * <h4>Usage in XHTML:</h4>
+     * <pre>
+     * &lt;f:event type="preRenderView" listener="#{productKardexController.checkAccess}" /&gt;
+     * </pre>
+     *
+     * @see #isLoggedIn()
      */
     public void checkAccess() {
         if (!isLoggedIn()) {
@@ -94,19 +172,51 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Check if current user is logged in
+     * Checks if a user is currently logged in by verifying session state.
+     * <p>
+     * This method checks for the presence of a "user" object in the HTTP session map.
+     * The user object is set by {@code UserController} during successful authentication.
+     * </p>
+     *
+     * @return {@code true} if a user is logged in, {@code false} otherwise
+     * @see UserController#login()
      */
     public boolean isLoggedIn() {
         return FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user") != null;
     }
 
     /**
-     * Get current logged-in user
+     * Retrieves the currently logged-in user from the HTTP session.
+     * <p>
+     * This method extracts the {@link User} object stored in the session map by
+     * {@code UserController} during authentication. Returns {@code null} if no user
+     * is logged in.
+     * </p>
+     *
+     * @return The current {@link User} object, or {@code null} if not logged in
+     * @see UserController#getCurrentUser()
+     * @see #isLoggedIn()
      */
     public User getCurrentUser() {
         return (User) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
     }
 
+    /**
+     * Redirects the user to the products list page (products.xhtml).
+     * <p>
+     * This method is called when:
+     * </p>
+     * <ul>
+     *   <li>No productId parameter is provided in the URL</li>
+     *   <li>The productId parameter is invalid (not a valid Long)</li>
+     *   <li>The product with the given ID is not found in the database</li>
+     * </ul>
+     *
+     * <h4>Error Handling:</h4>
+     * <p>
+     * Logs severe error if redirection fails, but does not throw exception.
+     * </p>
+     */
     private void redirectToProducts() {
         try {
             FacesContext.getCurrentInstance().getExternalContext().redirect("products.xhtml");
@@ -115,6 +225,26 @@ public class ProductKardexController implements Serializable {
         }
     }
 
+    /**
+     * Loads the product entity from the database using the productId field.
+     * <p>
+     * This method performs product lookup and validation:
+     * </p>
+     * <ol>
+     *   <li>Queries the database for the product with the specified ID</li>
+     *   <li>If product not found:
+     *     <ul>
+     *       <li>Logs warning with product ID</li>
+     *       <li>Displays error message to user</li>
+     *       <li>Redirects to products list page</li>
+     *     </ul>
+     *   </li>
+     *   <li>If found, sets the product field for use by other methods</li>
+     * </ol>
+     *
+     * @see IProductService#findById(Long)
+     * @see #redirectToProducts()
+     */
     private void loadProduct() {
         if (productId != null) {
             product = productService.findById(productId);
@@ -127,31 +257,83 @@ public class ProductKardexController implements Serializable {
         }
     }
 
+    /**
+     * Loads all inventory movements for the currently loaded product.
+     * <p>
+     * This method queries the database for all {@link InventoryMovement} records
+     * associated with the current product. The movements are stored in chronological
+     * order and will be used by {@link #calculateKardex()} to generate KARDEX rows.
+     * </p>
+     *
+     * <h4>Side Effects:</h4>
+     * <p>
+     * Sets the {@code movements} field with the retrieved list. Logs the count of
+     * movements loaded for debugging purposes.
+     * </p>
+     *
+     * @see IInventoryMovementService#findByProduct(Product)
+     * @see #calculateKardex()
+     */
     private void loadMovements() {
         if (product != null) {
             movements = inventoryMovementService.findByProduct(product);
-            LOGGER.info("Loaded " + movements.size() + " movements for product: " + product.getCommercialName());
+            // LOGGER.info("Loaded " + movements.size() + " movements for product: " + product.getCommercialName());
         }
     }
 
     /**
-     * Load all active products for the dropdown selector
+     * Loads all active products from the database for the product selector dropdown.
+     * <p>
+     * This method populates the {@code allProducts} list used by the dropdown component
+     * in the XHTML view. Users can select a different product from this list to view
+     * its KARDEX without navigating back to the products list page.
+     * </p>
+     *
+     * <h4>Side Effects:</h4>
+     * <p>
+     * Sets the {@code allProducts} field. Logs the count of products loaded for
+     * debugging purposes.
+     * </p>
+     *
+     * @see IProductService#list()
+     * @see #onProductChange()
      */
     private void loadAllProducts() {
         allProducts = productService.list();
-        LOGGER.info("Loaded " + (allProducts != null ? allProducts.size() : 0) + " products for selector");
+        // LOGGER.info("Loaded " + (allProducts != null ? allProducts.size() : 0) + " products for selector");
     }
 
     /**
-     * Handle product selection change from dropdown
-     * Redirects to KARDEX page with new product ID
+     * Handles product selection change from the dropdown selector.
+     * <p>
+     * When a user selects a different product from the dropdown, this method triggers
+     * a page redirect to the KARDEX page for the newly selected product. This allows
+     * users to quickly switch between product KARDEXes without returning to the products
+     * list page.
+     * </p>
+     *
+     * <h4>Process Flow:</h4>
+     * <ol>
+     *   <li>Validates that selectedProduct and its ID are not null</li>
+     *   <li>Constructs URL: "product-kardex.xhtml?productId={productId}"</li>
+     *   <li>Performs HTTP redirect to the new URL</li>
+     *   <li>On error: Displays error message to user and logs error</li>
+     * </ol>
+     *
+     * <h4>AJAX Integration:</h4>
+     * <p>
+     * This method is typically called via AJAX from a PrimeFaces selectOneMenu or
+     * autoComplete component with {@code p:ajax} listener.
+     * </p>
+     *
+     * @see Product#getProductId()
      */
     public void onProductChange() {
         if (selectedProduct != null && selectedProduct.getProductId() != null) {
             try {
                 String url = "product-kardex.xhtml?productId=" + selectedProduct.getProductId();
                 FacesContext.getCurrentInstance().getExternalContext().redirect(url);
-                LOGGER.info("Redirecting to KARDEX for product: " + selectedProduct.getCommercialName());
+                // LOGGER.info("Redirecting to KARDEX for product: " + selectedProduct.getCommercialName());
             } catch (Exception e) {
                 LOGGER.severe("Error redirecting to product KARDEX: " + e.getMessage());
                 FacesContext.getCurrentInstance().addMessage(null,
@@ -161,7 +343,48 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Calculate KARDEX with running balance (traditional accounting format)
+     * Calculates KARDEX rows with running balance using traditional accounting format.
+     * <p>
+     * This method transforms the flat list of {@link InventoryMovement} records into
+     * structured {@link KardexRow} objects that display inputs, outputs, and running balance
+     * in the three-column KARDEX format (ENTRADAS | SALIDAS | SALDOS).
+     * </p>
+     *
+     * <h4>Calculation Logic:</h4>
+     * <ol>
+     *   <li>Reverses movements list to process from oldest to newest</li>
+     *   <li>For each movement:
+     *     <ul>
+     *       <li>Extracts unit cost from associated batch (defaults to 0 if no batch)</li>
+     *       <li>Calculates total cost: unitCost × quantity</li>
+     *       <li>Determines if movement is INPUT or OUTPUT:
+     *         <ul>
+     *           <li><strong>MovementType.IN:</strong> Always treated as INPUT</li>
+     *           <li><strong>MovementType.OUT:</strong> Always treated as OUTPUT</li>
+     *           <li><strong>MovementType.ADJUSTMENT:</strong> Positive quantity = INPUT, negative = OUTPUT</li>
+     *         </ul>
+     *       </li>
+     *       <li>Updates running balance:
+     *         <ul>
+     *           <li>INPUT: Add quantity and total cost to balance</li>
+     *           <li>OUTPUT: Subtract quantity and total cost from balance</li>
+     *         </ul>
+     *       </li>
+     *       <li>Populates KardexRow with INPUT/OUTPUT columns and current BALANCE</li>
+     *     </ul>
+     *   </li>
+     *   <li>Maintains chronological order (oldest first) for table display</li>
+     * </ol>
+     *
+     * <h4>Side Effects:</h4>
+     * <p>
+     * Sets the {@code kardexRows} field with the calculated list of KardexRow objects.
+     * This list is bound to the DataTable in the XHTML view.
+     * </p>
+     *
+     * @see KardexRow
+     * @see InventoryMovement
+     * @see MovementType
      */
     private void calculateKardex() {
         kardexRows = new ArrayList<>();
@@ -235,7 +458,23 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get icon for movement type
+     * Returns the PrimeIcons CSS class for the specified movement type.
+     * <p>
+     * This method provides visual iconography for each movement type in the UI,
+     * making it easier for users to quickly identify the type of inventory movement.
+     * </p>
+     *
+     * <h4>Icon Mapping:</h4>
+     * <ul>
+     *   <li><strong>IN:</strong> "pi pi-arrow-down" (downward arrow, inventory coming in)</li>
+     *   <li><strong>OUT:</strong> "pi pi-arrow-up" (upward arrow, inventory going out)</li>
+     *   <li><strong>ADJUSTMENT:</strong> "pi pi-sync" (sync/refresh icon, manual adjustment)</li>
+     *   <li><strong>null or unknown:</strong> "pi pi-question" (question mark)</li>
+     * </ul>
+     *
+     * @param type The {@link MovementType} to get an icon for
+     * @return PrimeIcons CSS class string (e.g., "pi pi-arrow-down")
+     * @see MovementType
      */
     public String getMovementTypeIcon(MovementType type) {
         if (type == null) return "pi pi-question";
@@ -253,7 +492,24 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get CSS class for movement type
+     * Returns the CSS text color class for the specified movement type.
+     * <p>
+     * This method provides color-coding for movement types using Bootstrap/PrimeFlex
+     * text utility classes. Colors help users quickly distinguish between different
+     * types of inventory movements.
+     * </p>
+     *
+     * <h4>Color Mapping:</h4>
+     * <ul>
+     *   <li><strong>IN:</strong> "text-success" (green text, positive action)</li>
+     *   <li><strong>OUT:</strong> "text-danger" (red text, negative action)</li>
+     *   <li><strong>ADJUSTMENT:</strong> "text-warning" (yellow/orange text, manual intervention)</li>
+     *   <li><strong>null or unknown:</strong> "" (empty string, default color)</li>
+     * </ul>
+     *
+     * @param type The {@link MovementType} to get a CSS class for
+     * @return Bootstrap/PrimeFlex CSS class string (e.g., "text-success")
+     * @see MovementType
      */
     public String getMovementTypeClass(MovementType type) {
         if (type == null) return "";
@@ -271,7 +527,29 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get badge severity for movement type
+     * Returns the PrimeFaces badge severity for the specified movement type.
+     * <p>
+     * This method provides severity levels for PrimeFaces badge components, allowing
+     * movement types to be displayed with appropriate background colors in badges.
+     * </p>
+     *
+     * <h4>Severity Mapping:</h4>
+     * <ul>
+     *   <li><strong>IN:</strong> "success" (green badge)</li>
+     *   <li><strong>OUT:</strong> "danger" (red badge)</li>
+     *   <li><strong>ADJUSTMENT:</strong> "warning" (yellow/orange badge)</li>
+     *   <li><strong>null or unknown:</strong> "info" (blue badge)</li>
+     * </ul>
+     *
+     * <h4>Usage in XHTML:</h4>
+     * <pre>
+     * &lt;p:badge value="#{movement.movementType.name()}"
+     *          severity="#{productKardexController.getMovementTypeSeverity(movement.movementType)}" /&gt;
+     * </pre>
+     *
+     * @param type The {@link MovementType} to get severity for
+     * @return PrimeFaces severity string ("success", "danger", "warning", or "info")
+     * @see MovementType
      */
     public String getMovementTypeSeverity(MovementType type) {
         if (type == null) return "info";
@@ -289,7 +567,16 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Format movement date
+     * Formats the movement date/time for display in the KARDEX table.
+     * <p>
+     * This method converts the {@link java.time.LocalDateTime} from the movement record
+     * into a user-friendly string format using the pattern "dd/MM/yyyy HH:mm:ss"
+     * (e.g., "15/01/2025 14:30:45").
+     * </p>
+     *
+     * @param movement The {@link InventoryMovement} to extract the date from
+     * @return Formatted date/time string (e.g., "15/01/2025 14:30:45"), or "N/A" if movement date is null
+     * @see #DATE_TIME_FORMATTER
      */
     public String formatMovementDate(InventoryMovement movement) {
         if (movement.getMovementDate() == null) {
@@ -299,7 +586,16 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get batch number from movement
+     * Extracts the batch number from an inventory movement for display.
+     * <p>
+     * This method retrieves the batch number associated with the movement's product batch.
+     * Some movements may not have an associated batch (e.g., adjustments), in which case
+     * "N/A" is returned.
+     * </p>
+     *
+     * @param movement The {@link InventoryMovement} to extract the batch number from
+     * @return The batch number string, or "N/A" if no batch is associated with the movement
+     * @see com.mycompany.model.entity.ProductBatch#getBatchNumber()
      */
     public String getBatchNumber(InventoryMovement movement) {
         if (movement.getBatch() == null) {
@@ -309,7 +605,16 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get branch name from movement
+     * Extracts the branch name from an inventory movement for display.
+     * <p>
+     * This method retrieves the name of the branch/location where the inventory movement
+     * occurred. Some movements may not have an associated branch, in which case "N/A"
+     * is returned.
+     * </p>
+     *
+     * @param movement The {@link InventoryMovement} to extract the branch name from
+     * @return The branch name string, or "N/A" if no branch is associated with the movement
+     * @see com.mycompany.model.entity.Branch#getBranchName()
      */
     public String getBranchName(InventoryMovement movement) {
         if (movement.getBranch() == null) {
@@ -319,7 +624,17 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Get user name from movement
+     * Extracts the full name of the user who performed an inventory movement.
+     * <p>
+     * This method constructs the full name by concatenating the user's first name and
+     * last name. Some movements may not have an associated user (e.g., automated system
+     * adjustments), in which case "N/A" is returned.
+     * </p>
+     *
+     * @param movement The {@link InventoryMovement} to extract the user name from
+     * @return The user's full name (e.g., "Juan Pérez"), or "N/A" if no user is associated
+     * @see User#getFirstName()
+     * @see User#getLastName()
      */
     public String getUserName(InventoryMovement movement) {
         if (movement.getUser() == null) {
@@ -329,7 +644,26 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Format currency with thousands separator and 2 decimal places
+     * Formats a monetary amount as Guatemalan Quetzales with thousands separator.
+     * <p>
+     * This method formats {@link BigDecimal} amounts into the Guatemalan currency format
+     * using the pattern "Q #,###.##" where:
+     * </p>
+     * <ul>
+     *   <li>Q is the currency symbol for Guatemalan Quetzal</li>
+     *   <li>Commas separate thousands (1,000.00)</li>
+     *   <li>Two decimal places are always shown</li>
+     * </ul>
+     *
+     * <h4>Examples:</h4>
+     * <ul>
+     *   <li>formatCurrency(BigDecimal.valueOf(1234.56)) → "Q 1,234.56"</li>
+     *   <li>formatCurrency(BigDecimal.ZERO) → "Q 0.00"</li>
+     *   <li>formatCurrency(null) → "Q 0.00"</li>
+     * </ul>
+     *
+     * @param amount The {@link BigDecimal} amount to format, may be null
+     * @return Formatted currency string (e.g., "Q 1,234.56"), defaults to "Q 0.00" if amount is null
      */
     public String formatCurrency(BigDecimal amount) {
         if (amount == null) {
@@ -339,7 +673,45 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Inner class to represent a KARDEX row with calculated balance
+     * Data transfer object representing a single row in the KARDEX table.
+     * <p>
+     * This inner class encapsulates the traditional accounting KARDEX format with three
+     * main sections: ENTRADAS (inputs), SALIDAS (outputs), and SALDOS (running balance).
+     * Each KardexRow corresponds to one {@link InventoryMovement} but organizes the data
+     * into the standardized KARDEX columns for clear financial tracking.
+     * </p>
+     *
+     * <h3>KARDEX Column Structure:</h3>
+     * <table border="1">
+     *   <tr>
+     *     <th>ENTRADAS (Inputs)</th>
+     *     <th>SALIDAS (Outputs)</th>
+     *     <th>SALDOS (Balance)</th>
+     *   </tr>
+     *   <tr>
+     *     <td>Quantity | Unit Cost | Total Cost</td>
+     *     <td>Quantity | Unit Cost | Total Cost</td>
+     *     <td>Quantity | Total Cost</td>
+     *   </tr>
+     * </table>
+     *
+     * <h3>Usage Pattern:</h3>
+     * <ul>
+     *   <li>For INPUT movements: ENTRADAS columns are populated, SALIDAS are null</li>
+     *   <li>For OUTPUT movements: SALIDAS columns are populated, ENTRADAS are null</li>
+     *   <li>SALDOS (balance) columns are ALWAYS populated with running totals</li>
+     * </ul>
+     *
+     * <h3>Field Descriptions:</h3>
+     * <ul>
+     *   <li><strong>movement:</strong> Reference to the original InventoryMovement entity</li>
+     *   <li><strong>inputQuantity/inputUnitCost/inputTotalCost:</strong> ENTRADAS section (incoming inventory)</li>
+     *   <li><strong>outputQuantity/outputUnitCost/outputTotalCost:</strong> SALIDAS section (outgoing inventory)</li>
+     *   <li><strong>balanceQuantity/balanceTotalCost:</strong> SALDOS section (running totals after this movement)</li>
+     * </ul>
+     *
+     * @see InventoryMovement
+     * @see #calculateKardex()
      */
     @Data
     public static class KardexRow implements Serializable {
