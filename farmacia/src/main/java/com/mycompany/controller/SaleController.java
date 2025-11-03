@@ -29,9 +29,65 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Controller for Sales operations
- * Accessible by ADMIN and CASHIER roles only
+ * JSF Managed Bean controller for point-of-sale operations and sales management.
+ * <p>
+ * This view-scoped controller handles the complete sales workflow including shopping cart
+ * management, customer information processing, payment handling, FIFO batch allocation,
+ * and sales history tracking. It integrates with cash register operations and enforces
+ * role-based access control.
+ * </p>
+ *
+ * <h3>Responsibilities:</h3>
+ * <ul>
+ *   <li>Shopping cart management (add, remove, update quantities)</li>
+ *   <li>FIFO batch allocation for stock reduction</li>
+ *   <li>Customer search and quick registration</li>
+ *   <li>Payment processing with change calculation</li>
+ *   <li>Tax calculation (IVA 12% included in prices)</li>
+ *   <li>Sales history and cancellation management</li>
+ *   <li>Cash register validation and integration</li>
+ *   <li>Stock availability validation in real-time</li>
+ * </ul>
+ *
+ * <h3>Sales Process Flow:</h3>
+ * <ol>
+ *   <li>Select branch and verify open cash register</li>
+ *   <li>Add products to cart with quantity validation</li>
+ *   <li>Search or register customer (optional for C/F)</li>
+ *   <li>Enter payment amount (validates sufficient cash)</li>
+ *   <li>Process sale (allocates inventory FIFO, records transaction)</li>
+ *   <li>Display receipt and reset for next sale</li>
+ * </ol>
+ *
+ * <h3>Tax Calculation (IVA):</h3>
+ * <ul>
+ *   <li>All prices include 12% IVA (Value Added Tax)</li>
+ *   <li>Subtotal without tax = Total ÷ 1.12</li>
+ *   <li>Tax amount = Total - Subtotal without tax</li>
+ *   <li>Total = Sum of all line totals (with IVA)</li>
+ * </ul>
+ *
+ * <h3>Customer Requirements:</h3>
+ * <ul>
+ *   <li><strong>C/F (Consumidor Final):</strong> No customer info required</li>
+ *   <li><strong>Specific NIT:</strong> Name, address, and phone are mandatory</li>
+ *   <li>Customer search by NIT or phone auto-fills information</li>
+ *   <li>Quick customer registration available during sale</li>
+ * </ul>
+ *
+ * <h3>Access Control:</h3>
+ * Restricted to ADMIN and CASHIER roles only. Storekeepers cannot access sales.
+ *
+ * <h3>JSF Scope:</h3>
+ * {@code @ViewScoped} - Cart and form data discarded on navigation, preventing stale data.
+ *
  * @author ramir
+ * @version 1.0
+ * @see Sale
+ * @see SaleDetail
+ * @see Customer
+ * @see CashRegister
+ * @see ISaleService
  */
 @Data
 @Named(value = "saleController")
@@ -90,6 +146,23 @@ public class SaleController implements Serializable {
     private Integer selectedBranchId;
     private CashRegister selectedCashRegister;
 
+    /**
+     * Initializes the controller after dependency injection is complete.
+     * <p>
+     * This method performs the following initialization tasks:
+     * <ul>
+     *   <li>Validates user access (ADMIN or CASHIER only)</li>
+     *   <li>Creates a new blank sale and cart</li>
+     *   <li>Loads active products for selection</li>
+     *   <li>Loads active branches for cash register selection</li>
+     *   <li>Loads sales history for display</li>
+     * </ul>
+     * </p>
+     *
+     * @see PostConstruct
+     * @see #checkSalesAccess()
+     * @see #initializeNewSale()
+     */
     @PostConstruct
     public void init() {
         checkSalesAccess();
@@ -100,8 +173,14 @@ public class SaleController implements Serializable {
     }
 
     /**
-     * Custom getter for cartItems with null-safety
-     * Overrides Lombok-generated getter
+     * Custom null-safe getter for cart items.
+     * <p>
+     * This method overrides the Lombok-generated getter to ensure cartItems
+     * is never null, preventing NullPointerException in JSF components.
+     * If cartItems is null, it initializes it as an empty ArrayList.
+     * </p>
+     *
+     * @return The cart items list, guaranteed non-null
      */
     public List<SaleDetail> getCartItems() {
         if (cartItems == null) {
@@ -229,11 +308,11 @@ public class SaleController implements Serializable {
             cartItems.add(detail);
 
             // Debug logging
-            System.out.println("=== DEBUG addToCart ===");
-            System.out.println("Cart size: " + (cartItems != null ? cartItems.size() : "NULL"));
-            System.out.println("Added product: " + (detail != null ? detail.getProduct().getCommercialName() : "NULL"));
-            System.out.println("Line total: " + (detail != null ? detail.getLineTotal() : "NULL"));
-            System.out.println("======================");
+            // System.out.println("=== DEBUG addToCart ===");
+            // System.out.println("Cart size: " + (cartItems != null ? cartItems.size() : "NULL"));
+            // System.out.println("Added product: " + (detail != null ? detail.getProduct().getCommercialName() : "NULL"));
+            // System.out.println("Line total: " + (detail != null ? detail.getLineTotal() : "NULL"));
+            // System.out.println("======================");
 
             // Reset selection
             selectedProduct = null;
