@@ -120,7 +120,7 @@ public class ProductBatch {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "batch", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "batch", fetch = FetchType.LAZY)
     private List<InventoryMovement> inventoryMovements;
     
     @PrePersist

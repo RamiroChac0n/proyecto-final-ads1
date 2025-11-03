@@ -249,12 +249,9 @@ public class ProductBatchServiceImpl implements IProductBatchService {
         batch.setQuantityAvailable(newQuantity);
         ProductBatch updatedBatch = productBatchRepository.update(batch);
 
-        // Create inventory movement record
-        String reason = quantityChange > 0 ?
-                      "Ajuste de stock - Incremento de " + quantityChange + " unidades" :
-                      "Ajuste de stock - Reducción de " + Math.abs(quantityChange) + " unidades";
-        createInventoryMovement(updatedBatch, MovementType.ADJUSTMENT, quantityChange,
-                              reason, null);
+        // Note: Inventory movement creation is now handled by the caller
+        // - For sales: SaleServiceImpl creates OUT movements
+        // - For manual adjustments: Use edit() method which tracks changes
 
         return updatedBatch;
     }

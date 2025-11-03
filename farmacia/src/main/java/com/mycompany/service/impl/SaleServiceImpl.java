@@ -2,11 +2,13 @@ package com.mycompany.service.impl;
 
 import com.mycompany.model.dto.BatchAllocation;
 import com.mycompany.model.entity.*;
+import com.mycompany.model.entity.enums.MovementType;
 import com.mycompany.model.entity.enums.SaleStatus;
 import com.mycompany.repository.ProductBatchRepository;
 import com.mycompany.repository.SaleRepository;
 import com.mycompany.repository.UserRepository;
 import com.mycompany.service.ICashRegisterService;
+import com.mycompany.service.IInventoryMovementService;
 import com.mycompany.service.IProductBatchService;
 import com.mycompany.service.ISaleService;
 import jakarta.ejb.EJB;
@@ -39,6 +41,9 @@ public class SaleServiceImpl implements ISaleService {
 
     @EJB
     private ICashRegisterService cashRegisterService;
+
+    @EJB
+    private IInventoryMovementService inventoryMovementService;
 
     @Override
     public List<BatchAllocation> allocateStock(Product product, Integer quantity) {
@@ -99,13 +104,38 @@ public class SaleServiceImpl implements ISaleService {
     }
 
     /**
-     * Apply a batch allocation by updating the batch quantity
-     * This method is called during sale processing to actually reduce inventory
+     * Apply a batch allocation by updating the batch quantity and creating inventory movement.
+     * <p>
+     * This method is called during sale processing to reduce inventory and track the movement.
+     * Creates an OUT movement to record the sale in the product kardex.
+     * </p>
+     *
      * @param allocation The allocation to apply
+     * @param sale The sale associated with this allocation
      */
-    public void applyBatchAllocation(BatchAllocation allocation) {
+    private void applyBatchAllocation(BatchAllocation allocation, Sale sale) {
+        // Get the batch
+        ProductBatch batch = productBatchRepository.findById(allocation.getBatchId());
+        if (batch == null) {
+            throw new IllegalArgumentException("Batch with ID " + allocation.getBatchId() + " does not exist");
+        }
+
         // Update batch quantity (negative value to reduce stock)
         productBatchService.updateBatchQuantity(allocation.getBatchId(), -allocation.getQuantity());
+
+        // Create inventory movement for the sale (OUT movement)
+        String reason = "Venta #" + (sale.getSaleNumber() != null ? sale.getSaleNumber() : "N/A");
+        InventoryMovement movement = InventoryMovement.builder()
+                .product(batch.getProduct())
+                .batch(batch)
+                .movementType(MovementType.OUT)
+                .quantity(-allocation.getQuantity()) // Negative for OUT movements
+                .reason(reason)
+                .user(sale.getUser())
+                .branch(sale.getBranch())
+                .build();
+
+        inventoryMovementService.save(movement);
     }
 
     @Override
@@ -129,9 +159,9 @@ public class SaleServiceImpl implements ISaleService {
             // Allocate stock using FIFO
             List<BatchAllocation> allocations = allocateStock(product, quantity);
 
-            // Apply allocations to reduce inventory
+            // Apply allocations to reduce inventory and create OUT movements
             for (BatchAllocation allocation : allocations) {
-                applyBatchAllocation(allocation);
+                applyBatchAllocation(allocation, sale);
             }
 
             // Set the first batch as the batch for this detail
