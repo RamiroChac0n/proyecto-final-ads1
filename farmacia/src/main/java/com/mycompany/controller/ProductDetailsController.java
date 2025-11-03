@@ -349,7 +349,7 @@ public class ProductDetailsController implements Serializable {
     }
 
     /**
-     * Saves a new batch or updates an existing batch in the database.
+     * Saves a new batch or updates an existing batch with automatic inventory tracking.
      * <p>
      * This method performs comprehensive validation before persisting the batch.
      * It handles both create and update operations based on the presence of batchId:
@@ -368,14 +368,27 @@ public class ProductDetailsController implements Serializable {
      *   <li>Expiration date &gt; manufacture date (if manufacture date provided)</li>
      * </ul>
      *
+     * <h4>Inventory Movement Tracking:</h4>
+     * <p>
+     * Both create and update operations automatically generate inventory movements:
+     * </p>
+     * <ul>
+     *   <li><strong>New Batch:</strong> Creates ADJUSTMENT movement with quantityReceived</li>
+     *   <li><strong>Edit Batch:</strong> Creates ADJUSTMENT movement if quantity changed (positive/negative)</li>
+     *   <li><strong>User Attribution:</strong> Movements track the current logged-in user</li>
+     *   <li><strong>Kardex Display:</strong> Movements appear in product-kardex.xhtml</li>
+     * </ul>
+     *
+     * <h4>UI Interaction:</h4>
      * After successful save, the batch list is refreshed, the dialog is closed,
      * and UI components are updated via AJAX. Validation errors are displayed
      * with detailed messages.
      *
      * @throws IllegalArgumentException if validation fails (caught and displayed to user)
      * @see #validateBatch()
-     * @see IProductBatchService#addBatchToExistingProduct(Long, ProductBatch)
-     * @see IProductBatchService#edit(ProductBatch)
+     * @see #getCurrentUser()
+     * @see IProductBatchService#addBatchToExistingProduct(Long, ProductBatch, User)
+     * @see IProductBatchService#edit(ProductBatch, User)
      */
     public void saveBatch() {
         try {
@@ -383,14 +396,17 @@ public class ProductDetailsController implements Serializable {
 
             validateBatch();
 
+            // Get current user from session
+            User currentUser = getCurrentUser();
+
             if (currentBatch.getBatchId() == null) {
                 // New batch
-                productBatchService.addBatchToExistingProduct(productId, currentBatch);
+                productBatchService.addBatchToExistingProduct(productId, currentBatch, currentUser);
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage("Lote agregado exitosamente"));
             } else {
                 // Existing batch
-                productBatchService.edit(currentBatch);
+                productBatchService.edit(currentBatch, currentUser);
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage("Lote actualizado exitosamente"));
             }

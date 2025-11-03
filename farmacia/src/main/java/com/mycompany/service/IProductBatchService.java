@@ -2,6 +2,7 @@ package com.mycompany.service;
 
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
+import com.mycompany.model.entity.User;
 import jakarta.ejb.Local;
 
 import java.util.Date;
@@ -18,10 +19,11 @@ public interface IProductBatchService {
      * Add a new batch to an existing product
      * @param productId The ID of the existing product
      * @param batch The batch information to add
+     * @param currentUser The user performing the operation
      * @return The saved ProductBatch
      * @throws IllegalArgumentException if product doesn't exist or batch number already exists
      */
-    ProductBatch addBatchToExistingProduct(Long productId, ProductBatch batch);
+    ProductBatch addBatchToExistingProduct(Long productId, ProductBatch batch, User currentUser);
 
     /**
      * Save a product batch
@@ -33,9 +35,10 @@ public interface IProductBatchService {
     /**
      * Update a product batch
      * @param batch The batch to update
+     * @param currentUser The user performing the operation
      * @return The updated ProductBatch
      */
-    ProductBatch edit(ProductBatch batch);
+    ProductBatch edit(ProductBatch batch, User currentUser);
 
     /**
      * Delete a product batch

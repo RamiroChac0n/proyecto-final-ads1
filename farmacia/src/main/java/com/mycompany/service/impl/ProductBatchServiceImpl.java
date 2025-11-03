@@ -3,8 +3,10 @@ package com.mycompany.service.impl;
 import com.mycompany.model.entity.InventoryMovement;
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
+import com.mycompany.model.entity.User;
 import com.mycompany.model.entity.enums.MovementType;
 import com.mycompany.repository.ProductBatchRepository;
+import com.mycompany.service.IInventoryMovementService;
 import com.mycompany.service.IProductBatchService;
 import com.mycompany.service.IProductService;
 import jakarta.ejb.EJB;
@@ -14,8 +16,27 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Implementation of ProductBatch business operations
+ * Implementation of ProductBatch business operations.
+ * <p>
+ * This stateless EJB service provides comprehensive batch management functionality
+ * with automatic inventory movement tracking. All batch creation and modification
+ * operations are recorded as inventory movements in the product kardex for
+ * complete traceability and audit purposes.
+ * </p>
+ *
+ * <h3>Inventory Movement Tracking:</h3>
+ * <ul>
+ *   <li><strong>Batch Creation:</strong> Creates ADJUSTMENT movement with positive quantity</li>
+ *   <li><strong>Batch Editing:</strong> Creates ADJUSTMENT movement with quantity difference (positive/negative)</li>
+ *   <li><strong>User Attribution:</strong> All movements track the user who performed the operation</li>
+ * </ul>
+ *
  * @author ramir
+ * @version 1.1
+ * @since 1.0
+ * @see IProductBatchService
+ * @see ProductBatch
+ * @see InventoryMovement
  */
 @Stateless
 public class ProductBatchServiceImpl implements IProductBatchService {
@@ -26,8 +47,43 @@ public class ProductBatchServiceImpl implements IProductBatchService {
     @EJB
     private IProductService productService;
 
+    @EJB
+    private IInventoryMovementService inventoryMovementService;
+
+    /**
+     * Adds a new batch to an existing product with automatic inventory movement tracking.
+     * <p>
+     * This method performs the following operations:
+     * <ol>
+     *   <li>Validates that the target product exists</li>
+     *   <li>Associates the batch with the product</li>
+     *   <li>Checks for duplicate batch numbers within the product</li>
+     *   <li>Validates batch business rules (quantities, dates, pricing)</li>
+     *   <li>Persists the batch to the database</li>
+     *   <li>Creates an inventory ADJUSTMENT movement for the reception</li>
+     * </ol>
+     * </p>
+     *
+     * <h4>Inventory Movement Details:</h4>
+     * <ul>
+     *   <li><strong>Type:</strong> ADJUSTMENT</li>
+     *   <li><strong>Quantity:</strong> quantityReceived (positive value)</li>
+     *   <li><strong>Reason:</strong> "Recepción de lote nuevo - Lote: {batchNumber}"</li>
+     *   <li><strong>User:</strong> The user who created the batch</li>
+     *   <li><strong>Date:</strong> Automatically set to current timestamp</li>
+     * </ul>
+     *
+     * @param productId The ID of the existing product to add the batch to
+     * @param batch The batch information to add (must have valid quantities, dates, and pricing)
+     * @param currentUser The user performing the operation (for audit trail)
+     * @return The saved ProductBatch with generated ID
+     * @throws IllegalArgumentException if product doesn't exist, batch number already exists,
+     *         or any validation rule is violated
+     * @see #validateBatch(ProductBatch)
+     * @see #createInventoryMovement(ProductBatch, MovementType, Integer, String, User)
+     */
     @Override
-    public ProductBatch addBatchToExistingProduct(Long productId, ProductBatch batch) {
+    public ProductBatch addBatchToExistingProduct(Long productId, ProductBatch batch, User currentUser) {
         // Validate that the product exists
         Product product = productService.findById(productId);
         if (product == null) {
@@ -50,8 +106,9 @@ public class ProductBatchServiceImpl implements IProductBatchService {
         ProductBatch savedBatch = productBatchRepository.save(batch);
 
         // Create inventory movement record
-        createInventoryMovement(savedBatch, MovementType.IN, savedBatch.getQuantityReceived(),
-                              "Initial batch reception");
+        String reason = "Recepción de lote nuevo - Lote: " + savedBatch.getBatchNumber();
+        createInventoryMovement(savedBatch, MovementType.ADJUSTMENT, savedBatch.getQuantityReceived(),
+                              reason, currentUser);
 
         return savedBatch;
     }
@@ -62,10 +119,83 @@ public class ProductBatchServiceImpl implements IProductBatchService {
         return productBatchRepository.save(batch);
     }
 
+    /**
+     * Updates an existing product batch with automatic inventory movement tracking.
+     * <p>
+     * This method performs the following operations:
+     * <ol>
+     *   <li>Validates the batch business rules</li>
+     *   <li>Retrieves the original batch from database for comparison</li>
+     *   <li>Detects changes in quantityAvailable</li>
+     *   <li>Persists the updated batch</li>
+     *   <li>If quantity changed, creates an inventory ADJUSTMENT movement</li>
+     * </ol>
+     * </p>
+     *
+     * <h4>Inventory Movement Tracking:</h4>
+     * <p>
+     * An inventory movement is created ONLY if the {@code quantityAvailable} field
+     * has changed. The movement records the difference between the new and original
+     * quantities, which can be positive (increase) or negative (decrease).
+     * </p>
+     *
+     * <h4>Movement Details for Quantity Changes:</h4>
+     * <ul>
+     *   <li><strong>Type:</strong> ADJUSTMENT</li>
+     *   <li><strong>Quantity:</strong> Positive for increases, negative for decreases</li>
+     *   <li><strong>Reason (Increase):</strong> "Ajuste de inventario - Incremento de X unidades"</li>
+     *   <li><strong>Reason (Decrease):</strong> "Ajuste de inventario - Reducción de X unidades"</li>
+     *   <li><strong>User:</strong> The user who modified the batch</li>
+     *   <li><strong>Date:</strong> Automatically set to current timestamp</li>
+     * </ul>
+     *
+     * <h4>Example Scenarios:</h4>
+     * <pre>
+     * Original quantity: 100, New quantity: 150 → Movement: +50 (Incremento)
+     * Original quantity: 100, New quantity: 75  → Movement: -25 (Reducción)
+     * Original quantity: 100, New quantity: 100 → No movement created
+     * </pre>
+     *
+     * @param batch The batch to update (must have a valid batchId)
+     * @param currentUser The user performing the operation (for audit trail)
+     * @return The updated ProductBatch
+     * @throws IllegalArgumentException if batch doesn't exist or any validation rule is violated
+     * @see #validateBatch(ProductBatch)
+     * @see #createInventoryMovement(ProductBatch, MovementType, Integer, String, User)
+     */
     @Override
-    public ProductBatch edit(ProductBatch batch) {
+    public ProductBatch edit(ProductBatch batch, User currentUser) {
         validateBatch(batch);
-        return productBatchRepository.update(batch);
+
+        // Get the original batch to compare quantities
+        ProductBatch originalBatch = productBatchRepository.findById(batch.getBatchId());
+        if (originalBatch == null) {
+            throw new IllegalArgumentException("Batch with ID " + batch.getBatchId() + " does not exist");
+        }
+
+        // Detect quantity changes
+        Integer originalQuantity = originalBatch.getQuantityAvailable();
+        Integer newQuantity = batch.getQuantityAvailable();
+
+        // Update the batch
+        ProductBatch updatedBatch = productBatchRepository.update(batch);
+
+        // If quantity changed, create inventory movement
+        if (!originalQuantity.equals(newQuantity)) {
+            Integer quantityDifference = newQuantity - originalQuantity;
+            String reason;
+
+            if (quantityDifference > 0) {
+                reason = "Ajuste de inventario - Incremento de " + quantityDifference + " unidades";
+            } else {
+                reason = "Ajuste de inventario - Reducción de " + Math.abs(quantityDifference) + " unidades";
+            }
+
+            createInventoryMovement(updatedBatch, MovementType.ADJUSTMENT, quantityDifference,
+                                  reason, currentUser);
+        }
+
+        return updatedBatch;
     }
 
     @Override
@@ -120,9 +250,11 @@ public class ProductBatchServiceImpl implements IProductBatchService {
         ProductBatch updatedBatch = productBatchRepository.update(batch);
 
         // Create inventory movement record
-        MovementType movementType = quantityChange > 0 ? MovementType.IN : MovementType.OUT;
-        createInventoryMovement(updatedBatch, movementType, Math.abs(quantityChange),
-                              quantityChange > 0 ? "Stock adjustment (increase)" : "Stock reduction");
+        String reason = quantityChange > 0 ?
+                      "Ajuste de stock - Incremento de " + quantityChange + " unidades" :
+                      "Ajuste de stock - Reducción de " + Math.abs(quantityChange) + " unidades";
+        createInventoryMovement(updatedBatch, MovementType.ADJUSTMENT, quantityChange,
+                              reason, null);
 
         return updatedBatch;
     }
@@ -166,24 +298,57 @@ public class ProductBatchServiceImpl implements IProductBatchService {
     }
 
     /**
-     * Create an inventory movement record
-     * @param batch The batch
-     * @param movementType The type of movement
-     * @param quantity The quantity moved
-     * @param reason The reason for the movement
+     * Creates and persists an inventory movement record for batch operations.
+     * <p>
+     * This private utility method is responsible for creating inventory movement
+     * records that appear in the product kardex. It is called automatically by
+     * batch management operations ({@link #addBatchToExistingProduct} and
+     * {@link #edit}) to maintain a complete audit trail of inventory changes.
+     * </p>
+     *
+     * <h4>Movement Record Structure:</h4>
+     * <ul>
+     *   <li><strong>Product:</strong> Extracted from the batch</li>
+     *   <li><strong>Batch:</strong> Reference to the specific batch involved</li>
+     *   <li><strong>Movement Type:</strong> Typically ADJUSTMENT for batch operations</li>
+     *   <li><strong>Quantity:</strong> Can be positive (increase) or negative (decrease)</li>
+     *   <li><strong>Reason:</strong> Descriptive text explaining the movement</li>
+     *   <li><strong>User:</strong> Who performed the operation (can be null for system operations)</li>
+     *   <li><strong>Movement Date:</strong> Auto-set via @PrePersist in InventoryMovement entity</li>
+     *   <li><strong>Branch:</strong> Not set (null) for batch operations</li>
+     * </ul>
+     *
+     * <h4>Kardex Display:</h4>
+     * <p>
+     * The created movement will appear in the product kardex (product-kardex.xhtml):
+     * </p>
+     * <ul>
+     *   <li>Positive quantities → Displayed in ENTRADAS (green)</li>
+     *   <li>Negative quantities → Displayed in SALIDAS (red)</li>
+     *   <li>Running balance automatically calculated</li>
+     * </ul>
+     *
+     * @param batch The product batch involved in the movement (must not be null)
+     * @param movementType The type of inventory movement (typically ADJUSTMENT)
+     * @param quantity The quantity change (positive for additions, negative for reductions)
+     * @param reason A descriptive reason for the movement (appears in kardex)
+     * @param user The user who performed the operation (null for system operations)
+     * @see InventoryMovement
+     * @see MovementType#ADJUSTMENT
+     * @see IInventoryMovementService#save(InventoryMovement)
      */
     private void createInventoryMovement(ProductBatch batch, MovementType movementType,
-                                       Integer quantity, String reason) {
+                                       Integer quantity, String reason, User user) {
         InventoryMovement movement = InventoryMovement.builder()
                 .product(batch.getProduct())
                 .batch(batch)
                 .movementType(movementType)
                 .quantity(quantity)
                 .reason(reason)
+                .user(user)
                 .build();
 
-        // Note: In a real implementation, you would inject an InventoryMovementService
-        // and save this movement. For now, this is just a placeholder to show the pattern.
-        // inventoryMovementService.save(movement);
+        // Save the inventory movement
+        inventoryMovementService.save(movement);
     }
 }
