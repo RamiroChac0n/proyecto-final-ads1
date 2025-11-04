@@ -536,4 +536,19 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
     public Long countByStatus(PurchaseReceiptStatus status) {
         return receiptRepository.countByStatus(status);
     }
+
+    @Override
+    public List<PurchaseReceipt> listByBranch(Branch branch) {
+        return receiptRepository.findByBranch(branch);
+    }
+
+    @Override
+    public List<PurchaseReceipt> findByBranchAndStatus(Branch branch, PurchaseReceiptStatus status) {
+        return receiptRepository.findByBranchAndStatus(branch, status);
+    }
+
+    @Override
+    public List<PurchaseReceipt> findByBranchAndDateRange(Branch branch, Date startDate, Date endDate) {
+        return receiptRepository.findByBranchAndDateRange(branch, startDate, endDate);
+    }
 }
