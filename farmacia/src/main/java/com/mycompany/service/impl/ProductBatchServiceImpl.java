@@ -313,12 +313,12 @@ public class ProductBatchServiceImpl implements IProductBatchService {
      * <ul>
      *   <li><strong>Product:</strong> Extracted from the batch</li>
      *   <li><strong>Batch:</strong> Reference to the specific batch involved</li>
+     *   <li><strong>Branch:</strong> Extracted from the batch (for multi-branch inventory segregation)</li>
      *   <li><strong>Movement Type:</strong> Typically ADJUSTMENT for batch operations</li>
      *   <li><strong>Quantity:</strong> Can be positive (increase) or negative (decrease)</li>
      *   <li><strong>Reason:</strong> Descriptive text explaining the movement</li>
      *   <li><strong>User:</strong> Who performed the operation (can be null for system operations)</li>
      *   <li><strong>Movement Date:</strong> Auto-set via @PrePersist in InventoryMovement entity</li>
-     *   <li><strong>Branch:</strong> Not set (null) for batch operations</li>
      * </ul>
      *
      * <h4>Kardex Display:</h4>
@@ -345,6 +345,7 @@ public class ProductBatchServiceImpl implements IProductBatchService {
         InventoryMovement movement = InventoryMovement.builder()
                 .product(batch.getProduct())
                 .batch(batch)
+                .branch(batch.getBranch())
                 .movementType(movementType)
                 .quantity(quantity)
                 .reason(reason)

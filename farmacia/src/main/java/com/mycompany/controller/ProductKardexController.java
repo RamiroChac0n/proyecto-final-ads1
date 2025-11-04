@@ -258,12 +258,20 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
-     * Loads all inventory movements for the currently loaded product.
+     * Loads inventory movements for the current product filtered by user's branch.
      * <p>
-     * This method queries the database for all {@link InventoryMovement} records
-     * associated with the current product. The movements are stored in chronological
-     * order and will be used by {@link #calculateKardex()} to generate KARDEX rows.
+     * This method queries the database for {@link InventoryMovement} records
+     * associated with the current product, filtered by the user's assigned branch
+     * for multi-branch inventory segregation. If the user has no branch assigned,
+     * all movements are shown (fallback behavior). The movements are stored in
+     * chronological order and used by {@link #calculateKardex()} to generate KARDEX rows.
      * </p>
+     *
+     * <h4>Branch Filtering:</h4>
+     * <ul>
+     *   <li><strong>User with branch:</strong> Shows only movements from their branch</li>
+     *   <li><strong>User without branch:</strong> Shows all movements (fallback)</li>
+     * </ul>
      *
      * <h4>Side Effects:</h4>
      * <p>
@@ -271,12 +279,22 @@ public class ProductKardexController implements Serializable {
      * movements loaded for debugging purposes.
      * </p>
      *
+     * @see IInventoryMovementService#findByBranchAndProduct(Branch, Product)
      * @see IInventoryMovementService#findByProduct(Product)
      * @see #calculateKardex()
      */
     private void loadMovements() {
         if (product != null) {
-            movements = inventoryMovementService.findByProduct(product);
+            User currentUser = getCurrentUser();
+
+            // Filter movements by user's branch
+            if (currentUser != null && currentUser.getBranch() != null) {
+                movements = inventoryMovementService.findByBranchAndProduct(
+                    currentUser.getBranch(), product);
+            } else {
+                // Fallback: show all movements if user has no branch assigned
+                movements = inventoryMovementService.findByProduct(product);
+            }
             // LOGGER.info("Loaded " + movements.size() + " movements for product: " + product.getCommercialName());
         }
     }
