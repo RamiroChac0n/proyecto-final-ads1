@@ -289,6 +289,7 @@ public class PurchaseReceiptServiceImpl implements IPurchaseReceiptService {
                 .supplier(order.getSupplier())
                 .purchaseOrder(order)
                 .purchaseReceipt(receipt)
+                .branch(receipt.getBranch())
                 .isActive(true)
                 .build();
 
