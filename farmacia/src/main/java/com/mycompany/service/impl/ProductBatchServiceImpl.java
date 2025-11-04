@@ -1,5 +1,6 @@
 package com.mycompany.service.impl;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.InventoryMovement;
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
@@ -216,6 +217,11 @@ public class ProductBatchServiceImpl implements IProductBatchService {
     @Override
     public List<ProductBatch> findByProduct(Product product) {
         return productBatchRepository.findByProduct(product);
+    }
+
+    @Override
+    public List<ProductBatch> findByProductAndBranch(Product product, Branch branch) {
+        return productBatchRepository.findByProductAndBranch(product, branch);
     }
 
     @Override

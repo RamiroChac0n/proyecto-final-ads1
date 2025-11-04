@@ -109,6 +109,16 @@ public class ProductBatch {
     private PurchaseOrder purchaseOrder;
 
     /**
+     * Branch where this batch is located.
+     * Required for multi-branch inventory segregation.
+     */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    /**
      * Purchase receipt when this batch was received.
      * Optional - tracks when/how batch entered inventory.
      */

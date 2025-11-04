@@ -1,5 +1,6 @@
 package com.mycompany.service;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
 import com.mycompany.model.entity.User;
@@ -65,6 +66,14 @@ public interface IProductBatchService {
      * @return List of ProductBatches for the product
      */
     List<ProductBatch> findByProduct(Product product);
+
+    /**
+     * Find all batches for a specific product in a specific branch
+     * @param product The product
+     * @param branch The branch
+     * @return List of ProductBatches for the product in the branch
+     */
+    List<ProductBatch> findByProductAndBranch(Product product, Branch branch);
 
     /**
      * Find available batches (quantity > 0)

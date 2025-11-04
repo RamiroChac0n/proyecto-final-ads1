@@ -91,7 +91,7 @@ public class ProductBatchTest {
     @DisplayName("Parameterized constructor must have all required parameters")
     void testParameterizedConstructorHasAllParameters() throws NoSuchMethodException {
         Class<?> productBatchClass = ProductBatch.class;
-        
+
         Constructor<?> constructor = productBatchClass.getDeclaredConstructor(
             Integer.class,      // batchId
             Product.class,      // product
@@ -109,12 +109,13 @@ public class ProductBatchTest {
             Date.class,         // createdAt
             Supplier.class,     // supplier
             PurchaseOrder.class,    // purchaseOrder
+            Branch.class,       // branch
             PurchaseReceipt.class,  // purchaseReceipt
             List.class          // inventoryMovements
         );
 
         assertNotNull(constructor);
-        assertEquals(18, constructor.getParameterCount());
+        assertEquals(19, constructor.getParameterCount());
     }
 
     @Test

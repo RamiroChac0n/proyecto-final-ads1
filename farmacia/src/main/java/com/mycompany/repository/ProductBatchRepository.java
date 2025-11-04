@@ -1,5 +1,6 @@
 package com.mycompany.repository;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.ProductBatch;
 import com.mycompany.repository.persistence.PharmacyRepository;
@@ -106,6 +107,25 @@ public class ProductBatchRepository extends PharmacyRepository<ProductBatch> {
                 "SELECT pb FROM ProductBatch pb WHERE pb.product = :product AND pb.isActive = true ORDER BY pb.expirationDate ASC",
                 ProductBatch.class);
             query.setParameter("product", product);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Find all batches for a specific product filtered by branch
+     * @param product The product to search batches for
+     * @param branch The branch to filter by
+     * @return List of product batches in the specified branch
+     */
+    public List<ProductBatch> findByProductAndBranch(Product product, Branch branch) {
+        try {
+            TypedQuery<ProductBatch> query = em.createQuery(
+                "SELECT pb FROM ProductBatch pb WHERE pb.product = :product AND pb.branch = :branch ORDER BY pb.expirationDate ASC",
+                ProductBatch.class);
+            query.setParameter("product", product);
+            query.setParameter("branch", branch);
             return query.getResultList();
         } catch (Exception e) {
             return List.of();

@@ -250,23 +250,33 @@ public class ProductDetailsController implements Serializable {
     /**
      * Loads all batches associated with the current product from the database.
      * <p>
-     * This method retrieves all product batches and applies filtering based on
-     * the {@code showInactiveBatches} flag. By default, only active batches are
-     * displayed. When the flag is toggled, inactive batches are also included.
+     * This method retrieves product batches filtered by the current user's branch
+     * and applies additional filtering based on the {@code showInactiveBatches} flag.
+     * By default, only active batches from the user's branch are displayed.
      * </p>
      *
      * <h4>Filtering:</h4>
      * <ul>
+     *   <li><strong>Branch filter:</strong> Shows only batches from the user's assigned branch</li>
      *   <li><strong>Active only (default):</strong> Shows batches where isActive = true</li>
-     *   <li><strong>All batches:</strong> Shows both active and inactive batches</li>
+     *   <li><strong>All batches:</strong> Shows both active and inactive batches (when toggled)</li>
      * </ul>
      *
-     * @see IProductBatchService#findByProduct(Product)
+     * @see IProductBatchService#findByProductAndBranch(Product, Branch)
      * @see #toggleInactiveBatches()
      */
     public void loadBatches() {
         if (product != null) {
-            batches = productBatchService.findByProduct(product);
+            User currentUser = getCurrentUser();
+
+            // Filter batches by user's branch
+            if (currentUser != null && currentUser.getBranch() != null) {
+                batches = productBatchService.findByProductAndBranch(product, currentUser.getBranch());
+            } else {
+                // Fallback: show all batches if user has no branch assigned
+                batches = productBatchService.findByProduct(product);
+            }
+
             if (!showInactiveBatches) {
                 batches = batches.stream()
                         .filter(batch -> batch.getIsActive())
@@ -297,6 +307,7 @@ public class ProductDetailsController implements Serializable {
      * is pre-populated with sensible defaults:
      * <ul>
      *   <li><strong>product:</strong> Current product being viewed</li>
+     *   <li><strong>branch:</strong> Current user's branch (for multi-branch inventory segregation)</li>
      *   <li><strong>quantityReceived:</strong> 0 units</li>
      *   <li><strong>quantityAvailable:</strong> 0 units</li>
      *   <li><strong>unitCost:</strong> 0.00</li>
@@ -320,6 +331,7 @@ public class ProductDetailsController implements Serializable {
 
         currentBatch = ProductBatch.builder()
                 .product(product)
+                .branch(getCurrentUser().getBranch())
                 .quantityReceived(0)
                 .quantityAvailable(0)
                 .unitCost(BigDecimal.ZERO)
@@ -398,6 +410,11 @@ public class ProductDetailsController implements Serializable {
 
             // Get current user from session
             User currentUser = getCurrentUser();
+
+            // Ensure branch is set for new batches (safety check)
+            if (currentBatch.getBranch() == null && currentUser.getBranch() != null) {
+                currentBatch.setBranch(currentUser.getBranch());
+            }
 
             if (currentBatch.getBatchId() == null) {
                 // New batch
