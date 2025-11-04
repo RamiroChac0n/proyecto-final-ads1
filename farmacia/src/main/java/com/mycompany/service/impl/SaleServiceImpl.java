@@ -46,9 +46,9 @@ public class SaleServiceImpl implements ISaleService {
     private IInventoryMovementService inventoryMovementService;
 
     @Override
-    public List<BatchAllocation> allocateStock(Product product, Integer quantity) {
-        // Get available batches ordered by FIFO (expiration date ASC)
-        List<ProductBatch> availableBatches = productBatchRepository.findAvailableBatchesByProductFIFO(product);
+    public List<BatchAllocation> allocateStock(Product product, Integer quantity, Branch branch) {
+        // Get available batches ordered by FIFO (expiration date ASC) filtered by branch
+        List<ProductBatch> availableBatches = productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(product, branch);
 
         // Calculate total available quantity
         int totalAvailable = availableBatches.stream()
@@ -90,14 +90,14 @@ public class SaleServiceImpl implements ISaleService {
     }
 
     @Override
-    public boolean validateStockAvailability(Product product, Integer quantity) {
-        Integer totalAvailable = getTotalAvailableQuantity(product);
+    public boolean validateStockAvailability(Product product, Integer quantity, Branch branch) {
+        Integer totalAvailable = getTotalAvailableQuantity(product, branch);
         return totalAvailable >= quantity;
     }
 
     @Override
-    public Integer getTotalAvailableQuantity(Product product) {
-        List<ProductBatch> availableBatches = productBatchRepository.findAvailableBatchesByProductFIFO(product);
+    public Integer getTotalAvailableQuantity(Product product, Branch branch) {
+        List<ProductBatch> availableBatches = productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(product, branch);
         return availableBatches.stream()
                 .mapToInt(ProductBatch::getQuantityAvailable)
                 .sum();
@@ -145,19 +145,25 @@ public class SaleServiceImpl implements ISaleService {
             throw new IllegalArgumentException("Sale must have at least one detail");
         }
 
+        // Get branch from sale
+        Branch branch = sale.getBranch();
+        if (branch == null) {
+            throw new IllegalArgumentException("Sale must have a branch assigned");
+        }
+
         // Validate and allocate stock for all items
         for (SaleDetail detail : details) {
             Product product = detail.getProduct();
             Integer quantity = detail.getQuantity();
 
-            // Validate stock availability
-            if (!validateStockAvailability(product, quantity)) {
+            // Validate stock availability in the specific branch
+            if (!validateStockAvailability(product, quantity, branch)) {
                 throw new IllegalArgumentException(
                     String.format("Insufficient stock for product %s", product.getCommercialName()));
             }
 
-            // Allocate stock using FIFO
-            List<BatchAllocation> allocations = allocateStock(product, quantity);
+            // Allocate stock using FIFO from the specific branch
+            List<BatchAllocation> allocations = allocateStock(product, quantity, branch);
 
             // Apply allocations to reduce inventory and create OUT movements
             for (BatchAllocation allocation : allocations) {

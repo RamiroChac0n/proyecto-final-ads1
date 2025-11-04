@@ -33,25 +33,28 @@ public interface ISaleService {
      * Returns list of batch allocations ordered by expiration date (earliest first)
      * @param product The product to allocate stock for
      * @param quantity The total quantity needed
+     * @param branch The branch to allocate stock from
      * @return List of BatchAllocation showing how stock is distributed across batches
      * @throws IllegalArgumentException if insufficient total stock available
      */
-    List<BatchAllocation> allocateStock(Product product, Integer quantity);
+    List<BatchAllocation> allocateStock(Product product, Integer quantity, Branch branch);
 
     /**
      * Validate if sufficient stock is available for a product
      * @param product The product to check
      * @param quantity The quantity needed
+     * @param branch The branch to check stock in
      * @return true if sufficient stock exists across all batches, false otherwise
      */
-    boolean validateStockAvailability(Product product, Integer quantity);
+    boolean validateStockAvailability(Product product, Integer quantity, Branch branch);
 
     /**
      * Get total available quantity for a product across all batches
      * @param product The product
+     * @param branch The branch to check stock in
      * @return Total quantity available (sum of all active, non-expired batches)
      */
-    Integer getTotalAvailableQuantity(Product product);
+    Integer getTotalAvailableQuantity(Product product, Branch branch);
 
     /**
      * Save a sale

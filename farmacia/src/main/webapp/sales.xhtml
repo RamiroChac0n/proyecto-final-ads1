@@ -50,7 +50,9 @@
                                     <div class="p-fluid formgrid grid">
                                         <div class="field col-12 md:col-6 sales-select">
                                             <p:outputLabel for="branch" value="Sucursal" />
-                                            <p:selectOneMenu id="branch" value="#{saleController.selectedBranchId}" required="true">
+                                            <p:selectOneMenu id="branch" value="#{saleController.selectedBranchId}"
+                                                           required="true"
+                                                           disabled="#{saleController.userHasAssignedBranch}">
                                                 <f:selectItem itemLabel="Seleccione Sucursal" itemValue="#{null}" noSelectionOption="true" />
                                                 <f:selectItems value="#{saleController.branches}"
                                                              var="branch"

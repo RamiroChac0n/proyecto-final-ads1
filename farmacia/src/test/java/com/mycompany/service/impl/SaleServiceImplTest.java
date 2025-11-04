@@ -47,6 +47,7 @@ public class SaleServiceImplTest {
 
     private Product testProduct;
     private List<ProductBatch> testBatches;
+    private Branch testBranch;
 
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
@@ -60,6 +61,7 @@ public class SaleServiceImplTest {
 
         testProduct = createTestProduct();
         testBatches = new ArrayList<>();
+        testBranch = createTestBranch();
     }
 
     /**
@@ -79,11 +81,11 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 50;
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When: Se solicita asignar 50 unidades
-        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity);
+        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity, testBranch);
 
         // Then: Debe retornar 1 asignación del lote único
         assertNotNull(allocations, "Allocations should not be null");
@@ -95,7 +97,7 @@ public class SaleServiceImplTest {
         assertEquals("BATCH001", allocation.getBatchNumber());
 
         // Verify repository was called
-        verify(productBatchRepository).findAvailableBatchesByProductFIFO(testProduct);
+        verify(productBatchRepository).findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch);
     }
 
     /**
@@ -126,11 +128,11 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 80; // Necesita batch1 (30) + batch2 (40) + parte de batch3 (10)
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When: Se solicitan 80 unidades
-        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity);
+        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity, testBranch);
 
         // Then: Debe usar 3 lotes en orden FIFO
         assertNotNull(allocations);
@@ -148,7 +150,7 @@ public class SaleServiceImplTest {
         assertEquals(3, allocations.get(2).getBatchId());
         assertEquals(10, allocations.get(2).getQuantity(), "Should take only 10 from batch3");
 
-        verify(productBatchRepository).findAvailableBatchesByProductFIFO(testProduct);
+        verify(productBatchRepository).findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch);
     }
 
     /**
@@ -168,11 +170,11 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 75; // Exactamente la cantidad disponible
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When: Se solicitan exactamente 75 unidades
-        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity);
+        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity, testBranch);
 
         // Then: Debe asignar las 75 unidades del único lote
         assertNotNull(allocations);
@@ -180,7 +182,7 @@ public class SaleServiceImplTest {
         assertEquals(75, allocations.get(0).getQuantity(), "Should allocate all 75 units");
         assertEquals(1, allocations.get(0).getBatchId());
 
-        verify(productBatchRepository).findAvailableBatchesByProductFIFO(testProduct);
+        verify(productBatchRepository).findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch);
     }
 
     /**
@@ -205,13 +207,13 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 100; // Se solicitan 100 pero solo hay 45 total
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When & Then: Debe lanzar excepción
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> service.allocateStock(testProduct, requestedQuantity),
+            () -> service.allocateStock(testProduct, requestedQuantity, testBranch),
             "Should throw exception for insufficient stock"
         );
 
@@ -222,7 +224,7 @@ public class SaleServiceImplTest {
         assertTrue(exception.getMessage().contains("45"),
             "Exception should mention available quantity");
 
-        verify(productBatchRepository).findAvailableBatchesByProductFIFO(testProduct);
+        verify(productBatchRepository).findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch);
         // Verify no batch quantities were modified
         verify(productBatchService, never()).updateBatchQuantity(anyInt(), anyInt());
     }
@@ -249,7 +251,7 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 100; // Necesita todo batch1 (60) + 40 de batch2
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // Mock the quantity update behavior (lenient since they're not called in this test)
@@ -259,7 +261,7 @@ public class SaleServiceImplTest {
             .thenReturn(batch2);
 
         // When: Se procesan las asignaciones
-        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity);
+        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity, testBranch);
 
         // Then: Verify allocations are correct (applyBatchAllocation is now private and called by processSale)
         assertEquals(2, allocations.size());
@@ -302,11 +304,11 @@ public class SaleServiceImplTest {
 
         Integer requestedQuantity = 70; // Debe tomar batch2 (30) + batch3 (35) + parte de batch4 (5)
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When: Se solicitan 70 unidades
-        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity);
+        List<BatchAllocation> allocations = service.allocateStock(testProduct, requestedQuantity, testBranch);
 
         // Then: Debe respetar orden FIFO estrictamente
         assertNotNull(allocations);
@@ -332,7 +334,7 @@ public class SaleServiceImplTest {
         assertTrue(allocations.stream().noneMatch(a -> a.getBatchId() == 1),
             "Batch1 should not be used as it expires last");
 
-        verify(productBatchRepository).findAvailableBatchesByProductFIFO(testProduct);
+        verify(productBatchRepository).findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch);
     }
 
     /**
@@ -350,19 +352,19 @@ public class SaleServiceImplTest {
         testBatches.add(batch1);
         testBatches.add(batch2);
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(testBatches);
 
         // When & Then: Stock suficiente
-        assertTrue(service.validateStockAvailability(testProduct, 80),
+        assertTrue(service.validateStockAvailability(testProduct, 80, testBranch),
             "Should return true when stock is sufficient");
 
         // When & Then: Stock exacto
-        assertTrue(service.validateStockAvailability(testProduct, 100),
+        assertTrue(service.validateStockAvailability(testProduct, 100, testBranch),
             "Should return true when requesting exact available quantity");
 
         // When & Then: Stock insuficiente
-        assertFalse(service.validateStockAvailability(testProduct, 101),
+        assertFalse(service.validateStockAvailability(testProduct, 101, testBranch),
             "Should return false when stock is insufficient");
     }
 
@@ -459,9 +461,9 @@ public class SaleServiceImplTest {
         injectMock(service, "cashRegisterService", cashRegisterService);
 
         // Mock batch allocations
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(product1))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(product1, testBranch))
             .thenReturn(Arrays.asList(batch1));
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(product2))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(product2, testBranch))
             .thenReturn(Arrays.asList(batch2));
         when(productBatchRepository.findById(1)).thenReturn(batch1);
         when(productBatchRepository.findById(2)).thenReturn(batch2);
@@ -520,7 +522,7 @@ public class SaleServiceImplTest {
         injectMock(service, "saleRepository", saleRepository);
         injectMock(service, "cashRegisterService", cashRegisterService);
 
-        when(productBatchRepository.findAvailableBatchesByProductFIFO(testProduct))
+        when(productBatchRepository.findAvailableBatchesByProductAndBranchFIFO(testProduct, testBranch))
             .thenReturn(Arrays.asList(batch));
         when(productBatchRepository.findById(1)).thenReturn(batch);
         when(saleRepository.save(any(Sale.class))).thenReturn(sale);
@@ -653,6 +655,7 @@ public class SaleServiceImplTest {
             .saleNumber("VEN-001")
             .saleDate(new Date())
             .user(user)
+            .branch(testBranch)
             .subtotal(new BigDecimal("100.00"))
             .totalAmount(new BigDecimal("100.00"))
             .cashReceived(new BigDecimal("100.00"))
@@ -741,6 +744,19 @@ public class SaleServiceImplTest {
                 .receivedDate(new Date())
                 .isActive(true)
                 .isExpired(false)
+                .build();
+    }
+
+    /**
+     * Helper method to create a test Branch
+     */
+    private Branch createTestBranch() {
+        return Branch.builder()
+                .branchId(1)
+                .branchName("Main Branch")
+                .address("123 Test Street")
+                .phone("12345678")
+                .isActive(true)
                 .build();
     }
 }

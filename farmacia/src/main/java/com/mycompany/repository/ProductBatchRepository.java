@@ -176,4 +176,33 @@ public class ProductBatchRepository extends PharmacyRepository<ProductBatch> {
             return List.of();
         }
     }
+
+    /**
+     * Find available batches for a specific product and branch using FIFO ordering
+     * FIFO: First In, First Out / PEPS: Primero en Entrar, Primero en Salir
+     * Orders by expiration date (earliest first), then received date, then batch ID
+     * Only includes active, non-expired batches with available quantity in the specified branch
+     *
+     * @param product The product to search batches for
+     * @param branch The branch to filter by
+     * @return List of available product batches in the specified branch ordered by FIFO
+     */
+    public List<ProductBatch> findAvailableBatchesByProductAndBranchFIFO(Product product, Branch branch) {
+        try {
+            TypedQuery<ProductBatch> query = em.createQuery(
+                "SELECT pb FROM ProductBatch pb " +
+                "WHERE pb.product = :product " +
+                "AND pb.branch = :branch " +
+                "AND pb.isActive = true " +
+                "AND pb.isExpired = false " +
+                "AND pb.quantityAvailable > 0 " +
+                "ORDER BY pb.expirationDate ASC, pb.receivedDate ASC, pb.batchId ASC",
+                ProductBatch.class);
+            query.setParameter("product", product);
+            query.setParameter("branch", branch);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
 }

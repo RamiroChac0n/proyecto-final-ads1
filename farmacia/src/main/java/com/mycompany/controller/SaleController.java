@@ -222,15 +222,30 @@ public class SaleController implements Serializable {
         changeGiven = BigDecimal.ZERO;
         selectedProduct = null;
         selectedQuantity = 1;
-        selectedBranchId = null;
+
+        // Preselect branch from user
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch != null) {
+            selectedBranchId = userBranch.getBranchId();
+        } else {
+            selectedBranchId = null;
+        }
+
         selectedCashRegister = null;
     }
 
     /**
-     * Load all active products
+     * Load all active products filtered by user's branch
      */
     public void loadAvailableProducts() {
-        availableProducts = productService.findActiveProducts();
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch != null) {
+            // Load only products with stock in user's branch
+            availableProducts = productService.findActiveProductsWithStockInBranch(userBranch);
+        } else {
+            // Fallback to all active products if user has no branch
+            availableProducts = productService.findActiveProducts();
+        }
     }
 
     /**
@@ -277,9 +292,18 @@ public class SaleController implements Serializable {
                 return;
             }
 
-            // Check stock availability
-            if (!saleService.validateStockAvailability(selectedProduct, selectedQuantity)) {
-                Integer available = saleService.getTotalAvailableQuantity(selectedProduct);
+            // Get user's branch for stock validation
+            Branch userBranch = userController.getCurrentUser().getBranch();
+            if (userBranch == null) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                        "Error", "Usuario no tiene sucursal asignada. Contacte al administrador."));
+                return;
+            }
+
+            // Check stock availability in user's branch
+            if (!saleService.validateStockAvailability(selectedProduct, selectedQuantity, userBranch)) {
+                Integer available = saleService.getTotalAvailableQuantity(selectedProduct, userBranch);
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
                         "Stock insuficiente",
@@ -287,8 +311,8 @@ public class SaleController implements Serializable {
                 return;
             }
 
-            // Get batch allocation to show pricing
-            List<BatchAllocation> allocations = saleService.allocateStock(selectedProduct, selectedQuantity);
+            // Get batch allocation to show pricing from user's branch
+            List<BatchAllocation> allocations = saleService.allocateStock(selectedProduct, selectedQuantity, userBranch);
 
             // Calculate weighted average price from allocations
             BigDecimal totalPrice = BigDecimal.ZERO;
@@ -530,9 +554,18 @@ public class SaleController implements Serializable {
     public void updateLineTotal(SaleDetail item) {
         try {
             if (item != null && item.getQuantity() != null && item.getUnitPrice() != null) {
-                // Validate stock availability
-                if (!saleService.validateStockAvailability(item.getProduct(), item.getQuantity())) {
-                    Integer available = saleService.getTotalAvailableQuantity(item.getProduct());
+                // Get user's branch for stock validation
+                Branch userBranch = userController.getCurrentUser().getBranch();
+                if (userBranch == null) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error", "Usuario no tiene sucursal asignada. Contacte al administrador."));
+                    return;
+                }
+
+                // Validate stock availability in user's branch
+                if (!saleService.validateStockAvailability(item.getProduct(), item.getQuantity(), userBranch)) {
+                    Integer available = saleService.getTotalAvailableQuantity(item.getProduct(), userBranch);
                     FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_WARN,
                             "Stock insuficiente",
@@ -569,13 +602,17 @@ public class SaleController implements Serializable {
     }
 
     /**
-     * Get available quantity for a product
+     * Get available quantity for a product in user's branch
      */
     public Integer getAvailableQuantity(Product product) {
         if (product == null) {
             return 0;
         }
-        return saleService.getTotalAvailableQuantity(product);
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch == null) {
+            return 0;
+        }
+        return saleService.getTotalAvailableQuantity(product, userBranch);
     }
 
     /**
@@ -724,6 +761,15 @@ public class SaleController implements Serializable {
      */
     public boolean hasOpenCashRegister() {
         return getOpenCashRegister() != null;
+    }
+
+    /**
+     * Check if current user has an assigned branch
+     * Used to determine if branch selector should be disabled in sales.xhtml
+     */
+    public boolean isUserHasAssignedBranch() {
+        return userController.getCurrentUser() != null &&
+               userController.getCurrentUser().getBranch() != null;
     }
 
     // ==================== CUSTOMER MANAGEMENT METHODS ====================
