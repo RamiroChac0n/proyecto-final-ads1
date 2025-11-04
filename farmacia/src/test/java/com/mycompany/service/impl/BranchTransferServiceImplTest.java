@@ -291,8 +291,8 @@ public class BranchTransferServiceImplTest {
         testTransfer.setStatus(TransferStatus.IN_TRANSIT);
 
         when(transferRepository.findById(1)).thenReturn(testTransfer);
-        when(batchRepository.findByProductAndBatchNumber(testProduct, testBatch.getBatchNumber()))
-                .thenReturn(testBatch);
+        when(batchRepository.findById(testBatch.getBatchId())).thenReturn(testBatch);
+        when(batchRepository.save(any(ProductBatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transferRepository.update(any(BranchTransfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
@@ -310,19 +310,21 @@ public class BranchTransferServiceImplTest {
         // Given
         testTransfer.setTransferId(1);
         testTransfer.setStatus(TransferStatus.IN_TRANSIT);
-        Integer initialQuantity = testBatch.getQuantityAvailable();
 
         when(transferRepository.findById(1)).thenReturn(testTransfer);
-        when(batchRepository.findByProductAndBatchNumber(testProduct, testBatch.getBatchNumber()))
-                .thenReturn(testBatch);
+        when(batchRepository.findById(testBatch.getBatchId())).thenReturn(testBatch);
+        when(batchRepository.save(any(ProductBatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transferRepository.update(any(BranchTransfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
         transferService.receiveTransfer(1, testUser);
 
         // Then
-        assertEquals(initialQuantity + testTransfer.getQuantity(), testBatch.getQuantityAvailable());
-        verify(batchRepository).update(testBatch);
+        // Verify new batch is created with correct quantity
+        verify(batchRepository).save(argThat(batch ->
+            batch.getQuantityAvailable().equals(testTransfer.getQuantity()) &&
+            batch.getBranch().equals(toBranch)
+        ));
     }
 
     @Test
@@ -333,8 +335,8 @@ public class BranchTransferServiceImplTest {
         testTransfer.setStatus(TransferStatus.IN_TRANSIT);
 
         when(transferRepository.findById(1)).thenReturn(testTransfer);
-        when(batchRepository.findByProductAndBatchNumber(testProduct, testBatch.getBatchNumber()))
-                .thenReturn(testBatch);
+        when(batchRepository.findById(testBatch.getBatchId())).thenReturn(testBatch);
+        when(batchRepository.save(any(ProductBatch.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transferRepository.update(any(BranchTransfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
@@ -367,31 +369,30 @@ public class BranchTransferServiceImplTest {
     }
 
     @Test
-    @DisplayName("receiveTransfer: Should create new batch if does not exist at destination")
-    void receiveTransfer_CreatesNewBatchIfNotExists() {
+    @DisplayName("receiveTransfer: Should always create new batch with unique batch number")
+    void receiveTransfer_CreatesNewBatchWithUniqueBatchNumber() {
         // Given
-        testTransfer.setTransferId(1);
+        testTransfer.setTransferId(5);
         testTransfer.setStatus(TransferStatus.IN_TRANSIT);
 
-        when(transferRepository.findById(1)).thenReturn(testTransfer);
-        when(batchRepository.findByProductAndBatchNumber(testProduct, testBatch.getBatchNumber()))
-                .thenReturn(null); // Batch doesn't exist at destination
+        when(transferRepository.findById(5)).thenReturn(testTransfer);
         when(batchRepository.findById(testBatch.getBatchId())).thenReturn(testBatch); // Need source batch for copy
         when(batchRepository.save(any(ProductBatch.class))).thenAnswer(invocation -> {
             ProductBatch newBatch = invocation.getArgument(0);
-            newBatch.setBatchId(2);
+            newBatch.setBatchId(99);
             return newBatch;
         });
         when(transferRepository.update(any(BranchTransfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        transferService.receiveTransfer(1, testUser);
+        transferService.receiveTransfer(5, testUser);
 
         // Then
         verify(batchRepository).save(argThat(batch ->
                 batch.getProduct().equals(testProduct) &&
-                batch.getBatchNumber().equals(testBatch.getBatchNumber()) &&
-                batch.getQuantityAvailable().equals(testTransfer.getQuantity())
+                batch.getBatchNumber().equals("BATCH001-T5") && // New unique batch number format
+                batch.getQuantityAvailable().equals(testTransfer.getQuantity()) &&
+                batch.getBranch().equals(toBranch) // Destination branch
         ));
     }
 

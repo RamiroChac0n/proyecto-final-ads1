@@ -1,0 +1,344 @@
+/**
+ * Transfers Module Styles
+ * Styles for the branch transfer management module
+ * Uses the project's color palette (Indigo Dye, Paynes Gray, Ash Gray)
+ */
+
+/* ==================== HEADER ==================== */
+
+.transfer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--indigo-dye, #18455C) 0%, var(--paynes-gray, #546A76) 100%);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+    margin-bottom: 1.5rem;
+}
+
+.transfer-title {
+    color: var(--white, #FFFFFF);
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.transfer-title i {
+    font-size: 1.5rem;
+}
+
+.transfer-btn-new {
+    background: var(--color-success, #28a745) !important;
+    border-color: var(--color-success, #28a745) !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    transition: var(--transition-fast, 150ms ease-in-out);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+}
+
+.transfer-btn-new:hover {
+    background: var(--color-success-dark, #1e7e34) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+}
+
+/* ==================== PANEL ==================== */
+
+.transfer-panel {
+    background: var(--color-bg-primary, #FFFFFF);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+    border: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.transfer-panel .ui-panel-titlebar {
+    background: var(--color-bg-secondary, #f8f9fa);
+    color: var(--indigo-dye, #18455C);
+    border-bottom: 2px solid var(--ash-gray, #9FC1C0);
+    font-weight: 600;
+    font-size: 1.25rem;
+    padding: 1rem 1.5rem;
+}
+
+/* ==================== TABLE ==================== */
+
+.transfer-table {
+    width: 100%;
+}
+
+.transfer-table .ui-datatable-header {
+    background: var(--color-bg-secondary, #f8f9fa);
+    border-bottom: 2px solid var(--ash-gray, #9FC1C0);
+    padding: 1rem;
+}
+
+.transfer-table thead th {
+    background: var(--indigo-dye, #18455C) !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border: none;
+}
+
+.transfer-table tbody tr {
+    transition: var(--transition-fast, 150ms ease-in-out);
+}
+
+.transfer-table tbody tr:hover {
+    background: var(--color-bg-accent, #e8f4f4) !important;
+}
+
+.transfer-table tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border-light, #e9ecef);
+}
+
+/* ==================== STATUS BADGES ==================== */
+
+.transfer-status-badge {
+    font-weight: 600 !important;
+    padding: 0.375rem 0.75rem !important;
+    border-radius: var(--border-radius-md, 0.375rem) !important;
+    font-size: 0.875rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Status: PENDING (Warning - Yellow) */
+.transfer-status-badge.p-tag-warning {
+    background: var(--color-warning-light, #fff3cd) !important;
+    color: var(--color-warning-dark, #d39e00) !important;
+    border: 1px solid var(--color-warning, #ffc107) !important;
+}
+
+/* Status: IN_TRANSIT (Info - Ash Gray) */
+.transfer-status-badge.p-tag-info {
+    background: var(--color-bg-accent, #e8f4f4) !important;
+    color: var(--indigo-dye, #18455C) !important;
+    border: 1px solid var(--ash-gray, #9FC1C0) !important;
+}
+
+/* Status: COMPLETED (Success - Green) */
+.transfer-status-badge.p-tag-success {
+    background: var(--color-success-light, #d4edda) !important;
+    color: var(--color-success-dark, #1e7e34) !important;
+    border: 1px solid var(--color-success, #28a745) !important;
+}
+
+/* Status: CANCELLED (Danger - Red) */
+.transfer-status-badge.p-tag-danger {
+    background: var(--color-danger-light, #f8d7da) !important;
+    color: var(--color-danger-dark, #bd2130) !important;
+    border: 1px solid var(--color-danger, #dc3545) !important;
+}
+
+/* ==================== DIALOG ==================== */
+
+.transfer-dialog .ui-dialog-titlebar {
+    background: linear-gradient(135deg, var(--indigo-dye, #18455C) 0%, var(--paynes-gray, #546A76) 100%);
+    color: var(--white, #FFFFFF);
+    font-weight: 600;
+    font-size: 1.25rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-lg, 0.5rem) var(--border-radius-lg, 0.5rem) 0 0;
+}
+
+.transfer-dialog .ui-dialog-content {
+    padding: 1.5rem;
+    background: var(--color-bg-primary, #FFFFFF);
+}
+
+.transfer-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border-light, #e9ecef);
+}
+
+/* ==================== WARNING TEXT ==================== */
+
+.transfer-warning-text {
+    background: var(--color-warning-light, #fff3cd);
+    color: var(--color-warning-dark, #d39e00);
+    padding: 1rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    border: 1px solid var(--color-warning, #ffc107);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.transfer-warning-text i {
+    font-size: 1.5rem;
+}
+
+/* ==================== DETAILS DIALOG ==================== */
+
+.transfer-details-dialog .ui-dialog-content {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.transfer-details {
+    color: var(--color-text-primary, #212529);
+}
+
+.transfer-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--ash-gray, #9FC1C0);
+    margin-bottom: 1.5rem;
+}
+
+.transfer-details-header h3 {
+    color: var(--indigo-dye, #18455C);
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.transfer-detail-card {
+    background: var(--color-bg-secondary, #f8f9fa);
+    padding: 1.25rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    border: 1px solid var(--color-border-light, #e9ecef);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+}
+
+.transfer-detail-card h4 {
+    color: var(--indigo-dye, #18455C);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--ash-gray, #9FC1C0);
+    padding-bottom: 0.5rem;
+}
+
+.transfer-detail-card h4 i {
+    color: var(--ash-gray, #9FC1C0);
+}
+
+.transfer-detail-card p {
+    margin: 0.5rem 0;
+    color: var(--color-text-secondary, #546A76);
+    line-height: 1.6;
+}
+
+.transfer-detail-card p strong {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+
+.transfer-dialog .ui-inputfield,
+.transfer-dialog .ui-selectonemenu {
+    border-color: var(--color-border, #dee2e6);
+    border-radius: var(--border-radius-sm, 0.25rem);
+}
+
+.transfer-dialog .ui-inputfield:focus,
+.transfer-dialog .ui-selectonemenu:focus {
+    border-color: var(--indigo-dye, #18455C);
+    box-shadow: 0 0 0 0.2rem rgba(24, 69, 92, 0.25);
+}
+
+.transfer-dialog .ui-outputlabel {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* ==================== BUTTONS ==================== */
+
+.transfer-dialog .ui-button {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    font-weight: 600;
+    transition: var(--transition-fast, 150ms ease-in-out);
+}
+
+.transfer-dialog .ui-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+}
+
+.transfer-dialog .ui-button-success {
+    background: var(--color-success, #28a745) !important;
+    border-color: var(--color-success, #28a745) !important;
+}
+
+.transfer-dialog .ui-button-danger {
+    background: var(--color-danger, #dc3545) !important;
+    border-color: var(--color-danger, #dc3545) !important;
+}
+
+.transfer-dialog .ui-button-secondary {
+    background: var(--paynes-gray, #546A76) !important;
+    border-color: var(--paynes-gray, #546A76) !important;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .transfer-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .transfer-title {
+        font-size: 1.25rem;
+    }
+
+    .transfer-btn-new {
+        width: 100%;
+    }
+
+    .transfer-table tbody td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .transfer-dialog-footer {
+        flex-direction: column;
+    }
+
+    .transfer-dialog-footer .ui-button {
+        width: 100%;
+    }
+
+    .transfer-details-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .transfer-title {
+        font-size: 1.125rem;
+    }
+
+    .transfer-detail-card {
+        padding: 1rem;
+    }
+
+    .transfer-detail-card h4 {
+        font-size: 1rem;
+    }
+}
