@@ -1,5 +1,6 @@
 package com.mycompany.repository;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.PurchaseReceipt;
 import com.mycompany.model.entity.enums.PurchaseReceiptStatus;
 import com.mycompany.repository.persistence.PharmacyRepository;
@@ -182,6 +183,62 @@ public class PurchaseReceiptRepository extends PharmacyRepository<PurchaseReceip
                 "ORDER BY pr.receiptDate DESC",
                 PurchaseReceipt.class)
                 .setParameter("userId", userId)
+                .getResultList();
+    }
+
+    /**
+     * Find all purchase receipts for a specific branch (using Branch entity).
+     *
+     * @param branch the branch to filter by
+     * @return list of purchase receipts for that branch
+     */
+    public List<PurchaseReceipt> findByBranch(Branch branch) {
+        return em.createQuery(
+                "SELECT pr FROM PurchaseReceipt pr " +
+                "WHERE pr.branch = :branch " +
+                "ORDER BY pr.receiptDate DESC",
+                PurchaseReceipt.class)
+                .setParameter("branch", branch)
+                .getResultList();
+    }
+
+    /**
+     * Find purchase receipts by branch and status.
+     *
+     * @param branch the branch to filter by
+     * @param status the status to filter by
+     * @return list of purchase receipts
+     */
+    public List<PurchaseReceipt> findByBranchAndStatus(Branch branch, PurchaseReceiptStatus status) {
+        return em.createQuery(
+                "SELECT pr FROM PurchaseReceipt pr " +
+                "WHERE pr.branch = :branch " +
+                "AND pr.status = :status " +
+                "ORDER BY pr.receiptDate DESC",
+                PurchaseReceipt.class)
+                .setParameter("branch", branch)
+                .setParameter("status", status)
+                .getResultList();
+    }
+
+    /**
+     * Find purchase receipts by branch and date range.
+     *
+     * @param branch the branch to filter by
+     * @param startDate the start date (inclusive)
+     * @param endDate the end date (inclusive)
+     * @return list of purchase receipts
+     */
+    public List<PurchaseReceipt> findByBranchAndDateRange(Branch branch, Date startDate, Date endDate) {
+        return em.createQuery(
+                "SELECT pr FROM PurchaseReceipt pr " +
+                "WHERE pr.branch = :branch " +
+                "AND pr.receiptDate BETWEEN :startDate AND :endDate " +
+                "ORDER BY pr.receiptDate DESC",
+                PurchaseReceipt.class)
+                .setParameter("branch", branch)
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
                 .getResultList();
     }
 }

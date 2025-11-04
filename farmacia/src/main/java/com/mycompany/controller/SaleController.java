@@ -243,10 +243,17 @@ public class SaleController implements Serializable {
     }
 
     /**
-     * Load sales history
+     * Load sales history filtered by user's branch
      */
     public void loadSalesHistory() {
-        salesHistory = saleService.list();
+        // Filter sales by user's branch
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch != null) {
+            salesHistory = saleService.findByBranchWithUser(userBranch);
+        } else {
+            // Fallback to all sales if user has no branch assigned (shouldn't happen)
+            salesHistory = saleService.list();
+        }
     }
 
     /**
@@ -355,19 +362,12 @@ public class SaleController implements Serializable {
                 return;
             }
 
-            // Validate branch and cash register selection
-            if (selectedBranchId == null) {
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN,
-                        "Sucursal requerida", "Debe seleccionar una sucursal"));
-                return;
-            }
-
-            Branch branch = branchRepository.findById(selectedBranchId);
+            // Get branch from current user (users can only operate in their assigned branch)
+            Branch branch = userController.getCurrentUser().getBranch();
             if (branch == null) {
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                        "Error", "Sucursal no encontrada"));
+                        "Error", "Usuario no tiene sucursal asignada. Contacte al administrador."));
                 return;
             }
 

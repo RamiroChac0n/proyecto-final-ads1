@@ -1,11 +1,14 @@
 package com.mycompany.service;
 
 import com.mycompany.model.dto.BatchAllocation;
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Product;
 import com.mycompany.model.entity.Sale;
 import com.mycompany.model.entity.SaleDetail;
+import com.mycompany.model.entity.enums.SaleStatus;
 import jakarta.ejb.Local;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -100,4 +103,35 @@ public interface ISaleService {
      * @throws IllegalArgumentException if sale not found or already cancelled
      */
     Sale cancelSale(Integer saleId, String cancelledBy, String reason);
+
+    /**
+     * List all sales for a specific branch
+     * @param branch The branch to filter by
+     * @return List of sales for the given branch
+     */
+    List<Sale> listByBranch(Branch branch);
+
+    /**
+     * Find sales by branch with user information loaded
+     * @param branch The branch to filter by
+     * @return List of sales with user relationship eagerly loaded
+     */
+    List<Sale> findByBranchWithUser(Branch branch);
+
+    /**
+     * Find sales by branch and date range
+     * @param branch The branch to filter by
+     * @param fromDate Start date
+     * @param toDate End date
+     * @return List of sales in the date range for the branch
+     */
+    List<Sale> findByBranchAndDateRange(Branch branch, Date fromDate, Date toDate);
+
+    /**
+     * Find sales by branch and status
+     * @param branch The branch to filter by
+     * @param status The sale status
+     * @return List of sales with the given status for the branch
+     */
+    List<Sale> findByBranchAndStatus(Branch branch, SaleStatus status);
 }

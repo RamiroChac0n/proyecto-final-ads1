@@ -176,12 +176,19 @@ public class CashRegisterController implements Serializable {
      * @see CashRegisterStatus#OPEN
      */
     public void loadOpenRegisters() {
-        openRegisters = cashRegisterService.getRegisterHistory(
-            LocalDate.now().minusDays(7),
-            LocalDate.now()
-        ).stream()
-        .filter(cr -> CashRegisterStatus.OPEN.equals(cr.getStatus()))
-        .toList();
+        // Filter by user's branch
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch != null) {
+            openRegisters = cashRegisterService.getRegisterHistoryByBranch(
+                userBranch,
+                LocalDate.now().minusDays(7),
+                LocalDate.now()
+            ).stream()
+            .filter(cr -> CashRegisterStatus.OPEN.equals(cr.getStatus()))
+            .toList();
+        } else {
+            openRegisters = List.of(); // Empty list if no branch assigned
+        }
     }
 
     /**
@@ -240,7 +247,13 @@ public class CashRegisterController implements Serializable {
             toDate = LocalDate.now();
         }
 
-        cashRegisters = cashRegisterService.getRegisterHistory(fromDate, toDate);
+        // Filter by user's branch
+        Branch userBranch = userController.getCurrentUser().getBranch();
+        if (userBranch != null) {
+            cashRegisters = cashRegisterService.getRegisterHistoryByBranch(userBranch, fromDate, toDate);
+        } else {
+            cashRegisters = List.of(); // Empty list if no branch assigned
+        }
     }
 
     /**
@@ -341,20 +354,15 @@ public class CashRegisterController implements Serializable {
                 throw new IllegalArgumentException("Solo administradores pueden abrir cajas");
             }
 
-            // Validate branch selected
-            if (selectedBranchId == null) {
-                throw new IllegalArgumentException("Debe seleccionar una sucursal");
-            }
-
             // Validate initial cash
             if (initialCash == null || initialCash.compareTo(BigDecimal.ZERO) < 0) {
                 throw new IllegalArgumentException("El monto inicial debe ser mayor o igual a cero");
             }
 
-            // Find branch
-            Branch branch = branchRepository.findById(selectedBranchId);
+            // Use admin's assigned branch (users can only operate in their branch)
+            Branch branch = admin.getBranch();
             if (branch == null) {
-                throw new IllegalArgumentException("Sucursal no encontrada");
+                throw new IllegalArgumentException("Usuario no tiene sucursal asignada. Contacte al administrador del sistema.");
             }
 
             // Open register through service

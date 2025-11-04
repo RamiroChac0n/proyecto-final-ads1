@@ -1,5 +1,6 @@
 package com.mycompany.service;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.PurchaseReceipt;
 import com.mycompany.model.entity.PurchaseReceiptDetail;
 import com.mycompany.model.entity.enums.PurchaseReceiptStatus;
@@ -228,4 +229,31 @@ public interface IPurchaseReceiptService {
      * @return count of receipts with that status
      */
     Long countByStatus(PurchaseReceiptStatus status);
+
+    /**
+     * Find all purchase receipts for a specific branch.
+     *
+     * @param branch the branch to filter by
+     * @return list of purchase receipts for that branch
+     */
+    List<PurchaseReceipt> listByBranch(Branch branch);
+
+    /**
+     * Find purchase receipts by branch and status.
+     *
+     * @param branch the branch to filter by
+     * @param status the status to filter by
+     * @return list of purchase receipts
+     */
+    List<PurchaseReceipt> findByBranchAndStatus(Branch branch, PurchaseReceiptStatus status);
+
+    /**
+     * Find purchase receipts by branch and date range.
+     *
+     * @param branch the branch to filter by
+     * @param startDate the start date (inclusive)
+     * @param endDate the end date (inclusive)
+     * @return list of purchase receipts
+     */
+    List<PurchaseReceipt> findByBranchAndDateRange(Branch branch, Date startDate, Date endDate);
 }

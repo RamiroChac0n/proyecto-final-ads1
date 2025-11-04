@@ -1,11 +1,13 @@
 package com.mycompany.service.impl;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.InventoryMovement;
 import com.mycompany.model.entity.Product;
 import com.mycompany.repository.InventoryMovementRepository;
 import com.mycompany.service.IInventoryMovementService;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -51,5 +53,20 @@ public class InventoryMovementServiceImpl implements IInventoryMovementService {
     @Override
     public List<InventoryMovement> findByProductId(Long productId) {
         return inventoryMovementRepository.findByProductId(productId);
+    }
+
+    @Override
+    public List<InventoryMovement> findByBranch(Branch branch) {
+        return inventoryMovementRepository.findByBranch(branch);
+    }
+
+    @Override
+    public List<InventoryMovement> findByBranchAndProduct(Branch branch, Product product) {
+        return inventoryMovementRepository.findByBranchAndProduct(branch, product);
+    }
+
+    @Override
+    public List<InventoryMovement> findByBranchAndDateRange(Branch branch, LocalDateTime fromDate, LocalDateTime toDate) {
+        return inventoryMovementRepository.findByBranchAndDateRange(branch, fromDate, toDate);
     }
 }

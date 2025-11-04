@@ -218,7 +218,13 @@ public class PurchaseReceiptController implements Serializable {
      */
     private void loadPurchaseReceipts() {
         try {
-            purchaseReceipts = receiptService.list();
+            // Filter by user's branch
+            Branch userBranch = userController.getCurrentUser().getBranch();
+            if (userBranch != null) {
+                purchaseReceipts = receiptService.listByBranch(userBranch);
+            } else {
+                purchaseReceipts = List.of(); // Empty list if no branch assigned
+            }
         } catch (Exception e) {
             showErrorMessage("Error al cargar recepciones: " + e.getMessage());
         }
@@ -229,9 +235,15 @@ public class PurchaseReceiptController implements Serializable {
      */
     private void loadAvailableOrders() {
         try {
-            availableOrders = orderService.list().stream()
-                    .filter(order -> receiptService.canStartReceiptForOrder(order.getOrderId()))
-                    .collect(Collectors.toList());
+            // Filter by user's branch
+            Branch userBranch = userController.getCurrentUser().getBranch();
+            if (userBranch != null) {
+                availableOrders = orderService.findByBranch(userBranch).stream()
+                        .filter(order -> receiptService.canStartReceiptForOrder(order.getOrderId()))
+                        .collect(Collectors.toList());
+            } else {
+                availableOrders = List.of(); // Empty list if no branch assigned
+            }
         } catch (Exception e) {
             showErrorMessage("Error al cargar órdenes disponibles: " + e.getMessage());
         }

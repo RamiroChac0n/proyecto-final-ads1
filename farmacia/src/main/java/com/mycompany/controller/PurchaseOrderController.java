@@ -203,7 +203,14 @@ public class PurchaseOrderController implements Serializable {
      */
     private void loadPurchaseOrders() {
         try {
-            purchaseOrders = purchaseOrderService.list();
+            // Filter by user's branch
+            Branch userBranch = userController.getCurrentUser().getBranch();
+            if (userBranch != null) {
+                purchaseOrders = purchaseOrderService.findByBranch(userBranch);
+            } else {
+                // Fallback to empty list if no branch assigned
+                purchaseOrders = List.of();
+            }
         } catch (Exception e) {
             showErrorMessage("Error al cargar órdenes de compra: " + e.getMessage());
         }
@@ -264,6 +271,7 @@ public class PurchaseOrderController implements Serializable {
                 .status(PurchaseOrderStatus.DRAFT)
                 .shippingCost(BigDecimal.ZERO)
                 .createdBy(userController.getUser().getId())
+                .branch(userController.getCurrentUser().getBranch()) // Assign user's branch
                 .build();
         currentDetails = new ArrayList<>();
         prepareNewDetail();

@@ -1,5 +1,6 @@
 package com.mycompany.repository;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Sale;
 import com.mycompany.model.entity.enums.SaleStatus;
 import com.mycompany.repository.persistence.PharmacyRepository;
@@ -134,6 +135,90 @@ public class SaleRepository extends PharmacyRepository<Sale> {
             return query.getSingleResult();
         } catch (NoResultException e) {
             return null;
+        }
+    }
+
+    /**
+     * Find sales by branch
+     * @param branch The branch to filter by
+     * @return List of sales for the given branch (excluding NULL branches)
+     */
+    public List<Sale> findByBranch(Branch branch) {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT s FROM Sale s WHERE s.branch = :branch ORDER BY s.saleDate DESC",
+                Sale.class);
+            query.setParameter("branch", branch);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Find sales by branch with User loaded (JOIN FETCH)
+     * Used for sales history view to avoid LazyInitializationException
+     * @param branch The branch to filter by
+     * @return List of sales with user relationship loaded
+     */
+    public List<Sale> findByBranchWithUser(Branch branch) {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT s FROM Sale s " +
+                "LEFT JOIN FETCH s.user " +
+                "WHERE s.branch = :branch " +
+                "ORDER BY s.saleDate DESC",
+                Sale.class);
+            query.setParameter("branch", branch);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Find sales by branch and date range
+     * @param branch The branch to filter by
+     * @param fromDate Start date
+     * @param toDate End date
+     * @return List of sales in the date range for the given branch
+     */
+    public List<Sale> findByBranchAndDateRange(Branch branch, Date fromDate, Date toDate) {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT s FROM Sale s " +
+                "WHERE s.branch = :branch " +
+                "AND s.saleDate BETWEEN :fromDate AND :toDate " +
+                "ORDER BY s.saleDate DESC",
+                Sale.class);
+            query.setParameter("branch", branch);
+            query.setParameter("fromDate", fromDate);
+            query.setParameter("toDate", toDate);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Find sales by branch and status
+     * @param branch The branch to filter by
+     * @param status The sale status
+     * @return List of sales with the given status for the branch
+     */
+    public List<Sale> findByBranchAndStatus(Branch branch, SaleStatus status) {
+        try {
+            TypedQuery<Sale> query = em.createQuery(
+                "SELECT s FROM Sale s " +
+                "WHERE s.branch = :branch " +
+                "AND s.saleStatus = :status " +
+                "ORDER BY s.saleDate DESC",
+                Sale.class);
+            query.setParameter("branch", branch);
+            query.setParameter("status", status);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
         }
     }
 }

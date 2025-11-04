@@ -268,4 +268,24 @@ public class SaleServiceImpl implements ISaleService {
         // Save updated sale
         return saleRepository.update(sale);
     }
+
+    @Override
+    public List<Sale> listByBranch(Branch branch) {
+        return saleRepository.findByBranch(branch);
+    }
+
+    @Override
+    public List<Sale> findByBranchWithUser(Branch branch) {
+        return saleRepository.findByBranchWithUser(branch);
+    }
+
+    @Override
+    public List<Sale> findByBranchAndDateRange(Branch branch, Date fromDate, Date toDate) {
+        return saleRepository.findByBranchAndDateRange(branch, fromDate, toDate);
+    }
+
+    @Override
+    public List<Sale> findByBranchAndStatus(Branch branch, SaleStatus status) {
+        return saleRepository.findByBranchAndStatus(branch, status);
+    }
 }
