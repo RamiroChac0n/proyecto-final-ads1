@@ -164,7 +164,7 @@
                                                 <div class="field">
                                                     <p:outputLabel for="branch">Sucursal</p:outputLabel>
                                                     <p:selectOneMenu id="branch" value="#{userController.user.branch}"
-                                                                     converter="branchConverter" required="false">
+                                                                     converter="branchConverter" required="true">
                                                         <f:selectItem itemLabel="Seleccione una sucursal..." itemValue="#{null}" noSelectionOption="true" />
                                                         <f:selectItems value="#{userController.branches}"
                                                                        var="branch"
