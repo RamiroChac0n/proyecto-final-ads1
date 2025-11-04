@@ -1,7 +1,9 @@
 package com.mycompany.service;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.User;
 import com.mycompany.model.entity.enums.Role;
+import com.mycompany.service.IBranchService;
 import com.mycompany.service.IUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,30 +21,45 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminDataInitializerTest {
-    
+
     @Mock
     private IUserService userService;
-    
+
+    @Mock
+    private IBranchService branchService;
+
     @InjectMocks
     private AdminDataInitializer adminDataInitializer;
-    
+
     @BeforeEach
     void setUp() {
         // Reset mocks before each test
-        reset(userService);
+        reset(userService, branchService);
     }
     
     @Test
     void testInitializeAdminUser_WhenNoUsersExist_CreatesAdminUser() {
         // Arrange
         when(userService.list()).thenReturn(new ArrayList<>());
-        
+        when(branchService.list()).thenReturn(new ArrayList<>());
+
+        Branch mockBranch = Branch.builder()
+                .branchId(1)
+                .branchName("Casa Matriz")
+                .address("Dirección Principal")
+                .phone("00000000")
+                .isActive(true)
+                .build();
+        when(branchService.save(any(Branch.class))).thenReturn(mockBranch);
+
         // Act
         adminDataInitializer.initializeAdminUser();
-        
+
         // Assert
         verify(userService, times(1)).list();
-        verify(userService, times(1)).save(argThat(user -> 
+        verify(branchService, times(1)).list();
+        verify(branchService, times(1)).save(any(Branch.class));
+        verify(userService, times(1)).save(argThat(user ->
             user != null &&
             "System".equals(user.getFirstName()) &&
             "Administrator".equals(user.getLastName()) &&
@@ -51,6 +68,7 @@ public class AdminDataInitializerTest {
             "root".equals(user.getPassword()) &&
             "12345678".equals(user.getPhoneNumber()) &&
             Role.ADMIN.equals(user.getRole()) &&
+            user.getBranch() != null &&
             user.getId() != null &&
             user.getId().length() >= 13
         ));
@@ -95,16 +113,30 @@ public class AdminDataInitializerTest {
                 .role(Role.CASHIER)
                 .build();
         existingUsers.add(cashier);
-        
+
         when(userService.list()).thenReturn(existingUsers);
-        
+        when(branchService.list()).thenReturn(new ArrayList<>());
+
+        Branch mockBranch = Branch.builder()
+                .branchId(1)
+                .branchName("Casa Matriz")
+                .address("Dirección Principal")
+                .phone("00000000")
+                .isActive(true)
+                .build();
+        when(branchService.save(any(Branch.class))).thenReturn(mockBranch);
+
         // Act
         adminDataInitializer.initializeAdminUser();
-        
+
         // Assert
         verify(userService, times(1)).list();
-        verify(userService, times(1)).save(argThat(user -> 
-            user != null && Role.ADMIN.equals(user.getRole())
+        verify(branchService, times(1)).list();
+        verify(branchService, times(1)).save(any(Branch.class));
+        verify(userService, times(1)).save(argThat(user ->
+            user != null &&
+            Role.ADMIN.equals(user.getRole()) &&
+            user.getBranch() != null
         ));
     }
     

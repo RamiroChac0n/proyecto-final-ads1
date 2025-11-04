@@ -4,8 +4,10 @@
  */
 package com.mycompany.controller;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.User;
 import com.mycompany.model.entity.enums.Role;
+import com.mycompany.service.IBranchService;
 import com.mycompany.service.IUserService;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
@@ -62,11 +64,15 @@ public class UserController implements Serializable {
     @EJB
     private IUserService userService;
 
+    @EJB
+    private IBranchService branchService;
+
     private String username;
     private String password;
 
     private User user;
     private List<User> users;
+    private List<Branch> branches;
 
     /**
      * Authenticates a user with the provided credentials and establishes a session.
@@ -281,7 +287,7 @@ public class UserController implements Serializable {
      * <p>
      * This method is automatically invoked by the CDI container after all
      * dependencies (like {@code userService}) have been injected. It loads
-     * the initial list of users for the user management interface.
+     * the initial list of users and branches for the user management interface.
      * </p>
      *
      * @see PostConstruct
@@ -289,6 +295,7 @@ public class UserController implements Serializable {
     @PostConstruct
     public void init() {
         refreshUsers();
+        branches = branchService.list();
     }
 
     /**
@@ -331,6 +338,24 @@ public class UserController implements Serializable {
             users = userService.list();
         }
         return users;
+    }
+
+    /**
+     * Retrieves the list of all branches in the system with lazy loading.
+     * <p>
+     * This getter implements lazy loading - if the branches collection is null,
+     * it automatically loads all branches (both active and inactive) from the database.
+     * This pattern ensures data is loaded on first access and cached for subsequent
+     * requests within the session scope.
+     * </p>
+     *
+     * @return List of all {@link Branch} entities in the system, never {@code null}
+     */
+    public List<Branch> getBranches() {
+        if (branches == null) {
+            branches = branchService.list();
+        }
+        return branches;
     }
 
     /**

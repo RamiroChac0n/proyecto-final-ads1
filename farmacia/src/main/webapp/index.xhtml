@@ -162,6 +162,17 @@
                                                     </p:password>
                                                 </div>
                                                 <div class="field">
+                                                    <p:outputLabel for="branch">Sucursal</p:outputLabel>
+                                                    <p:selectOneMenu id="branch" value="#{userController.user.branch}"
+                                                                     converter="branchConverter" required="false">
+                                                        <f:selectItem itemLabel="Seleccione una sucursal..." itemValue="#{null}" noSelectionOption="true" />
+                                                        <f:selectItems value="#{userController.branches}"
+                                                                       var="branch"
+                                                                       itemLabel="#{branch.branchName}"
+                                                                       itemValue="#{branch}" />
+                                                    </p:selectOneMenu>
+                                                </div>
+                                                <div class="field">
                                                     <p:outputLabel for="role">Rol</p:outputLabel>
                                                     <p:selectOneMenu id="role" value="#{userController.user.role}" required="true"
                                                                    requiredMessage="Por favor seleccione un rol">
