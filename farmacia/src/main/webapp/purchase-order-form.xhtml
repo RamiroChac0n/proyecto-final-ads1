@@ -52,7 +52,7 @@
                                             <!-- Supplier -->
                                             <div class="col-12 md:col-6">
                                                 <div class="field">
-                                                    <p:outputLabel for="supplier" value="Proveedor *" />
+                                                    <p:outputLabel for="supplier" value="Proveedor" />
                                                     <p:selectOneMenu id="supplier"
                                                                      value="#{purchaseOrderController.currentOrder.supplier}"
                                                                      converter="omnifaces.SelectItemsConverter"
@@ -72,12 +72,13 @@
                                             <!-- Branch -->
                                             <div class="col-12 md:col-6">
                                                 <div class="field">
-                                                    <p:outputLabel for="branch" value="Sucursal *" />
+                                                    <p:outputLabel for="branch" value="Sucursal" />
                                                     <p:selectOneMenu id="branch"
                                                                      value="#{purchaseOrderController.currentOrder.branch}"
                                                                      converter="omnifaces.SelectItemsConverter"
                                                                      required="true"
-                                                                     requiredMessage="Debe seleccionar una sucursal">
+                                                                     requiredMessage="Debe seleccionar una sucursal"
+                                                                     disabled="true">
                                                         <f:selectItem itemLabel="Seleccione una sucursal" itemValue="#{null}" />
                                                         <f:selectItems value="#{purchaseOrderController.branches}"
                                                                        var="br"

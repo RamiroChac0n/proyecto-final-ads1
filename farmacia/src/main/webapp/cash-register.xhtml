@@ -179,19 +179,7 @@
                                              showEffect="fade"
                                              width="500">
                                         <p:outputPanel id="open-panel">
-                                            <div class="field">
-                                                <p:outputLabel for="branch" value="Sucursal:" />
-                                                <p:selectOneMenu id="branch"
-                                                               value="#{cashRegisterController.selectedBranchId}"
-                                                               styleClass="w-full"
-                                                               required="true">
-                                                    <f:selectItem itemLabel="Seleccione una sucursal..." itemValue="#{null}" noSelectionOption="true" />
-                                                    <f:selectItems value="#{cashRegisterController.branches}"
-                                                                 var="branch"
-                                                                 itemLabel="#{branch.branchName}"
-                                                                 itemValue="#{branch.branchId}" />
-                                                </p:selectOneMenu>
-                                            </div>
+ 
 
                                             <div class="field">
                                                 <p:outputLabel for="initialCash" value="Efectivo Inicial:" />
