@@ -122,16 +122,16 @@
                                                 </p:row>
                                                 <p:row>
                                                     <!-- ENTRADAS sub-columns -->
-                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #E8F5E9;" />
-                                                    <p:column headerText="Cu" style="text-align: center; width: 100px; background-color: #E8F5E9;" />
-                                                    <p:column headerText="CT" style="text-align: center; width: 120px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Costo Unitario" style="text-align: center; width: 100px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 120px; background-color: #E8F5E9;" />
                                                     <!-- SALIDAS sub-columns -->
-                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #FFEBEE;" />
-                                                    <p:column headerText="Cu" style="text-align: center; width: 100px; background-color: #FFEBEE;" />
-                                                    <p:column headerText="CT" style="text-align: center; width: 120px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Costo Unitario" style="text-align: center; width: 100px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 120px; background-color: #FFEBEE;" />
                                                     <!-- SALDOS sub-columns -->
-                                                    <p:column headerText="Q" style="text-align: center; width: 80px; background-color: #E3F2FD;" />
-                                                    <p:column headerText="CT" style="text-align: center; width: 130px; background-color: #E3F2FD;" />
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #E3F2FD;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 130px; background-color: #E3F2FD;" />
                                                 </p:row>
                                             </p:columnGroup>
 
@@ -239,20 +239,9 @@
                                         <div class="mt-3">
                                             <p:commandButton value="Exportar a Excel"
                                                              icon="pi pi-file-excel"
-                                                             styleClass="ui-button-success mr-2">
+                                                             styleClass="ui-button-success mr-2"
+                                                             ajax="false">
                                                 <p:dataExporter type="xlsx" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
-                                            </p:commandButton>
-
-                                            <p:commandButton value="Exportar a PDF"
-                                                             icon="pi pi-file-pdf"
-                                                             styleClass="ui-button-danger mr-2">
-                                                <p:dataExporter type="pdf" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
-                                            </p:commandButton>
-
-                                            <p:commandButton value="Exportar a CSV"
-                                                             icon="pi pi-file"
-                                                             styleClass="ui-button-info">
-                                                <p:dataExporter type="csv" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
                                             </p:commandButton>
                                         </div>
                                     </p:panel>

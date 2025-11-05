@@ -29,14 +29,15 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
     /**
      * Find all inventory movements for a specific product
      * Ordered by movement date descending (most recent first)
-     * Uses JOIN FETCH to avoid LazyInitializationException
+     * Uses comprehensive JOIN FETCH to prevent LazyInitializationException during exports
      *
      * @param product The product to find movements for
      * @return List of inventory movements
      */
     public List<InventoryMovement> findByProduct(Product product) {
         TypedQuery<InventoryMovement> query = em.createQuery(
-            "SELECT im FROM InventoryMovement im " +
+            "SELECT DISTINCT im FROM InventoryMovement im " +
+            "LEFT JOIN FETCH im.product " +
             "LEFT JOIN FETCH im.batch " +
             "LEFT JOIN FETCH im.branch " +
             "LEFT JOIN FETCH im.user " +
@@ -50,13 +51,15 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
 
     /**
      * Find all inventory movements for a specific product by product ID
+     * Uses comprehensive JOIN FETCH to prevent LazyInitializationException during exports
      *
      * @param productId The product ID to find movements for
      * @return List of inventory movements
      */
     public List<InventoryMovement> findByProductId(Long productId) {
         TypedQuery<InventoryMovement> query = em.createQuery(
-            "SELECT im FROM InventoryMovement im " +
+            "SELECT DISTINCT im FROM InventoryMovement im " +
+            "LEFT JOIN FETCH im.product " +
             "LEFT JOIN FETCH im.batch " +
             "LEFT JOIN FETCH im.branch " +
             "LEFT JOIN FETCH im.user " +
@@ -71,15 +74,17 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
     /**
      * Find all inventory movements for a specific branch
      * Ordered by movement date descending (most recent first)
+     * Uses comprehensive JOIN FETCH to prevent LazyInitializationException during exports
      *
      * @param branch The branch to filter by
      * @return List of inventory movements for the given branch
      */
     public List<InventoryMovement> findByBranch(Branch branch) {
         TypedQuery<InventoryMovement> query = em.createQuery(
-            "SELECT im FROM InventoryMovement im " +
+            "SELECT DISTINCT im FROM InventoryMovement im " +
             "LEFT JOIN FETCH im.product " +
             "LEFT JOIN FETCH im.batch " +
+            "LEFT JOIN FETCH im.branch " +
             "LEFT JOIN FETCH im.user " +
             "WHERE im.branch = :branch " +
             "ORDER BY im.movementDate DESC",
@@ -91,6 +96,7 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
 
     /**
      * Find inventory movements by branch and product
+     * Uses comprehensive JOIN FETCH to prevent LazyInitializationException during exports
      *
      * @param branch The branch to filter by
      * @param product The product to find movements for
@@ -98,8 +104,10 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
      */
     public List<InventoryMovement> findByBranchAndProduct(Branch branch, Product product) {
         TypedQuery<InventoryMovement> query = em.createQuery(
-            "SELECT im FROM InventoryMovement im " +
+            "SELECT DISTINCT im FROM InventoryMovement im " +
+            "LEFT JOIN FETCH im.product " +
             "LEFT JOIN FETCH im.batch " +
+            "LEFT JOIN FETCH im.branch " +
             "LEFT JOIN FETCH im.user " +
             "WHERE im.branch = :branch " +
             "AND im.product = :product " +
@@ -113,6 +121,7 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
 
     /**
      * Find inventory movements by branch and date range
+     * Uses comprehensive JOIN FETCH to prevent LazyInitializationException during exports
      *
      * @param branch The branch to filter by
      * @param fromDate Start date/time
@@ -121,9 +130,10 @@ public class InventoryMovementRepository extends PharmacyRepository<InventoryMov
      */
     public List<InventoryMovement> findByBranchAndDateRange(Branch branch, LocalDateTime fromDate, LocalDateTime toDate) {
         TypedQuery<InventoryMovement> query = em.createQuery(
-            "SELECT im FROM InventoryMovement im " +
+            "SELECT DISTINCT im FROM InventoryMovement im " +
             "LEFT JOIN FETCH im.product " +
             "LEFT JOIN FETCH im.batch " +
+            "LEFT JOIN FETCH im.branch " +
             "LEFT JOIN FETCH im.user " +
             "WHERE im.branch = :branch " +
             "AND im.movementDate BETWEEN :fromDate AND :toDate " +

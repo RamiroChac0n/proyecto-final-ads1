@@ -6,7 +6,7 @@ import java.io.File;
 
 /**
  * Service for generating invoice XML documents
- * @author Claude Code
+ * @author ramir
  */
 @Local
 public interface IInvoiceGenerationService {
