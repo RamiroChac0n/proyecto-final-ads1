@@ -123,6 +123,11 @@ public class Sale {
     @Temporal(TemporalType.TIMESTAMP)
     private Date cancellationDate;
 
+    // Invoice
+    @Size(max = 500)
+    @Column(name = "invoice_path", length = 500)
+    private String invoicePath;
+
     // Audit
     @Column(name = "created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

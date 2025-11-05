@@ -9,15 +9,19 @@ import com.mycompany.repository.SaleRepository;
 import com.mycompany.repository.UserRepository;
 import com.mycompany.service.ICashRegisterService;
 import com.mycompany.service.IInventoryMovementService;
+import com.mycompany.service.IInvoiceGenerationService;
 import com.mycompany.service.IProductBatchService;
 import com.mycompany.service.ISaleService;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of Sale business operations
@@ -26,6 +30,8 @@ import java.util.List;
  */
 @Stateless
 public class SaleServiceImpl implements ISaleService {
+
+    private static final Logger LOGGER = Logger.getLogger(SaleServiceImpl.class.getName());
 
     @EJB
     private ProductBatchRepository productBatchRepository;
@@ -44,6 +50,9 @@ public class SaleServiceImpl implements ISaleService {
 
     @EJB
     private IInventoryMovementService inventoryMovementService;
+
+    @EJB
+    private IInvoiceGenerationService invoiceGenerationService;
 
     @Override
     public List<BatchAllocation> allocateStock(Product product, Integer quantity, Branch branch) {
@@ -198,6 +207,18 @@ public class SaleServiceImpl implements ISaleService {
                 savedSale.getCashRegister(),
                 savedSale.getTotalAmount()
             );
+        }
+
+        // Generate invoice XML automatically
+        try {
+            File invoiceFile = invoiceGenerationService.generateInvoiceXML(savedSale);
+            savedSale.setInvoicePath(invoiceFile.getAbsolutePath());
+            savedSale = saleRepository.update(savedSale);
+            LOGGER.log(Level.INFO, "Invoice generated successfully for sale {0}: {1}",
+                    new Object[]{savedSale.getSaleNumber(), invoiceFile.getAbsolutePath()});
+        } catch (Exception e) {
+            // Log error but don't fail the sale
+            LOGGER.log(Level.WARNING, "Failed to generate invoice for sale " + savedSale.getSaleNumber(), e);
         }
 
         return savedSale;
