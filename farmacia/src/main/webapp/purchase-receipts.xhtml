@@ -27,6 +27,7 @@
                                     <p:growl id="messages" showDetail="true" />
 
                                     <!-- Toolbar -->
+                                    <!--
                                     <p:toolbar>
                                         <p:toolbarGroup>
                                             <p:commandButton value="Ver Órdenes Disponibles"
@@ -37,6 +38,7 @@
                                                              rendered="#{userController.adminOrStorekeeper}" />
                                         </p:toolbarGroup>
                                     </p:toolbar>
+                                    -->
 
                                     <!-- DataTable -->
                                     <p:dataTable id="dt-receipts"
@@ -114,11 +116,13 @@
 
                                         <!-- Actions -->
                                         <p:column headerText="Acciones" style="width: 180px;">
+                                            <!--
                                             <p:commandButton icon="pi pi-eye"
                                                              styleClass="ui-button-info ui-button-rounded"
                                                              action="#{purchaseReceiptController.editReceipt(receipt)}"
                                                              title="Ver Detalles"
                                                              style="margin-right: .25rem;" />
+                                            -->
 
                                             <p:commandButton icon="pi pi-pencil"
                                                              styleClass="ui-button-warning ui-button-rounded"

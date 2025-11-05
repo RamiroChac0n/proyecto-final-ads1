@@ -612,6 +612,7 @@ public class BranchTransferServiceImplTest {
         user.setUserName("admin");
         user.setFirstName("Admin");
         user.setLastName("User");
+        user.setBranch(toBranch);  // User belongs to destination branch for receive tests
         return user;
     }
 }

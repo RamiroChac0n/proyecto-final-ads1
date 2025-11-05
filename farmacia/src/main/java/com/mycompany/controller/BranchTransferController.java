@@ -484,9 +484,24 @@ public class BranchTransferController implements Serializable {
 
     /**
      * Checks if transfer can be received.
+     * Only users from the destination branch can receive transfers.
      */
     public boolean canReceive(BranchTransfer transfer) {
-        return transfer.getStatus() == TransferStatus.IN_TRANSIT;
+        User currentUser = userController.getCurrentUser();
+
+        // Check status is IN_TRANSIT
+        if (transfer.getStatus() != TransferStatus.IN_TRANSIT) {
+            return false;
+        }
+
+        // Check user has branch assigned
+        if (currentUser.getBranch() == null) {
+            return false;
+        }
+
+        // Check user's branch matches destination branch
+        return currentUser.getBranch().getBranchId()
+                .equals(transfer.getToBranch().getBranchId());
     }
 
     /**

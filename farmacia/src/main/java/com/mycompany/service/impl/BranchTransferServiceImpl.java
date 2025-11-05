@@ -131,6 +131,18 @@ public class BranchTransferServiceImpl implements IBranchTransferService {
             throw new IllegalStateException("Transfer can only be received if status is IN_TRANSIT. Current status: " + transfer.getStatus());
         }
 
+        // Validate user has branch assigned
+        if (receivedBy.getBranch() == null) {
+            throw new IllegalStateException("Usuario no tiene sucursal asignada");
+        }
+
+        // Validate user's branch matches destination branch
+        if (!receivedBy.getBranch().getBranchId().equals(transfer.getToBranch().getBranchId())) {
+            throw new IllegalStateException("Solo usuarios de la sucursal de destino pueden recibir este traslado. " +
+                    "Traslado destinado a: " + transfer.getToBranch().getBranchName() +
+                    ". Su sucursal: " + receivedBy.getBranch().getBranchName());
+        }
+
         // Always create a new batch at destination for complete traceability
         ProductBatch sourceBatch = batchRepository.findById(transfer.getBatch().getBatchId());
         if (sourceBatch == null) {
