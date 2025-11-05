@@ -146,7 +146,8 @@
                                             <!-- TIPO Column -->
                                             <p:column sortBy="#{row.movement.movementType}"
                                                       filterBy="#{row.movement.movementType}"
-                                                      filterMatchMode="equals">
+                                                      filterMatchMode="equals"
+                                                      exportValue="#{productKardexController.getMovementTypeLabel(row.movement.movementType)}">
                                                 <f:facet name="filter">
                                                     <p:selectOneMenu onchange="PF('dtKardex').filter()" styleClass="w-full">
                                                         <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />

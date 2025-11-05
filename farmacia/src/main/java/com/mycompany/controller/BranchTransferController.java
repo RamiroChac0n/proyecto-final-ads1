@@ -232,6 +232,15 @@ public class BranchTransferController implements Serializable {
                 return;
             }
 
+            // Validate quantity is positive
+            if (quantity <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "La cantidad debe ser mayor a cero"));
+                return;
+            }
+
             // Get entities
             Product product = productRepository.findById(selectedProductId);
             ProductBatch batch = batchRepository.findById(selectedBatchId);
@@ -243,6 +252,60 @@ public class BranchTransferController implements Serializable {
                         new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                 "Error",
                                 "Datos inválidos. Por favor intente nuevamente."));
+                return;
+            }
+
+            // Validate same branch
+            if (fromBranch.getBranchId().equals(toBranch.getBranchId())) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "La sucursal de origen y destino deben ser diferentes"));
+                return;
+            }
+
+            // Validate product is active
+            if (!product.getIsActive()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "El producto seleccionado está inactivo"));
+                return;
+            }
+
+            // Validate batch is not expired
+            if (batch.getIsExpired()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "El lote seleccionado está vencido"));
+                return;
+            }
+
+            // Validate batch is active
+            if (!batch.getIsActive()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "El lote seleccionado no está activo"));
+                return;
+            }
+
+            // Validate sufficient stock
+            if (batch.getQuantityAvailable() < quantity) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "Stock insuficiente. Disponible: " + batch.getQuantityAvailable() + " unidades"));
+                return;
+            }
+
+            // Validate product-batch consistency
+            if (!batch.getProduct().getProductId().equals(product.getProductId())) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "El lote seleccionado no corresponde al producto"));
                 return;
             }
 
@@ -258,12 +321,12 @@ public class BranchTransferController implements Serializable {
                     .build();
 
             // Request transfer (this validates and creates with PENDING status)
-            transferService.requestTransfer(transfer);
+            BranchTransfer createdTransfer = transferService.requestTransfer(transfer);
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO,
                             "Éxito",
-                            "Traslado solicitado correctamente"));
+                            "Traslado #" + createdTransfer.getTransferId() + " solicitado exitosamente. Pendiente de aprobación."));
 
             // Reload transfers
             loadTransfers();
@@ -289,7 +352,7 @@ public class BranchTransferController implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO,
                             "Éxito",
-                            "Traslado aprobado. Estado: EN TRÁNSITO"));
+                            "Traslado #" + transfer.getTransferId() + " aprobado. En tránsito a " + transfer.getToBranch().getBranchName() + "."));
 
             loadTransfers();
         } catch (Exception e) {
@@ -310,7 +373,7 @@ public class BranchTransferController implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO,
                             "Éxito",
-                            "Traslado recibido. Estado: COMPLETADO"));
+                            "Traslado #" + transfer.getTransferId() + " recibido exitosamente. " + transfer.getQuantity() + " unidades agregadas al inventario."));
 
             loadTransfers();
         } catch (Exception e) {
@@ -342,8 +405,9 @@ public class BranchTransferController implements Serializable {
                 return;
             }
 
+            Integer transferId = selectedTransfer.getTransferId();
             transferService.cancelTransfer(
-                    selectedTransfer.getTransferId(),
+                    transferId,
                     cancellationReason,
                     userController.getCurrentUser()
             );
@@ -351,7 +415,7 @@ public class BranchTransferController implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO,
                             "Éxito",
-                            "Traslado cancelado"));
+                            "Traslado #" + transferId + " cancelado exitosamente."));
 
             loadTransfers();
 

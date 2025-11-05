@@ -585,6 +585,48 @@ public class ProductKardexController implements Serializable {
     }
 
     /**
+     * Returns a user-friendly Spanish label for the movement type.
+     * <p>
+     * This method is used primarily for Excel/PDF exports to provide readable Spanish labels
+     * instead of technical enum names. The web interface uses the {@code getMovementTypeIcon()},
+     * {@code getMovementTypeClass()}, and {@code getMovementTypeSeverity()} methods to display
+     * visual badges with icons.
+     * </p>
+     * <p>
+     * <strong>Usage in XHTML:</strong>
+     * <pre>
+     * &lt;p:column exportValue="#{productKardexController.getMovementTypeLabel(row.movement.movementType)}"&gt;
+     *     ...
+     * &lt;/p:column&gt;
+     * </pre>
+     * </p>
+     *
+     * @param type The {@link MovementType} to get a label for
+     * @return Spanish label string:
+     *         <ul>
+     *             <li>"ENTRADA" for {@code IN} (incoming inventory)</li>
+     *             <li>"SALIDA" for {@code OUT} (outgoing inventory)</li>
+     *             <li>"AJUSTE" for {@code ADJUSTMENT} (inventory adjustments)</li>
+     *             <li>"N/A" if type is null</li>
+     *         </ul>
+     * @see MovementType
+     */
+    public String getMovementTypeLabel(MovementType type) {
+        if (type == null) return "N/A";
+
+        switch (type) {
+            case IN:
+                return "ENTRADA";
+            case OUT:
+                return "SALIDA";
+            case ADJUSTMENT:
+                return "AJUSTE";
+            default:
+                return "N/A";
+        }
+    }
+
+    /**
      * Formats the movement date/time for display in the KARDEX table.
      * <p>
      * This method converts the {@link java.time.LocalDateTime} from the movement record

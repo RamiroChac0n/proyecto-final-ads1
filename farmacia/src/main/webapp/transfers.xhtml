@@ -162,12 +162,12 @@
                 <h:form id="newTransferForm">
                     <div class="grid p-fluid">
                         <div class="col-12">
-                            <p:outputLabel for="product" value="Producto:" />
+                            <p:outputLabel for="product" value="Producto:" styleClass="required-field" />
                             <p:selectOneMenu id="product"
                                            value="#{branchTransferController.selectedProductId}"
                                            required="true"
-                                           requiredMessage="Debe seleccionar un producto">
-                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true" />
+                                           requiredMessage="El producto es obligatorio">
+                                <f:selectItem itemLabel="-- Seleccione un producto --" itemValue="#{null}" noSelectionOption="true" />
                                 <f:selectItems value="#{branchTransferController.products}"
                                              var="prod"
                                              itemLabel="#{prod.commercialName}"
@@ -180,12 +180,12 @@
                         </div>
 
                         <div class="col-12">
-                            <p:outputLabel for="batch" value="Lote:" />
+                            <p:outputLabel for="batch" value="Lote:" styleClass="required-field" />
                             <p:selectOneMenu id="batch"
                                            value="#{branchTransferController.selectedBatchId}"
                                            required="true"
                                            disabled="#{branchTransferController.availableBatches == null}"
-                                           requiredMessage="Debe seleccionar un lote">
+                                           requiredMessage="El lote es obligatorio">
                                 <f:selectItem itemLabel="-- Seleccione un producto primero --" itemValue="#{null}" noSelectionOption="true"
                                             rendered="#{branchTransferController.availableBatches == null}" />
                                 <f:selectItem itemLabel="-- Seleccione un lote --" itemValue="#{null}" noSelectionOption="true"
@@ -199,12 +199,12 @@
                         </div>
 
                         <div class="col-12">
-                            <p:outputLabel for="destination" value="Sucursal Destino:" />
+                            <p:outputLabel for="destination" value="Sucursal Destino:" styleClass="required-field" />
                             <p:selectOneMenu id="destination"
                                            value="#{branchTransferController.destinationBranchId}"
                                            required="true"
-                                           requiredMessage="Debe seleccionar una sucursal destino">
-                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true" />
+                                           requiredMessage="La sucursal de destino es obligatoria">
+                                <f:selectItem itemLabel="-- Seleccione la sucursal de destino --" itemValue="#{null}" noSelectionOption="true" />
                                 <f:selectItems value="#{branchTransferController.branches}"
                                              var="branch"
                                              itemLabel="#{branch.branchName}"
@@ -214,13 +214,14 @@
                         </div>
 
                         <div class="col-12">
-                            <p:outputLabel for="quantity" value="Cantidad:" />
+                            <p:outputLabel for="quantity" value="Cantidad:" styleClass="required-field" />
                             <p:inputNumber id="quantity"
                                          value="#{branchTransferController.quantity}"
                                          decimalPlaces="0"
                                          required="true"
-                                         requiredMessage="Debe ingresar una cantidad"
-                                         minValue="1" />
+                                         requiredMessage="La cantidad es obligatoria"
+                                         minValue="1"
+                                         validatorMessage="La cantidad debe ser mayor a cero" />
                             <p:message for="quantity" />
                         </div>
 
