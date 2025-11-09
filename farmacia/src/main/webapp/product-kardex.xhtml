@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{productKardexController.checkAccess}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">KARDEX de Producto - Movimientos de Inventario</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Navigation breadcrumb with product selector -->
+                                    <div class="flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                        <!-- Breadcrumb -->
+                                        <p:breadCrumb>
+                                            <p:menuitem value="Productos" outcome="products" />
+                                            <p:menuitem value="#{productKardexController.product.commercialName}"
+                                                        outcome="product-details">
+                                                <f:param name="productId" value="#{productKardexController.product.productId}" />
+                                            </p:menuitem>
+                                            <p:menuitem value="KARDEX" />
+                                        </p:breadCrumb>
+
+                                        <!-- Product Selector -->
+                                        <div class="flex align-items-center gap-2">
+                                            <p:outputLabel value="Cambiar producto:" styleClass="font-semibold" />
+                                            <p:selectOneMenu value="#{productKardexController.selectedProduct}"
+                                                             converter="productConverter"
+                                                             filter="true"
+                                                             filterMatchMode="contains"
+                                                             style="min-width: 300px;">
+                                                <f:selectItem itemLabel="Seleccione un producto..." itemValue="#{null}" noSelectionOption="true" />
+                                                <f:selectItems value="#{productKardexController.allProducts}"
+                                                               var="prod"
+                                                               itemLabel="#{prod.commercialName}"
+                                                               itemValue="#{prod}" />
+                                                <p:ajax event="itemSelect" listener="#{productKardexController.onProductChange()}" />
+                                            </p:selectOneMenu>
+                                        </div>
+                                    </div>
+
+                                    <!-- Product Information Header -->
+                                    <p:panel header="Información del Producto" styleClass="mb-4">
+                                        <div class="grid">
+                                            <div class="col-12 md:col-3">
+                                                <p:outputLabel value="ID Producto:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.productId}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-6">
+                                                <p:outputLabel value="Nombre Comercial:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.commercialName}"
+                                                              styleClass="text-xl font-bold" />
+                                            </div>
+
+                                            <div class="col-12 md:col-3">
+                                                <p:outputLabel value="Marca:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.brand}"
+                                                              rendered="#{not empty productKardexController.product.brand}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty productKardexController.product.brand}"
+                                                              styleClass="text-muted" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Fabricante:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.manufacturer}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Principio Activo:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.activePrinciple.innName}" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value="Concentración:" styleClass="font-bold mr-2" />
+                                                <h:outputText value="#{productKardexController.product.concentration} #{productKardexController.product.concentrationUnit.unitCode}" />
+                                            </div>
+                                        </div>
+                                    </p:panel>
+
+                                    <!-- KARDEX Panel -->
+                                    <p:panel header="KARDEX - Historial de Movimientos de Inventario" styleClass="mb-4">
+                                        <p:dataTable id="dt-kardex"
+                                                     widgetVar="dtKardex"
+                                                     var="row"
+                                                     value="#{productKardexController.kardexRows}"
+                                                     reflow="true"
+                                                     styleClass="kardex-table"
+                                                     paginator="true"
+                                                     rows="20"
+                                                     paginatorPosition="bottom"
+                                                     emptyMessage="No se encontraron movimientos de inventario para este producto"
+                                                     filteredValue="#{productKardexController.filteredKardexRows}"
+                                                     sortMode="multiple">
+
+                                            <!-- Grouped Header Row -->
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column headerText="FECHA" rowspan="2" style="width: 150px;" />
+                                                    <p:column headerText="TIPO" rowspan="2" style="width: 140px;" />
+                                                    <p:column headerText="ENTRADAS" colspan="3" style="text-align: center; background-color: #E8F5E9;" />
+                                                    <p:column headerText="SALIDAS" colspan="3" style="text-align: center; background-color: #FFEBEE;" />
+                                                    <p:column headerText="SALDOS" colspan="2" style="text-align: center; background-color: #E3F2FD;" />
+                                                </p:row>
+                                                <p:row>
+                                                    <!-- ENTRADAS sub-columns -->
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Costo Unitario" style="text-align: center; width: 100px; background-color: #E8F5E9;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 120px; background-color: #E8F5E9;" />
+                                                    <!-- SALIDAS sub-columns -->
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Costo Unitario" style="text-align: center; width: 100px; background-color: #FFEBEE;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 120px; background-color: #FFEBEE;" />
+                                                    <!-- SALDOS sub-columns -->
+                                                    <p:column headerText="Cantidad" style="text-align: center; width: 80px; background-color: #E3F2FD;" />
+                                                    <p:column headerText="Costo Total" style="text-align: center; width: 130px; background-color: #E3F2FD;" />
+                                                </p:row>
+                                            </p:columnGroup>
+
+                                            <!-- FECHA Column -->
+                                            <p:column sortBy="#{row.movement.movementDate}"
+                                                      sortOrder="ASCENDING"
+                                                      filterBy="#{productKardexController.formatMovementDate(row.movement)}"
+                                                      filterMatchMode="contains">
+                                                <h:outputText value="#{productKardexController.formatMovementDate(row.movement)}" />
+                                            </p:column>
+
+                                            <!-- TIPO Column -->
+                                            <p:column sortBy="#{row.movement.movementType}"
+                                                      filterBy="#{row.movement.movementType}"
+                                                      filterMatchMode="equals"
+                                                      exportValue="#{productKardexController.getMovementTypeLabel(row.movement.movementType)}">
+                                                <f:facet name="filter">
+                                                    <p:selectOneMenu onchange="PF('dtKardex').filter()" styleClass="w-full">
+                                                        <f:selectItem itemLabel="Todos" itemValue="#{null}" noSelectionOption="true" />
+                                                        <f:selectItem itemLabel="ENTRADA" itemValue="IN" />
+                                                        <f:selectItem itemLabel="SALIDA" itemValue="OUT" />
+                                                        <f:selectItem itemLabel="AJUSTE" itemValue="ADJUSTMENT" />
+                                                    </p:selectOneMenu>
+                                                </f:facet>
+                                                <div class="flex align-items-center">
+                                                    <i class="#{productKardexController.getMovementTypeIcon(row.movement.movementType)} mr-2 #{productKardexController.getMovementTypeClass(row.movement.movementType)}" />
+                                                    <p:tag value="#{row.movement.movementType}"
+                                                           severity="#{productKardexController.getMovementTypeSeverity(row.movement.movementType)}" />
+                                                </div>
+                                            </p:column>
+
+                                            <!-- ENTRADAS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputQuantity}"
+                                                              rendered="#{row.inputQuantity != null}">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- ENTRADAS: Costo Unitario -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputUnitCost}"
+                                                              rendered="#{row.inputUnitCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- ENTRADAS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #F1F8E9;">
+                                                <h:outputText value="#{row.inputTotalCost}"
+                                                              rendered="#{row.inputTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALIDAS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputQuantity}"
+                                                              rendered="#{row.outputQuantity != null}">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALIDAS: Costo Unitario -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputUnitCost}"
+                                                              rendered="#{row.outputUnitCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALIDAS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #FFEBEE;">
+                                                <h:outputText value="#{row.outputTotalCost}"
+                                                              rendered="#{row.outputTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALDOS: Cantidad -->
+                                            <p:column style="text-align: right; background-color: #E3F2FD;">
+                                                <h:outputText value="#{row.balanceQuantity}"
+                                                              styleClass="font-bold"
+                                                              rendered="#{row.balanceQuantity != null}">
+                                                    <f:convertNumber type="number" groupingUsed="true" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <!-- SALDOS: Costo Total -->
+                                            <p:column style="text-align: right; background-color: #E3F2FD;">
+                                                <h:outputText value="#{row.balanceTotalCost}"
+                                                              styleClass="font-bold"
+                                                              rendered="#{row.balanceTotalCost != null}">
+                                                    <f:convertNumber type="currency" currencySymbol="Q "
+                                                                     minFractionDigits="2" maxFractionDigits="2" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                        </p:dataTable>
+
+                                        <!-- Export Options -->
+                                        <div class="mt-3">
+                                            <p:commandButton value="Exportar a Excel"
+                                                             icon="pi pi-file-excel"
+                                                             styleClass="ui-button-success mr-2"
+                                                             ajax="false">
+                                                <p:dataExporter type="xlsx" target="dt-kardex" fileName="kardex_#{productKardexController.product.commercialName}" />
+                                            </p:commandButton>
+                                        </div>
+                                    </p:panel>
+
+                                </h:form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

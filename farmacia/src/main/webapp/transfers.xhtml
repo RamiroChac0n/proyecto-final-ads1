@@ -1,0 +1,379 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{branchTransferController.checkAdminAccess}" />
+    <f:event type="preRenderView" listener="#{branchTransferController.init}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Gestión de Traslados entre Sucursales</ui:define>
+
+        <!-- Additional CSS -->
+        <ui:define name="head">
+            <h:outputStylesheet library="css" name="transfers.css" />
+        </ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Page Header -->
+                                    <div class="transfer-header mb-4">
+                                        <h2 class="transfer-title">
+                                            <i class="pi pi-arrow-right-arrow-left"></i>
+                                            Traslados entre Sucursales
+                                        </h2>
+                                        <p:commandButton value="Nuevo Traslado"
+                                                       icon="pi pi-plus"
+                                                       styleClass="ui-button-success transfer-btn-new"
+                                                       actionListener="#{branchTransferController.prepareNewTransfer}"
+                                                       update=":newTransferForm"
+                                                       oncomplete="PF('dlgNewTransfer').show()" />
+                                    </div>
+
+                                    <!-- Transfers Table -->
+                                    <p:panel header="Historial de Traslados" styleClass="transfer-panel">
+                                        <p:dataTable value="#{branchTransferController.transfers}"
+                                                    var="transfer"
+                                                    emptyMessage="No hay traslados registrados"
+                                                    styleClass="transfer-table"
+                                                    paginator="true"
+                                                    rows="10"
+                                                    paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                                    rowsPerPageTemplate="10,20,50"
+                                                    filteredValue="#{branchTransferController.transfers}">
+
+                                            <p:column headerText="ID" sortBy="#{transfer.transferId}" filterBy="#{transfer.transferId}" style="width: 80px;">
+                                                <h:outputText value="#{transfer.transferId}" />
+                                            </p:column>
+
+                                            <p:column headerText="Fecha" sortBy="#{transfer.transferDate}" filterBy="#{transfer.transferDate}" style="width: 120px;">
+                                                <h:outputText value="#{transfer.transferDate}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="Producto" sortBy="#{transfer.product.commercialName}" filterBy="#{transfer.product.commercialName}">
+                                                <h:outputText value="#{transfer.product.commercialName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Lote" sortBy="#{transfer.batch.batchNumber}" filterBy="#{transfer.batch.batchNumber}" style="width: 120px;">
+                                                <h:outputText value="#{transfer.batch.batchNumber}" />
+                                            </p:column>
+
+                                            <p:column headerText="Origen" sortBy="#{transfer.fromBranch.branchName}" filterBy="#{transfer.fromBranch.branchName}">
+                                                <h:outputText value="#{transfer.fromBranch.branchName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Destino" sortBy="#{transfer.toBranch.branchName}" filterBy="#{transfer.toBranch.branchName}">
+                                                <h:outputText value="#{transfer.toBranch.branchName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Cantidad" sortBy="#{transfer.quantity}" style="width: 100px; text-align: center;">
+                                                <h:outputText value="#{transfer.quantity}" />
+                                            </p:column>
+
+                                            <p:column headerText="Estado" sortBy="#{transfer.status}" filterBy="#{transfer.status}" style="width: 140px;">
+                                                <p:tag value="#{branchTransferController.getStatusLabel(transfer.status)}"
+                                                       severity="#{branchTransferController.getStatusSeverity(transfer.status)}"
+                                                       styleClass="transfer-status-badge" />
+                                            </p:column>
+
+                                            <p:column headerText="Solicitado Por" sortBy="#{transfer.requestedBy}" style="width: 140px;">
+                                                <h:outputText value="#{transfer.requestedBy}" />
+                                            </p:column>
+
+                                            <p:column headerText="Acciones" style="width: 200px; text-align: center;">
+                                                <p:commandButton value="Aprobar"
+                                                               icon="pi pi-check"
+                                                               styleClass="ui-button-success ui-button-sm mr-2"
+                                                               actionListener="#{branchTransferController.approveTransfer(transfer)}"
+                                                               update="form:messages @form"
+                                                               rendered="#{branchTransferController.canApprove(transfer)}"
+                                                               title="Aprobar traslado">
+                                                    <p:confirm header="Confirmar Aprobación"
+                                                             message="¿Está seguro que desea aprobar este traslado? Se reducirá el stock en la sucursal origen."
+                                                             icon="pi pi-exclamation-triangle" />
+                                                </p:commandButton>
+
+                                                <p:commandButton value="Recibir"
+                                                               icon="pi pi-download"
+                                                               styleClass="ui-button-info ui-button-sm mr-2"
+                                                               actionListener="#{branchTransferController.receiveTransfer(transfer)}"
+                                                               update="form:messages @form"
+                                                               rendered="#{branchTransferController.canReceive(transfer)}"
+                                                               title="Recibir traslado">
+                                                    <p:confirm header="Confirmar Recepción"
+                                                             message="¿Confirma que ha recibido este traslado? Se aumentará el stock en la sucursal destino."
+                                                             icon="pi pi-exclamation-triangle" />
+                                                </p:commandButton>
+
+                                                <p:commandButton value="Cancelar"
+                                                               icon="pi pi-times"
+                                                               styleClass="ui-button-danger ui-button-sm mr-2"
+                                                               actionListener="#{branchTransferController.prepareCancelTransfer(transfer)}"
+                                                               update=":cancelTransferForm"
+                                                               oncomplete="PF('dlgCancelTransfer').show()"
+                                                               rendered="#{branchTransferController.canCancel(transfer)}"
+                                                               title="Cancelar traslado" />
+
+                                                <p:commandButton icon="pi pi-eye"
+                                                               styleClass="ui-button-secondary ui-button-sm"
+                                                               actionListener="#{branchTransferController.viewDetails(transfer)}"
+                                                               update=":detailsTransferForm"
+                                                               oncomplete="PF('dlgDetails').show()"
+                                                               title="Ver detalles" />
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panel>
+
+                                    <!-- Confirmation Dialog -->
+                                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                        <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes ui-button-success" />
+                                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-danger" />
+                                    </p:confirmDialog>
+
+                                </h:form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dialog: New Transfer -->
+            <p:dialog widgetVar="dlgNewTransfer" header="Nuevo Traslado" modal="true"
+                     styleClass="transfer-dialog" responsive="true" width="600">
+                <h:form id="newTransferForm">
+                    <div class="grid p-fluid">
+                        <div class="col-12">
+                            <p:outputLabel for="product" value="Producto:" styleClass="required-field" />
+                            <p:selectOneMenu id="product"
+                                           value="#{branchTransferController.selectedProductId}"
+                                           required="true"
+                                           requiredMessage="El producto es obligatorio">
+                                <f:selectItem itemLabel="-- Seleccione un producto --" itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{branchTransferController.products}"
+                                             var="prod"
+                                             itemLabel="#{prod.commercialName}"
+                                             itemValue="#{prod.productId}" />
+                                <p:ajax event="change"
+                                       listener="#{branchTransferController.onProductSelect}"
+                                       update="batch" />
+                            </p:selectOneMenu>
+                            <p:message for="product" />
+                        </div>
+
+                        <div class="col-12">
+                            <p:outputLabel for="batch" value="Lote:" styleClass="required-field" />
+                            <p:selectOneMenu id="batch"
+                                           value="#{branchTransferController.selectedBatchId}"
+                                           required="true"
+                                           disabled="#{branchTransferController.availableBatches == null}"
+                                           requiredMessage="El lote es obligatorio">
+                                <f:selectItem itemLabel="-- Seleccione un producto primero --" itemValue="#{null}" noSelectionOption="true"
+                                            rendered="#{branchTransferController.availableBatches == null}" />
+                                <f:selectItem itemLabel="-- Seleccione un lote --" itemValue="#{null}" noSelectionOption="true"
+                                            rendered="#{branchTransferController.availableBatches != null}" />
+                                <f:selectItems value="#{branchTransferController.availableBatches}"
+                                             var="batch"
+                                             itemLabel="#{batch.batchNumber} - Disponible: #{batch.quantityAvailable} - Vence: #{batch.expirationDate}"
+                                             itemValue="#{batch.batchId}" />
+                            </p:selectOneMenu>
+                            <p:message for="batch" />
+                        </div>
+
+                        <div class="col-12">
+                            <p:outputLabel for="destination" value="Sucursal Destino:" styleClass="required-field" />
+                            <p:selectOneMenu id="destination"
+                                           value="#{branchTransferController.destinationBranchId}"
+                                           required="true"
+                                           requiredMessage="La sucursal de destino es obligatoria">
+                                <f:selectItem itemLabel="-- Seleccione la sucursal de destino --" itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{branchTransferController.branches}"
+                                             var="branch"
+                                             itemLabel="#{branch.branchName}"
+                                             itemValue="#{branch.branchId}" />
+                            </p:selectOneMenu>
+                            <p:message for="destination" />
+                        </div>
+
+                        <div class="col-12">
+                            <p:outputLabel for="quantity" value="Cantidad:" styleClass="required-field" />
+                            <p:inputNumber id="quantity"
+                                         value="#{branchTransferController.quantity}"
+                                         decimalPlaces="0"
+                                         required="true"
+                                         requiredMessage="La cantidad es obligatoria"
+                                         minValue="1"
+                                         validatorMessage="La cantidad debe ser mayor a cero" />
+                            <p:message for="quantity" />
+                        </div>
+
+                        <div class="col-12">
+                            <p:outputLabel for="notes" value="Notas (opcional):" />
+                            <p:inputTextarea id="notes"
+                                           value="#{branchTransferController.notes}"
+                                           rows="3"
+                                           maxlength="500"
+                                           counter="notesCounter"
+                                           counterTemplate="{0} caracteres restantes" />
+                            <h:outputText id="notesCounter" />
+                        </div>
+                    </div>
+
+                    <div class="transfer-dialog-footer mt-3">
+                        <p:commandButton value="Cancelar"
+                                       icon="pi pi-times"
+                                       styleClass="ui-button-secondary"
+                                       onclick="PF('dlgNewTransfer').hide()"
+                                       type="button" />
+                        <p:commandButton value="Solicitar Traslado"
+                                       icon="pi pi-check"
+                                       styleClass="ui-button-success"
+                                       actionListener="#{branchTransferController.createTransfer}"
+                                       update=":form:messages :form" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <!-- Dialog: Cancel Transfer -->
+            <p:dialog widgetVar="dlgCancelTransfer" header="Cancelar Traslado" modal="true"
+                     styleClass="transfer-dialog" responsive="true" width="500">
+                <h:form id="cancelTransferForm">
+                    <div class="grid p-fluid">
+                        <div class="col-12">
+                            <p class="transfer-warning-text">
+                                <i class="pi pi-exclamation-triangle"></i>
+                                ¿Está seguro que desea cancelar este traslado?
+                            </p>
+                            <p class="mt-2">
+                                <strong>Traslado:</strong> #{branchTransferController.selectedTransfer.transferId}<br/>
+                                <strong>Producto:</strong> #{branchTransferController.selectedTransfer.product.commercialName}<br/>
+                                <strong>Cantidad:</strong> #{branchTransferController.selectedTransfer.quantity}
+                            </p>
+                        </div>
+
+                        <div class="col-12">
+                            <p:outputLabel for="cancelReason" value="Razón de Cancelación:" />
+                            <p:inputTextarea id="cancelReason"
+                                           value="#{branchTransferController.cancellationReason}"
+                                           rows="4"
+                                           required="true"
+                                           requiredMessage="Debe proporcionar una razón para cancelar el traslado"
+                                           maxlength="500" />
+                            <p:message for="cancelReason" />
+                        </div>
+                    </div>
+
+                    <div class="transfer-dialog-footer mt-3">
+                        <p:commandButton value="No, Mantener"
+                                       icon="pi pi-times"
+                                       styleClass="ui-button-secondary"
+                                       onclick="PF('dlgCancelTransfer').hide()"
+                                       type="button" />
+                        <p:commandButton value="Sí, Cancelar Traslado"
+                                       icon="pi pi-check"
+                                       styleClass="ui-button-danger"
+                                       actionListener="#{branchTransferController.cancelTransfer}"
+                                       update=":form:messages :form" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <!-- Dialog: Transfer Details -->
+            <p:dialog widgetVar="dlgDetails" header="Detalles del Traslado" modal="true"
+                     styleClass="transfer-dialog transfer-details-dialog" responsive="true" width="700">
+                <h:form id="detailsTransferForm">
+                    <div class="transfer-details">
+                        <div class="grid">
+                            <!-- Header Info -->
+                            <div class="col-12">
+                                <div class="transfer-details-header">
+                                    <h3>Traslado ##{branchTransferController.selectedTransfer.transferId}</h3>
+                                    <p:tag value="#{branchTransferController.getStatusLabel(branchTransferController.selectedTransfer.status)}"
+                                           severity="#{branchTransferController.getStatusSeverity(branchTransferController.selectedTransfer.status)}" />
+                                </div>
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="col-12 md:col-6">
+                                <div class="transfer-detail-card">
+                                    <h4><i class="pi pi-box"></i> Información del Producto</h4>
+                                    <p><strong>Producto:</strong> #{branchTransferController.selectedTransfer.product.commercialName}</p>
+                                    <p><strong>Lote:</strong> #{branchTransferController.selectedTransfer.batch.batchNumber}</p>
+                                    <p><strong>Cantidad:</strong> #{branchTransferController.selectedTransfer.quantity} unidades</p>
+                                    <p><strong>Fecha Vencimiento:</strong>
+                                        <h:outputText value="#{branchTransferController.selectedTransfer.batch.expirationDate}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                                        </h:outputText>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Branch Info -->
+                            <div class="col-12 md:col-6">
+                                <div class="transfer-detail-card">
+                                    <h4><i class="pi pi-building"></i> Sucursales</h4>
+                                    <p><strong>Origen:</strong> #{branchTransferController.selectedTransfer.fromBranch.branchName}</p>
+                                    <p><strong>Destino:</strong> #{branchTransferController.selectedTransfer.toBranch.branchName}</p>
+                                </div>
+                            </div>
+
+                            <!-- Timeline -->
+                            <div class="col-12">
+                                <div class="transfer-detail-card">
+                                    <h4><i class="pi pi-clock"></i> Línea de Tiempo</h4>
+                                    <p><strong>Solicitado:</strong>
+                                        <h:outputText value="#{branchTransferController.selectedTransfer.transferDate}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                        </h:outputText>
+                                        por #{branchTransferController.selectedTransfer.requestedBy}
+                                    </p>
+                                    <p rendered="#{branchTransferController.selectedTransfer.approvedBy != null}">
+                                        <strong>Aprobado por:</strong> #{branchTransferController.selectedTransfer.approvedBy}
+                                    </p>
+                                    <p rendered="#{branchTransferController.selectedTransfer.receivedBy != null}">
+                                        <strong>Recibido por:</strong> #{branchTransferController.selectedTransfer.receivedBy}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12" rendered="#{branchTransferController.selectedTransfer.notes != null and branchTransferController.selectedTransfer.notes != ''}">
+                                <div class="transfer-detail-card">
+                                    <h4><i class="pi pi-comment"></i> Notas</h4>
+                                    <p style="white-space: pre-wrap;">#{branchTransferController.selectedTransfer.notes}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="transfer-dialog-footer mt-3">
+                        <p:commandButton value="Cerrar"
+                                       icon="pi pi-times"
+                                       styleClass="ui-button-secondary"
+                                       onclick="PF('dlgDetails').hide()"
+                                       type="button" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+        </ui:define>
+    </ui:composition>
+</html>

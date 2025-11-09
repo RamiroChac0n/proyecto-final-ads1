@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <!-- Page title - can be overridden by individual pages -->
+        <title>
+            <ui:insert name="title">Pharmacy Management System</ui:insert>
+        </title>
+
+        <!-- Additional head content - can be injected by individual pages -->
+        <ui:insert name="head" />
+    </h:head>
+
+    <h:body>
+        <!-- Navigation Menu Component -->
+        <ui:include src="/templates/components/navigation-menu.xhtml" />
+
+        <!-- Main Content Area -->
+        <ui:insert name="content">
+            <!-- Page-specific content will be inserted here -->
+        </ui:insert>
+    </h:body>
+</html>

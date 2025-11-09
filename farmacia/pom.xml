@@ -5,7 +5,7 @@
     <artifactId>farmacia</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>farmacia-1.0-SNAPSHOT</name>
+    <name>salud+</name>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -85,8 +85,15 @@
             <groupId>org.webjars.npm</groupId>
             <artifactId>primeflex</artifactId>
             <version>3.3.1</version>
-        </dependency>   
-        
+        </dependency>
+
+        <!-- OmniFaces utilities for JSF/Jakarta EE 10 -->
+        <dependency>
+            <groupId>org.omnifaces</groupId>
+            <artifactId>omnifaces</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -100,7 +107,28 @@
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
+
+        <!-- Freemarker for invoice template generation -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.32</version>
+        </dependency>
         
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.4.1</version>
+        </dependency>   
+        
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.4.1</version>
+        </dependency>                  
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -151,5 +179,6 @@
                 <version>3.3.2</version>
             </plugin>
         </plugins>
+        <finalName>salud+</finalName>
     </build>
 </project>

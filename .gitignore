@@ -52,3 +52,7 @@ nbdist/
 .DS_Store
 Thumbs.db
 /farmacia/nbproject/
+
+*.sql
+*.mp4
+*.xlsx

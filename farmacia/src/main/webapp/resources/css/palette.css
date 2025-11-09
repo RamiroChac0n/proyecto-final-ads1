@@ -1,0 +1,155 @@
+/**
+ * Color Palette - Pharmacy Management System
+ * Source: palette.scss (Coolors.co export)
+ *
+ * This file contains CSS custom properties (variables) for the application's color scheme.
+ * Use these variables throughout the application for consistent theming.
+ */
+
+:root {
+    /* ========================================
+       PRIMARY PALETTE COLORS
+       ======================================== */
+
+    /* Ash Gray - Light neutral/accent color */
+    --ash-gray: #9FC1C0;
+    --ash-gray-rgb: 159, 193, 192;
+    --ash-gray-hsl: 178, 23%, 69%;
+
+    /* White - Primary background */
+    --white: #FFFFFF;
+    --white-rgb: 255, 255, 255;
+    --white-hsl: 0, 0%, 100%;
+
+    /* Paynes Gray - Medium gray for text/borders */
+    --paynes-gray: #546A76;
+    --paynes-gray-rgb: 84, 106, 118;
+    --paynes-gray-hsl: 201, 17%, 40%;
+
+    /* Indigo Dye - Deep blue for dark accents */
+    --indigo-dye: #18455C;
+    --indigo-dye-rgb: 24, 69, 92;
+    --indigo-dye-hsl: 200, 59%, 23%;
+
+
+    /* ========================================
+       SEMANTIC COLOR MAPPING
+       ======================================== */
+
+    /* Primary - Main brand color */
+    --color-primary: var(--indigo-dye);
+    --color-primary-light: #2a5f7f;
+    --color-primary-dark: #0f2e3d;
+
+    /* Secondary - Supporting brand color */
+    --color-secondary: var(--paynes-gray);
+    --color-secondary-light: #6d8491;
+    --color-secondary-dark: #3d4e57;
+
+    /* Accent - Highlight color */
+    --color-accent: var(--ash-gray);
+    --color-accent-light: #b8d4d3;
+    --color-accent-dark: #7fa3a2;
+
+    /* Background colors */
+    --color-bg-primary: var(--white);
+    --color-bg-secondary: #f8f9fa;
+    --color-bg-accent: #e8f4f4;
+
+    /* Text colors */
+    --color-text-primary: #212529;
+    --color-text-secondary: var(--paynes-gray);
+    --color-text-muted: #6c757d;
+    --color-text-light: var(--white);
+
+    /* Border colors */
+    --color-border: #dee2e6;
+    --color-border-dark: var(--paynes-gray);
+    --color-border-light: #e9ecef;
+
+
+    /* ========================================
+       STATUS COLORS (Extended palette)
+       ======================================== */
+
+    /* Success - Positive actions/states */
+    --color-success: #28a745;
+    --color-success-light: #d4edda;
+    --color-success-dark: #1e7e34;
+
+    /* Danger - Negative actions/states */
+    --color-danger: #dc3545;
+    --color-danger-light: #f8d7da;
+    --color-danger-dark: #bd2130;
+
+    /* Warning - Caution states */
+    --color-warning: #ffc107;
+    --color-warning-light: #fff3cd;
+    --color-warning-dark: #d39e00;
+
+    /* Info - Informational states */
+    --color-info: var(--ash-gray);
+    --color-info-light: #d1ecf1;
+    --color-info-dark: #7fa3a2;
+
+
+    /* ========================================
+       GRADIENTS
+       ======================================== */
+
+    --gradient-primary: linear-gradient(180deg, var(--indigo-dye) 0%, var(--paynes-gray) 100%);
+    --gradient-accent: linear-gradient(180deg, var(--ash-gray) 0%, var(--white) 100%);
+    --gradient-overlay: linear-gradient(135deg, rgba(24, 69, 92, 0.9) 0%, rgba(84, 106, 118, 0.8) 100%);
+
+
+    /* ========================================
+       SHADOWS & EFFECTS
+       ======================================== */
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    --shadow-primary: 0 4px 6px -1px rgba(24, 69, 92, 0.2);
+    --shadow-accent: 0 4px 6px -1px rgba(159, 193, 192, 0.2);
+
+
+    /* ========================================
+       SPACING & SIZING
+       ======================================== */
+
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.375rem;
+    --border-radius-lg: 0.5rem;
+    --border-radius-xl: 0.75rem;
+
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 300ms ease-in-out;
+    --transition-slow: 500ms ease-in-out;
+}
+
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Background utilities */
+.bg-primary { background-color: var(--color-primary) !important; }
+.bg-secondary { background-color: var(--color-secondary) !important; }
+.bg-accent { background-color: var(--color-accent) !important; }
+.bg-light { background-color: var(--color-bg-secondary) !important; }
+.bg-white { background-color: var(--white) !important; }
+
+/* Text color utilities */
+.text-primary { color: var(--color-primary) !important; }
+.text-secondary { color: var(--color-secondary) !important; }
+.text-muted { color: var(--color-text-muted) !important; }
+.text-success { color: var(--color-success) !important; }
+.text-danger { color: var(--color-danger) !important; }
+.text-warning { color: var(--color-warning) !important; }
+
+/* Border utilities */
+.border-primary { border-color: var(--color-primary) !important; }
+.border-secondary { border-color: var(--color-secondary) !important; }
+.border-light { border-color: var(--color-border-light) !important; }

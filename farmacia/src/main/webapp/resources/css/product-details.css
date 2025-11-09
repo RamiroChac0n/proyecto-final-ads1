@@ -1,0 +1,238 @@
+/* ========================================
+   PRODUCT DETAILS PAGE STYLES
+   ======================================== */
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.product-details-header {
+    margin-bottom: 1rem;
+}
+
+.product-details-header h1 {
+    color: var(--indigo-dye);
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.product-details-header h1 i {
+    font-size: 1.75rem;
+}
+
+.product-details-header .subtitle {
+    color: var(--paynes-gray);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* ========================================
+   STOCK SUMMARY CARD
+   ======================================== */
+.stock-summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 4px solid var(--indigo-dye);
+    margin-bottom: 1.5rem;
+}
+
+.stock-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stock-stat:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stock-stat.warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+}
+
+.stock-stat.warning:hover {
+    background: #ffe69c;
+}
+
+.stat-label {
+    color: var(--paynes-gray);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    color: var(--indigo-dye);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0.5rem 0;
+}
+
+.stock-stat.warning .stat-value {
+    color: #856404;
+}
+
+.stat-unit {
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* ========================================
+   INFO CARDS STYLING
+   ======================================== */
+.info-card {
+    margin-bottom: 1.5rem;
+}
+
+.info-card .ui-panelgrid {
+    width: 100%;
+}
+
+.info-card .ui-panelgrid-cell {
+    padding: 1rem;
+    border: none;
+}
+
+.info-card .ui-panelgrid .ui-outputlabel {
+    color: var(--paynes-gray);
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-card .ui-outputtext {
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    display: block;
+}
+
+/* Badge styles for status indicators */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.status-badge.requires-prescription {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+/* ========================================
+   BATCH SECTION ENHANCEMENTS
+   ======================================== */
+.batch-table-wrapper {
+    margin-top: 1rem;
+}
+
+.batch-toolbar {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 992px) {
+    .product-details-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-details-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .stock-stat {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+    }
+
+    /* Stack breadcrumb and button vertically on mobile */
+    .flex.align-items-center.justify-content-between.mb-3 {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .flex.align-items-center.justify-content-between.mb-3 .ui-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-details-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .product-details-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .product-details-header h1 i {
+        font-size: 1.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+    .action-buttons-row,
+    .batch-toolbar {
+        display: none;
+    }
+
+    .sales-card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+        page-break-inside: avoid;
+    }
+}

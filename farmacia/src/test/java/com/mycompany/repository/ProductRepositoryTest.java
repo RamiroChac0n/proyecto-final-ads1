@@ -253,7 +253,6 @@ public class ProductRepositoryTest {
                 .requiresPrescription(true)
                 .minStock(10)
                 .maxStock(1000)
-                .currentStock(50)
                 .isActive(true)
                 .build();
     }

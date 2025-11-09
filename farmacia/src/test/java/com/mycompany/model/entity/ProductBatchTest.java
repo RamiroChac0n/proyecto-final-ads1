@@ -3,8 +3,8 @@ package com.mycompany.model.entity;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,13 +54,13 @@ public class ProductBatchTest {
         assertEquals(BigDecimal.class, salePriceField.getType());
         
         Field manufactureDateField = productBatchClass.getDeclaredField("manufactureDate");
-        assertEquals(LocalDate.class, manufactureDateField.getType());
+        assertEquals(Date.class, manufactureDateField.getType());
         
         Field expirationDateField = productBatchClass.getDeclaredField("expirationDate");
-        assertEquals(LocalDate.class, expirationDateField.getType());
-        
+        assertEquals(Date.class, expirationDateField.getType());
+
         Field receivedDateField = productBatchClass.getDeclaredField("receivedDate");
-        assertEquals(LocalDate.class, receivedDateField.getType());
+        assertEquals(Date.class, receivedDateField.getType());
         
         Field isActiveField = productBatchClass.getDeclaredField("isActive");
         assertEquals(Boolean.class, isActiveField.getType());
@@ -72,17 +72,26 @@ public class ProductBatchTest {
         assertEquals(Integer.class, daysUntilExpirationField.getType());
         
         Field createdAtField = productBatchClass.getDeclaredField("createdAt");
-        assertEquals(LocalDateTime.class, createdAtField.getType());
+        assertEquals(Date.class, createdAtField.getType());
         
         Field inventoryMovementsField = productBatchClass.getDeclaredField("inventoryMovements");
         assertEquals(List.class, inventoryMovementsField.getType());
+
+        Field supplierField = productBatchClass.getDeclaredField("supplier");
+        assertEquals(Supplier.class, supplierField.getType());
+
+        Field purchaseOrderField = productBatchClass.getDeclaredField("purchaseOrder");
+        assertEquals(PurchaseOrder.class, purchaseOrderField.getType());
+
+        Field purchaseReceiptField = productBatchClass.getDeclaredField("purchaseReceipt");
+        assertEquals(PurchaseReceipt.class, purchaseReceiptField.getType());
     }
     
     @Test
     @DisplayName("Parameterized constructor must have all required parameters")
     void testParameterizedConstructorHasAllParameters() throws NoSuchMethodException {
         Class<?> productBatchClass = ProductBatch.class;
-        
+
         Constructor<?> constructor = productBatchClass.getDeclaredConstructor(
             Integer.class,      // batchId
             Product.class,      // product
@@ -91,18 +100,22 @@ public class ProductBatchTest {
             Integer.class,      // quantityAvailable
             BigDecimal.class,   // unitCost
             BigDecimal.class,   // salePrice
-            LocalDate.class,    // manufactureDate
-            LocalDate.class,    // expirationDate
-            LocalDate.class,    // receivedDate
+            Date.class,         // manufactureDate
+            Date.class,         // expirationDate
+            Date.class,         // receivedDate
             Boolean.class,      // isActive
             Boolean.class,      // isExpired
             Integer.class,      // daysUntilExpiration
-            LocalDateTime.class, // createdAt
+            Date.class,         // createdAt
+            Supplier.class,     // supplier
+            PurchaseOrder.class,    // purchaseOrder
+            Branch.class,       // branch
+            PurchaseReceipt.class,  // purchaseReceipt
             List.class          // inventoryMovements
         );
-        
+
         assertNotNull(constructor);
-        assertEquals(15, constructor.getParameterCount());
+        assertEquals(19, constructor.getParameterCount());
     }
 
     @Test
@@ -126,7 +139,10 @@ public class ProductBatchTest {
         assertNotNull(productBatchClass.getMethod("getDaysUntilExpiration"));
         assertNotNull(productBatchClass.getMethod("getCreatedAt"));
         assertNotNull(productBatchClass.getMethod("getInventoryMovements"));
-        
+        assertNotNull(productBatchClass.getMethod("getSupplier"));
+        assertNotNull(productBatchClass.getMethod("getPurchaseOrder"));
+        assertNotNull(productBatchClass.getMethod("getPurchaseReceipt"));
+
         // Test key setters
         assertNotNull(productBatchClass.getMethod("setBatchId", Integer.class));
         assertNotNull(productBatchClass.getMethod("setProduct", Product.class));
@@ -135,8 +151,11 @@ public class ProductBatchTest {
         assertNotNull(productBatchClass.getMethod("setQuantityAvailable", Integer.class));
         assertNotNull(productBatchClass.getMethod("setUnitCost", BigDecimal.class));
         assertNotNull(productBatchClass.getMethod("setSalePrice", BigDecimal.class));
-        assertNotNull(productBatchClass.getMethod("setExpirationDate", LocalDate.class));
-        
+        assertNotNull(productBatchClass.getMethod("setExpirationDate", Date.class));
+        assertNotNull(productBatchClass.getMethod("setSupplier", Supplier.class));
+        assertNotNull(productBatchClass.getMethod("setPurchaseOrder", PurchaseOrder.class));
+        assertNotNull(productBatchClass.getMethod("setPurchaseReceipt", PurchaseReceipt.class));
+
         // equals, hashCode, toString
         assertNotNull(productBatchClass.getMethod("equals", Object.class));
         assertNotNull(productBatchClass.getMethod("hashCode"));
@@ -159,9 +178,9 @@ public class ProductBatchTest {
                 .quantityAvailable(100)
                 .unitCost(new BigDecimal("10.50"))
                 .salePrice(new BigDecimal("15.75"))
-                .manufactureDate(LocalDate.of(2024, 1, 15))
-                .expirationDate(LocalDate.of(2026, 1, 15))
-                .receivedDate(LocalDate.of(2024, 2, 1))
+                .manufactureDate(createDate(2024, Calendar.JANUARY, 15))
+                .expirationDate(createDate(2026, Calendar.JANUARY, 15))
+                .receivedDate(createDate(2024, Calendar.FEBRUARY, 1))
                 .isActive(true)
                 .isExpired(false)
                 .daysUntilExpiration(365)
@@ -173,9 +192,9 @@ public class ProductBatchTest {
         assertEquals(100, productBatch.getQuantityAvailable());
         assertEquals(new BigDecimal("10.50"), productBatch.getUnitCost());
         assertEquals(new BigDecimal("15.75"), productBatch.getSalePrice());
-        assertEquals(LocalDate.of(2024, 1, 15), productBatch.getManufactureDate());
-        assertEquals(LocalDate.of(2026, 1, 15), productBatch.getExpirationDate());
-        assertEquals(LocalDate.of(2024, 2, 1), productBatch.getReceivedDate());
+        assertEquals(createDate(2024, Calendar.JANUARY, 15), productBatch.getManufactureDate());
+        assertEquals(createDate(2026, Calendar.JANUARY, 15), productBatch.getExpirationDate());
+        assertEquals(createDate(2024, Calendar.FEBRUARY, 1), productBatch.getReceivedDate());
         assertTrue(productBatch.getIsActive());
         assertFalse(productBatch.getIsExpired());
         assertEquals(365, productBatch.getDaysUntilExpiration());
@@ -190,7 +209,7 @@ public class ProductBatchTest {
                 .quantityAvailable(50)
                 .unitCost(new BigDecimal("5.00"))
                 .salePrice(new BigDecimal("7.50"))
-                .expirationDate(LocalDate.of(2025, 12, 31))
+                .expirationDate(createDate(2025, Calendar.DECEMBER, 31))
                 .build();
         
         assertTrue(productBatch.getIsActive()); // Should default to true
@@ -207,7 +226,7 @@ public class ProductBatchTest {
                 .quantityAvailable(1)
                 .unitCost(new BigDecimal("99.99"))
                 .salePrice(new BigDecimal("149.95"))
-                .expirationDate(LocalDate.of(2025, 6, 30))
+                .expirationDate(createDate(2025, Calendar.JUNE, 30))
                 .build();
         
         // Verify precision is maintained
@@ -225,9 +244,9 @@ public class ProductBatchTest {
     @Test
     @DisplayName("Should handle date fields correctly")
     void testDateFieldsHandling() {
-        LocalDate manufactureDate = LocalDate.of(2024, 3, 15);
-        LocalDate expirationDate = LocalDate.of(2027, 3, 15);
-        LocalDate receivedDate = LocalDate.of(2024, 4, 1);
+        Date manufactureDate = createDate(2024, Calendar.MARCH, 15);
+        Date expirationDate = createDate(2027, Calendar.MARCH, 15);
+        Date receivedDate = createDate(2024, Calendar.APRIL, 1);
         
         ProductBatch productBatch = ProductBatch.builder()
                 .batchNumber("DATE-TEST")
@@ -245,10 +264,25 @@ public class ProductBatchTest {
         assertEquals(receivedDate, productBatch.getReceivedDate());
         
         // Verify that dates can be modified independently
-        LocalDate newManufactureDate = LocalDate.of(2024, 5, 20);
+        Date newManufactureDate = createDate(2024, Calendar.MAY, 20);
         productBatch.setManufactureDate(newManufactureDate);
         assertEquals(newManufactureDate, productBatch.getManufactureDate());
         // Original variable should remain unchanged
-        assertEquals(LocalDate.of(2024, 3, 15), manufactureDate);
+        assertEquals(createDate(2024, Calendar.MARCH, 15), manufactureDate);
+    }
+
+    /**
+     * Helper method to create Date objects for testing
+     */
+    private Date createDate(int year, int month, int day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 }

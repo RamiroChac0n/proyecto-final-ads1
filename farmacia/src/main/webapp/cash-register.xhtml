@@ -1,0 +1,392 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{userController.checkAdminAccess}" />
+    <f:event type="preRenderView" listener="#{cashRegisterController.init}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Gestión de Caja Registradora</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Open Registers Panel -->
+                                    <p:panel header="Cajas Abiertas" styleClass="mb-3" id="open-registers">
+                                        <p:dataTable value="#{cashRegisterController.openRegisters}"
+                                                    var="register"
+                                                    emptyMessage="No hay cajas abiertas"
+                                                    styleClass="mb-3">
+
+                                            <p:column headerText="Sucursal">
+                                                <h:outputText value="#{register.branch.branchName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Fecha de Apertura">
+                                                <h:outputText value="#{register.openingDate}" converter="localDateConverter" />
+                                            </p:column>
+
+                                            <p:column headerText="Hora de Apertura">
+                                                <h:outputText value="#{register.openingTime}" converter="localTimeConverter" />
+                                            </p:column>
+
+                                            <p:column headerText="Abierta Por">
+                                                <h:outputText value="#{register.openingUser.firstName} #{register.openingUser.lastName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Efectivo Inicial">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.initialCash)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Total de Ventas">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.totalSales)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Transacciones">
+                                                <h:outputText value="#{register.totalTransactions}" />
+                                            </p:column>
+
+                                            <p:column headerText="Acciones" style="width: 120px;">
+                                                <p:commandButton value="Cerrar"
+                                                               icon="pi pi-times"
+                                                               styleClass="ui-button-warning"
+                                                               actionListener="#{cashRegisterController.prepareCloseRegister(register)}"
+                                                               update=":dlg-close:close-panel"
+                                                               oncomplete="PF('dlgCloseRegister').show()" />
+                                            </p:column>
+                                        </p:dataTable>
+
+                                        <p:commandButton value="Abrir Nueva Caja"
+                                                       icon="pi pi-plus"
+                                                       styleClass="ui-button-success"
+                                                       actionListener="#{cashRegisterController.prepareOpenRegister}"
+                                                       update=":dlg-open:open-panel"
+                                                       oncomplete="PF('dlgOpenRegister').show()" />
+                                    </p:panel>
+
+                                    <!-- Search Filters -->
+                                    <p:panel header="Historial de Cajas" styleClass="mb-3">
+                                        <div class="grid mb-3">
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel for="fromDate" value="Desde:" />
+                                                <p:calendar id="fromDate"
+                                                           value="#{cashRegisterController.fromDate}"
+                                                           pattern="dd/MM/yyyy"
+                                                           converter="localDateConverter"
+                                                           styleClass="w-full" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel for="toDate" value="Hasta:" />
+                                                <p:calendar id="toDate"
+                                                           value="#{cashRegisterController.toDate}"
+                                                           pattern="dd/MM/yyyy"
+                                                           converter="localDateConverter"
+                                                           styleClass="w-full" />
+                                            </div>
+
+                                            <div class="col-12 md:col-4">
+                                                <p:outputLabel value=" " style="display: block;" />
+                                                <p:commandButton value="Buscar"
+                                                               icon="pi pi-search"
+                                                               actionListener="#{cashRegisterController.searchRegisters}"
+                                                               update="dt-registers"
+                                                               styleClass="ui-button-info" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Cash Register History Table -->
+                                        <p:dataTable id="dt-registers"
+                                                    value="#{cashRegisterController.cashRegisters}"
+                                                    var="register"
+                                                    paginator="true"
+                                                    rows="10"
+                                                    emptyMessage="No se encontraron cajas registradoras">
+
+                                            <p:column headerText="Sucursal">
+                                                <h:outputText value="#{register.branch.branchName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Fecha de Apertura">
+                                                <h:outputText value="#{register.openingDate}" converter="localDateConverter" />
+                                            </p:column>
+
+                                            <p:column headerText="Hora de Apertura">
+                                                <h:outputText value="#{register.openingTime}" converter="localTimeConverter" />
+                                            </p:column>
+
+                                            <p:column headerText="Hora de Cierre">
+                                                <h:outputText value="#{register.closingTime}" converter="localTimeConverter" />
+                                            </p:column>
+
+                                            <p:column headerText="Estado">
+                                                <span class="badge badge-#{cashRegisterController.getStatusSeverity(register.status)}"
+                                                      style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 600;">
+                                                    #{cashRegisterController.getStatusLabel(register.status)}
+                                                </span>
+                                            </p:column>
+
+                                            <p:column headerText="Efectivo Inicial">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.initialCash)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Efectivo Final">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.finalCash)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Total de Ventas">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.totalSales)}" />
+                                            </p:column>
+
+                                            <p:column headerText="Diferencia">
+                                                <h:outputText value="#{cashRegisterController.formatCurrency(register.cashDifference)}"
+                                                             style="#{register.cashDifference lt 0 ? 'color: red;' : 'color: green;'}" />
+                                            </p:column>
+
+                                            <p:column headerText="Acciones" style="width: 100px;">
+                                                <p:commandButton icon="pi pi-eye"
+                                                               styleClass="ui-button-info"
+                                                               actionListener="#{cashRegisterController.viewRegisterDetails(register)}"
+                                                               update=":dlg-details:details-panel"
+                                                               oncomplete="PF('dlgRegisterDetails').show()" />
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:panel>
+
+                                </h:form>
+
+                                <!-- Dialog: Open Cash Register -->
+                                <h:form id="dlg-open">
+                                    <p:dialog header="Abrir Caja"
+                                             widgetVar="dlgOpenRegister"
+                                             modal="true"
+                                             showEffect="fade"
+                                             width="500">
+                                        <p:outputPanel id="open-panel">
+ 
+
+                                            <div class="field">
+                                                <p:outputLabel for="initialCash" value="Efectivo Inicial:" />
+                                                <p:inputNumber id="initialCash"
+                                                              value="#{cashRegisterController.initialCash}"
+                                                              minValue="0"
+                                                              decimalPlaces="2"
+                                                              styleClass="w-full"
+                                                              required="true" />
+                                            </div>
+                                        </p:outputPanel>
+
+                                        <f:facet name="footer">
+                                            <p:commandButton value="Abrir Caja"
+                                                           icon="pi pi-check"
+                                                           actionListener="#{cashRegisterController.openRegister}"
+                                                           update=":form:messages :form:open-registers :form:dt-registers open-panel"
+                                                           styleClass="ui-button-success" />
+                                            <p:commandButton value="Cancelar"
+                                                           icon="pi pi-times"
+                                                           onclick="PF('dlgOpenRegister').hide()"
+                                                           styleClass="ui-button-secondary"
+                                                           type="button" />
+                                        </f:facet>
+                                    </p:dialog>
+                                </h:form>
+
+                                <!-- Dialog: Close Cash Register -->
+                                <h:form id="dlg-close">
+                                    <p:dialog header="Cerrar Caja"
+                                             widgetVar="dlgCloseRegister"
+                                             modal="true"
+                                             showEffect="fade"
+                                             width="500">
+                                        <p:outputPanel id="close-panel">
+                                            <p:messages />
+
+                                            <div class="grid">
+                                                <div class="col-6">
+                                                    <strong>Sucursal:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.branch.branchName}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Efectivo Inicial:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.initialCash)}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Total de Ventas:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.totalSales)}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Efectivo Esperado:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.calculateExpectedCash(cashRegisterController.selectedRegister))}"
+                                                                 style="font-weight: bold; color: blue;" />
+                                                </div>
+
+                                                <div class="col-12"><p:divider /></div>
+                                            </div>
+
+                                            <div class="field">
+                                                <p:outputLabel for="finalCash" value="Conteo de Efectivo Final:" />
+                                                <p:inputNumber id="finalCash"
+                                                              value="#{cashRegisterController.finalCash}"
+                                                              minValue="0"
+                                                              decimalPlaces="2"
+                                                              styleClass="w-full"
+                                                              required="true" />
+                                            </div>
+
+                                            <div class="field">
+                                                <p:outputLabel for="closingNotes" value="Notas:" />
+                                                <p:inputTextarea id="closingNotes"
+                                                               value="#{cashRegisterController.closingNotes}"
+                                                               rows="3"
+                                                               styleClass="w-full" />
+                                            </div>
+                                        </p:outputPanel>
+
+                                        <f:facet name="footer">
+                                            <p:commandButton value="Cerrar Caja"
+                                                           icon="pi pi-check"
+                                                           actionListener="#{cashRegisterController.closeRegister}"
+                                                           update=":form:messages :form:open-registers :form:dt-registers close-panel"
+                                                           styleClass="ui-button-warning" />
+                                            <p:commandButton value="Cancelar"
+                                                           icon="pi pi-times"
+                                                           onclick="PF('dlgCloseRegister').hide()"
+                                                           styleClass="ui-button-secondary"
+                                                           type="button" />
+                                        </f:facet>
+                                    </p:dialog>
+                                </h:form>
+
+                                <!-- Dialog: Register Details -->
+                                <h:form id="dlg-details">
+                                    <p:dialog header="Detalles de Caja"
+                                             widgetVar="dlgRegisterDetails"
+                                             modal="true"
+                                             showEffect="fade"
+                                             width="600">
+                                        <p:outputPanel id="details-panel">
+                                            <div class="grid">
+                                                <div class="col-12">
+                                                    <h4>#{cashRegisterController.selectedRegister.branch.branchName}</h4>
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Fecha de Apertura:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.openingDate}" converter="localDateConverter" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Abierta Por:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.openingUser.firstName} #{cashRegisterController.selectedRegister.openingUser.lastName}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Hora de Cierre:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.closingTime}" converter="localTimeConverter" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Cerrada Por:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.closingUser.firstName} #{cashRegisterController.selectedRegister.closingUser.lastName}" />
+                                                </div>
+
+                                                <div class="col-12"><p:divider /></div>
+
+                                                <div class="col-6">
+                                                    <strong>Efectivo Inicial:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.initialCash)}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Total de Ventas:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.totalSales)}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Total de Transacciones:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.selectedRegister.totalTransactions}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Efectivo Final:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.finalCash)}" />
+                                                </div>
+
+                                                <div class="col-6">
+                                                    <strong>Diferencia de Efectivo:</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <h:outputText value="#{cashRegisterController.formatCurrency(cashRegisterController.selectedRegister.cashDifference)}"
+                                                                 style="#{cashRegisterController.selectedRegister.cashDifference lt 0 ? 'color: red; font-weight: bold;' : 'color: green; font-weight: bold;'}" />
+                                                </div>
+
+                                                <div class="col-12" rendered="#{not empty cashRegisterController.selectedRegister.notes}">
+                                                    <p:divider />
+                                                    <strong>Notas:</strong>
+                                                    <p><h:outputText value="#{cashRegisterController.selectedRegister.notes}" /></p>
+                                                </div>
+                                            </div>
+                                        </p:outputPanel>
+
+                                        <f:facet name="footer">
+                                            <p:commandButton value="Cerrar"
+                                                           icon="pi pi-times"
+                                                           onclick="PF('dlgRegisterDetails').hide()"
+                                                           styleClass="ui-button-secondary"
+                                                           type="button" />
+                                        </f:facet>
+                                    </p:dialog>
+                                </h:form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

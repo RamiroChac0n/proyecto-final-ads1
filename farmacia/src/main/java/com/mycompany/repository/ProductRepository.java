@@ -1,5 +1,6 @@
 package com.mycompany.repository;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Product;
 import com.mycompany.repository.persistence.PharmacyRepository;
 import jakarta.ejb.Stateless;
@@ -38,5 +39,29 @@ public class ProductRepository extends PharmacyRepository<Product> {
         TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p WHERE LOWER(p.manufacturer) LIKE LOWER(:manufacturer)", Product.class);
         query.setParameter("manufacturer", "%" + manufacturer + "%");
         return query.getResultList();
+    }
+
+    /**
+     * Find active products that have available stock in a specific branch
+     * @param branch The branch to filter by
+     * @return List of products with available stock in the specified branch
+     */
+    public List<Product> findActiveProductsWithStockInBranch(Branch branch) {
+        try {
+            TypedQuery<Product> query = em.createQuery(
+                "SELECT DISTINCT p FROM Product p " +
+                "JOIN p.batches pb " +
+                "WHERE p.isActive = true " +
+                "AND pb.branch = :branch " +
+                "AND pb.isActive = true " +
+                "AND pb.isExpired = false " +
+                "AND pb.quantityAvailable > 0 " +
+                "ORDER BY p.commercialName ASC",
+                Product.class);
+            query.setParameter("branch", branch);
+            return query.getResultList();
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

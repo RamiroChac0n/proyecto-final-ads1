@@ -5,25 +5,81 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
-        <title>Login</title>
+        <title>Salud+ | Inicio de Sesión</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <h:outputStylesheet library="css" name="login.css" />
     </h:head>
-    <h:body>
-        <p:growl id="growl" showDetail="true" />
+    <h:body styleClass="login-page">
+        <!-- Global messages -->
+        <p:growl id="growl" showDetail="true" sticky="false" life="4000" />
 
-        <h:form id="loginForm">
-            <p:panel header="Login">
-                <h:panelGrid columns="2" cellpadding="5">
-                    <p:outputLabel for="username" value="Username:" />
-                    <p:inputText id="username" value="#{userController.username}" required="true" label="username" autocomplete="on"/>
+        <!-- Full-screen Video Background -->
+        <div class="login-video-background">
+            <video
+                class="login-video"
+                autoplay="autoplay"
+                muted="muted"
+                loop="loop"
+                playsinline="playsinline">
+                <source src="#{resource['videos/login.mp4']}" type="video/mp4" />
+                Tu navegador no soporta la reproducción de videos.
+            </video>
+        </div>
 
-                    <p:outputLabel for="password" value="Password:" />
-                    <p:password id="password" value="#{userController.password}" required="true" label="password" autocomplete="on"/>
+        <!-- Video Overlay for Better Contrast -->
+        <div class="login-video-overlay"></div>
 
-                    <f:facet name="footer">
-                        <p:commandButton value="Login" action="#{userController.login}" update="growl"/>
-                    </f:facet>
-                </h:panelGrid>
-            </p:panel>
-        </h:form>
+        <!-- Main Container with Form Overlay -->
+        <div class="login-container">
+            <!-- Login Form - Floating on Left -->
+            <div class="login-form-section">
+                <div class="login-form-wrapper">
+                    <!-- Heading -->
+                    <h1 class="login-heading">Salud+</h1>
+                    <p class="login-subtitle">
+                        Sistema de Gestión Farmacéutica. Ingresa tus credenciales para acceder.
+                    </p>
+
+                    <!-- Login Form -->
+                    <h:form id="loginForm">
+                        <!-- Username Field -->
+                        <div class="p-field">
+                            <p:outputLabel for="username" value="Usuario" />
+                            <p:inputText
+                                id="username"
+                                value="#{userController.username}"
+                                required="true"
+                                requiredMessage="El usuario es requerido"
+                                placeholder="Ingresa tu usuario"
+                                autocomplete="username"
+                                styleClass="p-inputtext-lg" />
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="p-field">
+                            <p:outputLabel for="password" value="Contraseña" />
+                            <p:password
+                                id="password"
+                                value="#{userController.password}"
+                                required="true"
+                                requiredMessage="La contraseña es requerida"
+                                placeholder="Ingresa tu contraseña"
+                                feedback="false"
+                                autocomplete="current-password"
+                                styleClass="p-inputtext-lg" />
+                        </div>
+
+                        <!-- Submit Button -->
+                        <p:commandButton
+                            value="Ingresar"
+                            action="#{userController.login}"
+                            update="growl"
+                            styleClass="login-submit-btn"
+                            icon="pi pi-sign-in"
+                            iconPos="right" />
+                    </h:form>
+                </div>
+            </div>
+        </div>
     </h:body>
 </html>

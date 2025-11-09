@@ -1,0 +1,355 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check -->
+    <f:event type="preRenderView" listener="#{userController.checkLogin}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Detalles del Proveedor</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <h:panelGroup rendered="#{supplierDetailsController.supplier != null}">
+                                        <!-- Navigation breadcrumb -->
+                                        <p:breadCrumb styleClass="mb-3">
+                                            <p:menuitem value="Proveedores" outcome="suppliers" />
+                                            <p:menuitem value="#{supplierDetailsController.supplier.businessName}" />
+                                        </p:breadCrumb>
+
+                                        <!-- Basic Information Panel -->
+                                        <p:panel header="Información Básica" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Código:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.supplierCode}" />
+
+                                                <p:outputLabel value="NIT:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.taxId}" />
+
+                                                <p:outputLabel value="Nombre Oficial:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.businessName}" />
+
+                                                <p:outputLabel value="Nombre Comercial:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.tradeName}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.tradeName}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.tradeName}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Estado:" styleClass="font-bold" />
+                                                <p:tag severity="#{supplierDetailsController.supplier.isActive ? 'success' : 'danger'}"
+                                                       value="#{supplierDetailsController.supplier.isActive ? 'Activo' : 'Inactivo'}" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Contact Information Panel -->
+                                        <p:panel header="Información de Contacto" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Persona de Contacto:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.contactPerson}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.contactPerson}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.contactPerson}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Teléfono:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.phone}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.phone}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.phone}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Correo Electrónico:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.email}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.email}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.email}"
+                                                              styleClass="text-muted" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Location Information Panel -->
+                                        <p:panel header="Información de Ubicación" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Dirección:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.address}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.address}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.address}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="Ciudad:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.city}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.city}" />
+                                                <h:outputText value="N/A"
+                                                              rendered="#{empty supplierDetailsController.supplier.city}"
+                                                              styleClass="text-muted" />
+
+                                                <p:outputLabel value="País:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.country}" />
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Notes and Audit Information Panel -->
+                                        <p:panel header="Notas y Auditoría" styleClass="mb-4">
+                                            <p:panelGrid columns="4" layout="grid" styleClass="ui-fluid">
+                                                <p:outputLabel value="Notas:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.notes}"
+                                                              rendered="#{not empty supplierDetailsController.supplier.notes}" />
+                                                <h:outputText value="Sin notas"
+                                                              rendered="#{empty supplierDetailsController.supplier.notes}"
+                                                              styleClass="text-muted" />
+
+                                                <h:outputText value="" />
+                                                <h:outputText value="" />
+
+                                                <p:outputLabel value="Fecha de Creación:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.createdAt}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                </h:outputText>
+
+                                                <p:outputLabel value="Última Actualización:" styleClass="font-bold" />
+                                                <h:outputText value="#{supplierDetailsController.supplier.updatedAt}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                </h:outputText>
+                                            </p:panelGrid>
+                                        </p:panel>
+
+                                        <!-- Contacts Section -->
+                                        <p:panel header="Contactos del Proveedor" styleClass="mb-4">
+                                            <p:toolbar>
+                                                <p:toolbarGroup>
+                                                    <p:commandButton value="Agregar Contacto"
+                                                                     icon="pi pi-plus"
+                                                                     actionListener="#{supplierDetailsController.createNewContact()}"
+                                                                     update=":dialogs:contact-panel-content"
+                                                                     oncomplete="PF('dlgContact').show()"
+                                                                     styleClass="ui-button-success"
+                                                                     style="margin-right: .5rem"
+                                                                     rendered="#{supplierDetailsController.admin}">
+                                                        <p:resetInput target=":dialogs:contact-panel-content" />
+                                                    </p:commandButton>
+                                                </p:toolbarGroup>
+                                            </p:toolbar>
+
+                                            <p:dataTable id="dt-contacts"
+                                                         widgetVar="dtContacts"
+                                                         var="contact"
+                                                         value="#{supplierDetailsController.contacts}"
+                                                         reflow="true"
+                                                         styleClass="contacts-table"
+                                                         paginator="true"
+                                                         rows="10"
+                                                         paginatorPosition="bottom"
+                                                         emptyMessage="No se encontraron contactos para este proveedor">
+
+                                                <p:column headerText="Nombre" sortBy="#{contact.contactName}" filterBy="#{contact.contactName}">
+                                                    <h:outputText value="#{contact.contactName}" />
+                                                </p:column>
+
+                                                <p:column headerText="Cargo" sortBy="#{contact.position}">
+                                                    <h:outputText value="#{contact.position}"
+                                                                  rendered="#{not empty contact.position}" />
+                                                    <h:outputText value="N/A"
+                                                                  rendered="#{empty contact.position}"
+                                                                  styleClass="text-muted" />
+                                                </p:column>
+
+                                                <p:column headerText="Teléfono" sortBy="#{contact.phone}">
+                                                    <h:outputText value="#{contact.phone}"
+                                                                  rendered="#{not empty contact.phone}" />
+                                                    <h:outputText value="N/A"
+                                                                  rendered="#{empty contact.phone}"
+                                                                  styleClass="text-muted" />
+                                                </p:column>
+
+                                                <p:column headerText="Email" sortBy="#{contact.email}">
+                                                    <h:outputText value="#{contact.email}"
+                                                                  rendered="#{not empty contact.email}" />
+                                                    <h:outputText value="N/A"
+                                                                  rendered="#{empty contact.email}"
+                                                                  styleClass="text-muted" />
+                                                </p:column>
+
+                                                <p:column headerText="Principal" sortBy="#{contact.isPrimary}">
+                                                    <p:selectBooleanCheckbox value="#{contact.isPrimary}" disabled="true" />
+                                                </p:column>
+
+                                                <p:column ariaHeaderText="Acciones" rendered="#{supplierDetailsController.admin}">
+                                                    <p:commandButton icon="pi pi-pencil"
+                                                                     update=":dialogs:contact-panel-content"
+                                                                     oncomplete="PF('dlgContact').show()"
+                                                                     styleClass="edit-button rounded-button ui-button-success"
+                                                                     process="@this"
+                                                                     style="margin-right: .5rem"
+                                                                     title="Editar Contacto">
+                                                        <f:setPropertyActionListener value="#{contact}" target="#{supplierDetailsController.currentContact}" />
+                                                        <p:resetInput target=":dialogs:contact-panel-content" />
+                                                    </p:commandButton>
+
+                                                    <p:commandButton class="ui-button-warning rounded-button"
+                                                                     icon="pi pi-trash"
+                                                                     process="@this"
+                                                                     oncomplete="PF('dlgDeleteContact').show()"
+                                                                     title="Eliminar Contacto">
+                                                        <f:setPropertyActionListener value="#{contact}" target="#{supplierDetailsController.currentContact}" />
+                                                    </p:commandButton>
+                                                </p:column>
+
+                                            </p:dataTable>
+                                        </p:panel>
+
+                                    </h:panelGroup>
+
+                                    <h:panelGroup rendered="#{supplierDetailsController.supplier == null}">
+                                        <div class="card">
+                                            <div style="text-align: center; padding: 50px;">
+                                                <i class="pi pi-exclamation-triangle" style="font-size: 4rem; color: #f59e0b;"></i>
+                                                <h3 style="color: #6c757d; margin-top: 20px;">Proveedor no encontrado</h3>
+                                                <p style="color: #6c757d;">
+                                                    El proveedor solicitado no existe o no está disponible.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+
+                                </h:form>
+
+                                <!-- Contact Dialog -->
+                                <h:form id="dialogs" rendered="#{supplierDetailsController.admin}">
+                                    <p:dialog header="Información del Contacto"
+                                              showEffect="fade"
+                                              modal="true"
+                                              widgetVar="dlgContact"
+                                              responsive="true"
+                                              width="600">
+                                        <p:outputPanel id="contact-panel-content" class="ui-fluid">
+                                            <p:outputPanel rendered="#{supplierDetailsController.currentContact != null}">
+
+                                                <div class="grid">
+                                                    <div class="col-12">
+                                                        <div class="field">
+                                                            <p:outputLabel for="contactName">Nombre *</p:outputLabel>
+                                                            <p:inputText id="contactName"
+                                                                         value="#{supplierDetailsController.currentContact.contactName}"
+                                                                         required="true"
+                                                                         placeholder="Ingrese nombre del contacto"
+                                                                         maxlength="100">
+                                                                <f:validateLength maximum="100" />
+                                                            </p:inputText>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <div class="field">
+                                                            <p:outputLabel for="position">Cargo</p:outputLabel>
+                                                            <p:inputText id="position"
+                                                                         value="#{supplierDetailsController.currentContact.position}"
+                                                                         placeholder="Ingrese cargo (opcional)"
+                                                                         maxlength="100">
+                                                                <f:validateLength maximum="100" />
+                                                            </p:inputText>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="contactPhone">Teléfono</p:outputLabel>
+                                                            <p:inputText id="contactPhone"
+                                                                         value="#{supplierDetailsController.currentContact.phone}"
+                                                                         placeholder="Ingrese teléfono"
+                                                                         maxlength="20">
+                                                                <f:validateLength maximum="20" />
+                                                            </p:inputText>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12 md:col-6">
+                                                        <div class="field">
+                                                            <p:outputLabel for="contactEmail">Email</p:outputLabel>
+                                                            <p:inputText id="contactEmail"
+                                                                         value="#{supplierDetailsController.currentContact.email}"
+                                                                         placeholder="Ingrese correo electrónico"
+                                                                         validatorMessage="Por favor ingrese una dirección de correo válida"
+                                                                         maxlength="100">
+                                                                <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" />
+                                                            </p:inputText>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <div class="field">
+                                                            <div class="field-checkbox">
+                                                                <p:selectBooleanCheckbox id="isPrimary"
+                                                                                         value="#{supplierDetailsController.currentContact.isPrimary}" />
+                                                                <p:outputLabel for="isPrimary">Contacto Principal</p:outputLabel>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </p:outputPanel>
+                                        </p:outputPanel>
+
+                                        <f:facet name="footer">
+                                            <p:commandButton value="Guardar"
+                                                             icon="pi pi-check"
+                                                             actionListener="#{supplierDetailsController.saveContact()}"
+                                                             update="contact-panel-content :form:dt-contacts :form:messages"
+                                                             process="contact-panel-content @this"
+                                                             styleClass="ui-button-success"
+                                                             oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgContact').hide()" />
+                                            <p:commandButton value="Cancelar"
+                                                             icon="pi pi-times"
+                                                             onclick="PF('dlgContact').hide();"
+                                                             styleClass="ui-button-secondary"
+                                                             type="button" />
+                                        </f:facet>
+                                    </p:dialog>
+
+                                    <!-- Delete Contact Confirmation Dialog -->
+                                    <p:confirmDialog widgetVar="dlgDeleteContact"
+                                                     showEffect="fade"
+                                                     width="300"
+                                                     message="¿Eliminar este contacto?"
+                                                     header="Confirmar"
+                                                     severity="warn">
+                                        <p:commandButton value="Sí"
+                                                         icon="pi pi-check"
+                                                         actionListener="#{supplierDetailsController.deleteContact()}"
+                                                         update=":form:dt-contacts :form:messages"
+                                                         process="@this"
+                                                         oncomplete="PF('dlgDeleteContact').hide()" />
+                                        <p:commandButton value="No"
+                                                         type="button"
+                                                         styleClass="ui-button-secondary"
+                                                         icon="pi pi-times"
+                                                         onclick="PF('dlgDeleteContact').hide()" />
+                                    </p:confirmDialog>
+                                </h:form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

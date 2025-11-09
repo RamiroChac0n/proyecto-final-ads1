@@ -1,5 +1,6 @@
 package com.mycompany.service.impl;
 
+import com.mycompany.model.entity.Branch;
 import com.mycompany.model.entity.Product;
 import com.mycompany.repository.ProductRepository;
 import com.mycompany.service.IProductService;
@@ -60,5 +61,10 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public boolean productIdExists(Long productId) {
         return productRepository.findById(productId) != null;
+    }
+
+    @Override
+    public List<Product> findActiveProductsWithStockInBranch(Branch branch) {
+        return productRepository.findActiveProductsWithStockInBranch(branch);
     }
 }

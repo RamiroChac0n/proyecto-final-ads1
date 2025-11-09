@@ -34,8 +34,7 @@ public abstract class PharmacyRepository<T> implements Repository<T>{
     
     @Override
     public T update(T entity){
-        getEntityManager().merge(entity);
-        return entity;        
+        return getEntityManager().merge(entity);
     }
     
     @Override

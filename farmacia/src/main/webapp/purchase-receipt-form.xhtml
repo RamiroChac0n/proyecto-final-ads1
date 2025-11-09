@@ -1,0 +1,309 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check - ADMIN and STOREKEEPER only -->
+    <f:event type="preRenderView" listener="#{purchaseReceiptController.checkAccess}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Recepción de Productos</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+                        <h:form id="form">
+                            <p:growl id="messages" showDetail="true" />
+
+                            <!-- Breadcrumb -->
+                            <p:breadCrumb>
+                                <p:menuitem value="Inicio" url="home.xhtml" />
+                                <p:menuitem value="Recepciones" url="purchase-receipts.xhtml" />
+                                <p:menuitem value="#{purchaseReceiptController.currentReceipt.receiptNumber != null ? purchaseReceiptController.currentReceipt.receiptNumber : 'Nueva Recepción'}" />
+                            </p:breadCrumb>
+
+                            <!-- Order Information Panel -->
+                            <p:panel header="Información de la Orden de Compra" styleClass="mt-3">
+                                <div class="grid">
+                                    <div class="col-12 md:col-3">
+                                        <div class="field">
+                                            <label class="font-semibold">Número de Orden:</label>
+                                            <div>
+                                                <h:outputText value="#{purchaseReceiptController.selectedOrder.orderNumber}"
+                                                              styleClass="font-bold text-xl" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-3">
+                                        <div class="field">
+                                            <label class="font-semibold">Proveedor:</label>
+                                            <div>
+                                                <h:outputText value="#{purchaseReceiptController.selectedOrder.supplier.businessName}"
+                                                              styleClass="font-bold" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-3">
+                                        <div class="field">
+                                            <label class="font-semibold">Sucursal:</label>
+                                            <div>
+                                                <h:outputText value="#{purchaseReceiptController.selectedOrder.branch.branchName}"
+                                                              styleClass="font-bold" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-3">
+                                        <div class="field">
+                                            <label class="font-semibold">Fecha de Orden:</label>
+                                            <div>
+                                                <h:outputText value="#{purchaseReceiptController.selectedOrder.orderDate}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                </h:outputText>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p:panel>
+
+                            <!-- Products Table -->
+                            <p:panel header="Verificación de Productos Recibidos" styleClass="mt-3">
+                                <p:dataTable id="dt-details"
+                                             var="detail"
+                                             value="#{purchaseReceiptController.currentDetails}"
+                                             editable="true"
+                                             editMode="cell"
+                                             reflow="true"
+                                             styleClass="editable-cells-table">
+
+                                    <!-- Product Name -->
+                                    <p:column headerText="Producto" style="width: 250px;">
+                                        <h:outputText value="#{detail.product.commercialName}" />
+                                    </p:column>
+
+                                    <!-- Quantity Ordered -->
+                                    <p:column headerText="Cant. Ordenada" style="width: 100px;">
+                                        <h:outputText value="#{detail.purchaseOrderDetail.quantityOrdered}"
+                                                      styleClass="font-bold text-blue-600" />
+                                    </p:column>
+
+                                    <!-- Batch Number (Editable) -->
+                                    <p:column headerText="Núm. Lote *" style="width: 120px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.batchNumber}" />
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:inputText value="#{detail.batchNumber}"
+                                                             style="width:100%"
+                                                             required="true" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+
+                                    <!-- Quantity Received (Editable) -->
+                                    <p:column headerText="Cant. Recibida *" style="width: 110px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.quantityReceived}"
+                                                              styleClass="#{detail.quantityReceived > 0 ? 'font-bold text-green-600' : 'text-gray-400'}" />
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:inputNumber value="#{detail.quantityReceived}"
+                                                               decimalPlaces="0"
+                                                               minValue="0"
+                                                               style="width:100%" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+
+                                    <!-- Quantity Damaged (Editable) -->
+                                    <p:column headerText="Cant. Dañada" style="width: 110px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.quantityDamaged}"
+                                                              styleClass="#{detail.quantityDamaged > 0 ? 'font-bold text-red-600' : ''}" />
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:inputNumber value="#{detail.quantityDamaged}"
+                                                               decimalPlaces="0"
+                                                               minValue="0"
+                                                               style="width:100%" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+
+                                    <!-- Missing Quantity (Calculated) -->
+                                    <p:column headerText="Faltante" style="width: 90px;">
+                                        <h:outputText value="#{detail.quantityMissing}"
+                                                      styleClass="font-bold #{detail.quantityMissing != null and detail.quantityMissing > 0 ? 'text-red-600' : 'text-green-700'}" />
+                                    </p:column>
+
+                                    <!-- Manufacture Date (Editable) -->
+                                    <p:column headerText="Fecha Fab." style="width: 130px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.manufactureDate}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" type="localDate" />
+                                                </h:outputText>
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:datePicker value="#{detail.manufactureDate}"
+                                                              pattern="dd/MM/yyyy"
+                                                              showIcon="true"
+                                                              style="width:100%" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+
+                                    <!-- Expiration Date (Editable) -->
+                                    <p:column headerText="Fecha Venc. *" style="width: 130px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.expirationDate}"
+                                                              styleClass="#{detail.expirationDate != null ? '' : 'text-red-500'}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" type="localDate" />
+                                                </h:outputText>
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:datePicker value="#{detail.expirationDate}"
+                                                              pattern="dd/MM/yyyy"
+                                                              showIcon="true"
+                                                              required="true"
+                                                              style="width:100%" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+
+                                    <!-- Notes (Editable) -->
+                                    <p:column headerText="Notas" style="width: 200px;">
+                                        <p:cellEditor>
+                                            <f:facet name="output">
+                                                <h:outputText value="#{detail.notes}" />
+                                            </f:facet>
+                                            <f:facet name="input">
+                                                <p:inputTextarea value="#{detail.notes}"
+                                                                 rows="2"
+                                                                 style="width:100%" />
+                                            </f:facet>
+                                        </p:cellEditor>
+                                    </p:column>
+                                </p:dataTable>
+
+                                <div class="mt-2 p-2 bg-blue-50 border-round">
+                                    <p class="text-sm text-blue-900 m-0">
+                                        <i class="pi pi-info-circle mr-2"></i>
+                                        <strong>Instrucciones:</strong> Haga clic en cada celda para editarla. Complete la información de todos los productos recibidos.
+                                        Los campos marcados con * son obligatorios.
+                                    </p>
+                                </div>
+                            </p:panel>
+
+                            <!-- Summary Panel -->
+                            <p:panel id="summary" header="Resumen de la Recepción" styleClass="mt-3">
+                                <div class="grid">
+                                    <div class="col-12 md:col-4">
+                                        <div class="text-center p-3 border-round" style="background-color: #e3f2fd;">
+                                            <div class="text-900 font-medium mb-2">Total Recibido</div>
+                                            <div class="text-900 font-bold text-4xl">
+                                                #{purchaseReceiptController.totalQuantityReceived}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-4">
+                                        <div class="text-center p-3 border-round" style="background-color: #ffebee;">
+                                            <div class="text-900 font-medium mb-2">Total Dañado</div>
+                                            <div class="text-900 font-bold text-4xl text-red-500">
+                                                #{purchaseReceiptController.totalQuantityDamaged}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 md:col-4">
+                                        <div class="text-center p-3 border-round" style="background-color: #fff3e0;">
+                                            <div class="text-900 font-medium mb-2">Total Faltante</div>
+                                            <div class="text-900 font-bold text-4xl text-orange-600">
+                                                #{purchaseReceiptController.totalQuantityMissing}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p:panel>
+
+                            <!-- Actions Panel -->
+                            <p:panel header="Finalizar Recepción" styleClass="mt-3">
+                                <div class="grid">
+                                    <div class="col-12">
+                                        <div class="field-checkbox">
+                                            <p:selectBooleanCheckbox id="markFinal"
+                                                                     value="#{purchaseReceiptController.markAsFinal}"
+                                                                     itemLabel="Marcar como recepción final (no se esperan más productos de esta orden)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="field">
+                                            <label for="completionNotes">Notas de completación</label>
+                                            <p:inputTextarea id="completionNotes"
+                                                             value="#{purchaseReceiptController.completionNotes}"
+                                                             rows="3"
+                                                             placeholder="Observaciones generales sobre la recepción..."
+                                                             styleClass="w-full" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="flex gap-2 mt-2">
+                                            <p:commandButton value="Guardar Borrador"
+                                                             icon="pi pi-save"
+                                                             action="#{purchaseReceiptController.saveDraft}"
+                                                             update="form:messages form:summary"
+                                                             styleClass="ui-button-secondary" />
+
+                                            <p:commandButton value="Completar Recepción"
+                                                             icon="pi pi-check"
+                                                             action="#{purchaseReceiptController.completeReceipt}"
+                                                             update="form:messages"
+                                                             styleClass="ui-button-success">
+                                                <p:confirm header="Confirmar Completación"
+                                                           message="¿Está seguro de completar la recepción? Se crearán los lotes y movimientos de inventario. Esta acción no se puede deshacer."
+                                                           icon="pi pi-exclamation-triangle" />
+                                            </p:commandButton>
+
+                                            <p:commandButton value="Cancelar"
+                                                             icon="pi pi-times"
+                                                             action="#{purchaseReceiptController.returnToList}"
+                                                             immediate="true"
+                                                             styleClass="ui-button-danger">
+                                                <p:confirm header="Confirmar Cancelación"
+                                                           message="¿Está seguro de cancelar? Los cambios no guardados se perderán."
+                                                           icon="pi pi-exclamation-triangle" />
+                                            </p:commandButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p:panel>
+
+                            <!-- Confirmation Dialog -->
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+                            </p:confirmDialog>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+    </ui:composition>
+</html>

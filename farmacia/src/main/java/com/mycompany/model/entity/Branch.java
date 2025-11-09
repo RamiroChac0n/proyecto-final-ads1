@@ -40,7 +40,9 @@ public class Branch {
     @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
-    
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<InventoryMovement> inventoryMovements;
 }

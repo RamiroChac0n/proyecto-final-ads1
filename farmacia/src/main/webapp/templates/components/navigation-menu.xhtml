@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Navigation Menu Component - Reusable across all authenticated pages -->
+    <ui:composition>
+        <div class="card">
+            <h:form>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <!-- Logo -->
+                    <h:link outcome="home" style="margin-right: 20px;">
+                        <h:graphicImage library="images"
+                                        name="logo.PNG"
+                                        style="height: 40px; width: auto;"
+                                        alt="Logo"/>
+                    </h:link>
+
+                    <!-- Navigation Menu -->
+                    <div style="flex: 1;">
+                        <p:menubar>
+                            <!-- Home - Visible to all authenticated users -->
+                            <p:menuitem value="Inicio"
+                                       outcome="home"
+                                       icon="pi pi-fw pi-home" />
+
+                            <!-- User Management - ADMIN only -->
+                            <p:menuitem value="Gestión de Usuarios"
+                                       outcome="index"
+                                       icon="pi pi-fw pi-users"
+                                       rendered="#{userController.isAdmin()}" />
+
+                            <!-- Product Management - ADMIN only -->
+                            <p:submenu label="Inventario"
+                                       icon="pi pi-fw pi-warehouse"
+                                       rendered="#{userController.isAdmin()}">
+                                <p:menuitem value="Productos"
+                                           outcome="products"
+                                           icon="pi pi-fw pi-tags" />
+                                <p:menuitem value="Proveedores"
+                                           outcome="suppliers"
+                                           icon="pi pi-fw pi-truck" />
+                                <p:menuitem value="Compras"
+                                           outcome="purchase-orders"
+                                           icon="pi pi-fw pi-shopping-cart" />
+                                <p:menuitem value="Recepciones"
+                                           outcome="purchase-receipts"
+                                           icon="pi pi-fw pi-inbox"
+                                           rendered="#{userController.isAdminOrStorekeeper()}" />
+                                <p:menuitem value="Traslados"
+                                           outcome="transfers"
+                                           icon="pi pi-fw pi-arrow-right-arrow-left" />
+                            </p:submenu>
+
+                            <!-- Cash Register - ADMIN only -->
+                            <p:menuitem value="Caja Registradora"
+                                       outcome="cash-register"
+                                       icon="pi pi-fw pi-calculator"
+                                       rendered="#{userController.isAdmin()}" />
+
+                            <!-- Sales - ADMIN and CASHIER -->
+                            <p:menuitem value="Ventas"
+                                       outcome="sales"
+                                       icon="pi pi-fw pi-shopping-bag"
+                                       rendered="#{userController.isAdminOrCashier()}" />
+
+                            <!-- Inventory - ADMIN and STOREKEEPER (Future implementation) -->
+                            <!-- Uncomment when inventory views are implemented
+                            <p:menuitem value="Inventario"
+                                       outcome="inventory"
+                                       icon="pi pi-fw pi-box"
+                                       rendered="#{userController.isAdmin() or userController.getCurrentUser().role == 'STOREKEEPER'}" />
+                            -->
+
+                            <!-- Logout - Visible to all -->
+                            <p:menuitem value="Cerrar Sesión"
+                                       action="#{menuController.logout}"
+                                       icon="pi pi-fw pi-sign-out" />
+                        </p:menubar>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+    </ui:composition>
+</html>

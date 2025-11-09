@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check - ADMIN and STOREKEEPER only -->
+    <f:event type="preRenderView" listener="#{purchaseReceiptController.checkAccess}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Recepciones de Compra</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Toolbar -->
+                                    <!--
+                                    <p:toolbar>
+                                        <p:toolbarGroup>
+                                            <p:commandButton value="Ver Órdenes Disponibles"
+                                                             icon="pi pi-inbox"
+                                                             onclick="PF('ordersDialog').show()"
+                                                             styleClass="ui-button-primary"
+                                                             style="margin-right: .5rem"
+                                                             rendered="#{userController.adminOrStorekeeper}" />
+                                        </p:toolbarGroup>
+                                    </p:toolbar>
+                                    -->
+
+                                    <!-- DataTable -->
+                                    <p:dataTable id="dt-receipts"
+                                                 widgetVar="dtReceipts"
+                                                 var="receipt"
+                                                 value="#{purchaseReceiptController.purchaseReceipts}"
+                                                 reflow="true"
+                                                 styleClass="products-table"
+                                                 paginator="true"
+                                                 rows="10"
+                                                 paginatorPosition="bottom">
+
+                                        <f:facet name="header">
+                                            <div class="products-table-header">
+                                                <span style="font-weight: bold">Recepciones de Compra</span>
+                                                <span class="filter-container ui-input-icon-left">
+                                                    <i class="pi pi-search"></i>
+                                                    <p:inputText id="globalFilter"
+                                                                 onkeyup="PrimeFaces.debounce(() => PF('dtReceipts').filter())"
+                                                                 placeholder="Buscar" />
+                                                </span>
+                                            </div>
+                                        </f:facet>
+
+                                        <!-- Receipt Number -->
+                                        <p:column headerText="Número de Recepción"
+                                                  sortBy="#{receipt.receiptNumber}"
+                                                  filterBy="#{receipt.receiptNumber}">
+                                            <h:outputText value="#{receipt.receiptNumber}" />
+                                        </p:column>
+
+                                        <!-- Order Number -->
+                                        <p:column headerText="Orden"
+                                                  sortBy="#{receipt.purchaseOrder.orderNumber}"
+                                                  filterBy="#{receipt.purchaseOrder.orderNumber}">
+                                            <h:outputText value="#{receipt.purchaseOrder.orderNumber}" />
+                                        </p:column>
+
+                                        <!-- Supplier -->
+                                        <p:column headerText="Proveedor"
+                                                  sortBy="#{receipt.purchaseOrder.supplier.businessName}"
+                                                  filterBy="#{receipt.purchaseOrder.supplier.businessName}">
+                                            <h:outputText value="#{receipt.purchaseOrder.supplier.businessName}" />
+                                        </p:column>
+
+                                        <!-- Receipt Date -->
+                                        <p:column headerText="Fecha Recepción"
+                                                  sortBy="#{receipt.receiptDate}">
+                                            <h:outputText value="#{receipt.receiptDate}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <!-- Status -->
+                                        <p:column headerText="Estado"
+                                                  sortBy="#{receipt.status}"
+                                                  filterBy="#{receipt.status}">
+                                            <p:tag severity="#{receipt.status.severity}"
+                                                   value="#{receipt.status.displayName}" />
+                                        </p:column>
+
+                                        <!-- Received By -->
+                                        <p:column headerText="Recibido Por"
+                                                  sortBy="#{receipt.receivedBy}"
+                                                  filterBy="#{receipt.receivedBy}">
+                                            <h:outputText value="#{receipt.receivedBy}" />
+                                        </p:column>
+
+                                        <!-- Partial/Final -->
+                                        <p:column headerText="Tipo" style="width: 100px;">
+                                            <p:tag severity="#{receipt.isFinal ? 'success' : 'warning'}"
+                                                   value="#{receipt.isFinal ? 'Final' : 'Parcial'}"
+                                                   rendered="#{receipt.status.displayName == 'Completada'}" />
+                                        </p:column>
+
+                                        <!-- Actions -->
+                                        <p:column headerText="Acciones" style="width: 180px;">
+                                            <!--
+                                            <p:commandButton icon="pi pi-eye"
+                                                             styleClass="ui-button-info ui-button-rounded"
+                                                             action="#{purchaseReceiptController.editReceipt(receipt)}"
+                                                             title="Ver Detalles"
+                                                             style="margin-right: .25rem;" />
+                                            -->
+
+                                            <p:commandButton icon="pi pi-pencil"
+                                                             styleClass="ui-button-warning ui-button-rounded"
+                                                             action="#{purchaseReceiptController.editReceipt(receipt)}"
+                                                             title="Editar"
+                                                             rendered="#{purchaseReceiptController.canEdit(receipt)}"
+                                                             style="margin-right: .25rem;" />
+
+                                            <p:commandButton icon="pi pi-trash"
+                                                             styleClass="ui-button-danger ui-button-rounded"
+                                                             title="Eliminar"
+                                                             rendered="#{purchaseReceiptController.canDelete(receipt)}"
+                                                             onclick="PF('deleteConfirmDialog').show()">
+                                                <f:setPropertyActionListener value="#{receipt}"
+                                                                             target="#{purchaseReceiptController.selectedReceipt}" />
+                                            </p:commandButton>
+                                        </p:column>
+                                    </p:dataTable>
+
+                                    <!-- Dialog: Available Orders -->
+                                    <p:dialog header="Órdenes Disponibles para Recepción"
+                                              widgetVar="ordersDialog"
+                                              modal="true"
+                                              width="900"
+                                              height="600"
+                                              resizable="false">
+
+                                        <p:dataTable var="order"
+                                                     value="#{purchaseReceiptController.availableOrders}"
+                                                     paginator="true"
+                                                     rows="5">
+
+                                            <p:column headerText="Número de Orden">
+                                                <h:outputText value="#{order.orderNumber}" />
+                                            </p:column>
+
+                                            <p:column headerText="Proveedor">
+                                                <h:outputText value="#{order.supplier.businessName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Fecha">
+                                                <h:outputText value="#{order.orderDate}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                </h:outputText>
+                                            </p:column>
+
+                                            <p:column headerText="Estado">
+                                                <p:tag severity="#{order.status.severity}"
+                                                       value="#{order.status.displayName}" />
+                                            </p:column>
+
+                                            <p:column headerText="Acción">
+                                                <p:commandButton value="Iniciar Recepción"
+                                                                 icon="pi pi-plus"
+                                                                 styleClass="ui-button-success"
+                                                                 action="#{purchaseReceiptController.startNewReceipt(order)}" />
+                                            </p:column>
+                                        </p:dataTable>
+                                    </p:dialog>
+
+                                    <!-- Delete Confirmation Dialog -->
+                                    <p:confirmDialog widgetVar="deleteConfirmDialog"
+                                                     header="Confirmar Eliminación"
+                                                     message="¿Está seguro que desea eliminar esta recepción?">
+                                        <p:commandButton value="Sí"
+                                                         action="#{purchaseReceiptController.delete}"
+                                                         update="dt-receipts messages"
+                                                         styleClass="ui-button-danger"
+                                                         icon="pi pi-check"
+                                                         oncomplete="PF('deleteConfirmDialog').hide()" />
+                                        <p:commandButton value="No"
+                                                         type="button"
+                                                         styleClass="ui-button-secondary"
+                                                         icon="pi pi-times"
+                                                         onclick="PF('deleteConfirmDialog').hide()" />
+                                    </p:confirmDialog>
+
+                                </h:form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </ui:define>
+
+    </ui:composition>
+</html>

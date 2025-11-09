@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+    <!-- Security check - ADMIN only -->
+    <f:event type="preRenderView" listener="#{purchaseOrderController.checkAdminAccess}" />
+
+    <!-- Use main template -->
+    <ui:composition template="/templates/main-template.xhtml">
+
+        <!-- Page title -->
+        <ui:define name="title">Solicitudes de Compra</ui:define>
+
+        <!-- Page content -->
+        <ui:define name="content">
+            <div class="layout-wrapper">
+                <div class="layout-content">
+                    <div class="m-4">
+
+                        <div class="grid">
+                            <div class="col-12">
+                                <h:form id="form">
+                                    <p:growl id="messages" showDetail="true" />
+
+                                    <!-- Toolbar -->
+                                    <p:toolbar>
+                                        <p:toolbarGroup>
+                                            <p:commandButton value="Nueva Solicitud de Compra"
+                                                             icon="pi pi-plus"
+                                                             action="#{purchaseOrderController.createNewOrder()}"
+                                                             styleClass="ui-button-success"
+                                                             style="margin-right: .5rem" />
+                                        </p:toolbarGroup>
+                                    </p:toolbar>
+
+                                    <!-- DataTable -->
+                                    <p:dataTable id="dt-orders"
+                                                 widgetVar="dtOrders"
+                                                 var="order"
+                                                 value="#{purchaseOrderController.purchaseOrders}"
+                                                 reflow="true"
+                                                 styleClass="products-table"
+                                                 paginator="true"
+                                                 rows="10"
+                                                 paginatorPosition="bottom">
+
+                                        <f:facet name="header">
+                                            <div class="products-table-header">
+                                                <span style="font-weight: bold">Órdenes de Compra</span>
+                                                <span class="filter-container ui-input-icon-left">
+                                                    <i class="pi pi-search"></i>
+                                                    <p:inputText id="globalFilter"
+                                                                 onkeyup="PrimeFaces.debounce(() => PF('dtOrders').filter())"
+                                                                 placeholder="Buscar" />
+                                                </span>
+                                            </div>
+                                        </f:facet>
+
+                                        <!-- Order Number -->
+                                        <p:column headerText="Número de Orden"
+                                                  sortBy="#{order.orderNumber}"
+                                                  filterBy="#{order.orderNumber}">
+                                            <h:outputText value="#{order.orderNumber}" />
+                                        </p:column>
+
+                                        <!-- Order Date -->
+                                        <p:column headerText="Fecha"
+                                                  sortBy="#{order.orderDate}">
+                                            <h:outputText value="#{order.orderDate}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <!-- Supplier -->
+                                        <p:column headerText="Proveedor"
+                                                  sortBy="#{order.supplier.businessName}"
+                                                  filterBy="#{order.supplier.businessName}">
+                                            <h:outputText value="#{order.supplier.businessName}" />
+                                        </p:column>
+
+                                        <!-- Branch -->
+                                        <p:column headerText="Sucursal"
+                                                  sortBy="#{order.branch.branchName}"
+                                                  filterBy="#{order.branch.branchName}">
+                                            <h:outputText value="#{order.branch.branchName}" />
+                                        </p:column>
+
+                                        <!-- Status -->
+                                        <p:column headerText="Estado"
+                                                  sortBy="#{order.status}"
+                                                  filterBy="#{order.status}">
+                                            <p:tag severity="#{order.status.severity}"
+                                                   value="#{order.status.displayName}" />
+                                        </p:column>
+
+                                        <!-- Total Amount -->
+                                        <p:column headerText="Total"
+                                                  sortBy="#{order.totalAmount}"
+                                                  style="text-align: right">
+                                            <h:outputText value="#{order.totalAmount}">
+                                                <f:convertNumber type="currency"
+                                                                currencySymbol="Q "
+                                                                minFractionDigits="2"
+                                                                maxFractionDigits="2" />
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <!-- Actions -->
+                                        <p:column headerText="Acciones" style="width: 200px">
+                                            <!-- Edit (DRAFT only) -->
+                                            <p:commandButton icon="pi pi-pencil"
+                                                             styleClass="ui-button-success rounded-button"
+                                                             title="Editar"
+                                                             action="#{purchaseOrderController.editOrder(order)}"
+                                                             rendered="#{purchaseOrderController.canEdit(order)}"
+                                                             style="margin-right: .5rem" />
+
+                                            <!-- Send (DRAFT only) -->
+                                            <p:commandButton icon="pi pi-send"
+                                                             styleClass="ui-button-info rounded-button"
+                                                             title="Enviar al Proveedor"
+                                                             action="#{purchaseOrderController.sendOrder(order)}"
+                                                             update="dt-orders,:form:messages"
+                                                             rendered="#{purchaseOrderController.canSend(order)}"
+                                                             style="margin-right: .5rem">
+                                                <p:confirm header="Confirmar Envío"
+                                                           message="¿Está seguro que desea enviar esta orden al proveedor?"
+                                                           icon="pi pi-exclamation-triangle" />
+                                            </p:commandButton>
+
+                                            <!-- Confirm (SENT only) -->
+                                            <p:commandButton icon="pi pi-check"
+                                                             styleClass="ui-button-primary rounded-button"
+                                                             title="Confirmar Orden"
+                                                             actionListener="#{purchaseOrderController.prepareConfirm(order)}"
+                                                             update=":confirmForm:confirmOrderDialog"
+                                                             oncomplete="PF('confirmOrderDialogVar').show()"
+                                                             rendered="#{purchaseOrderController.canConfirm(order)}"
+                                                             style="margin-right: .5rem" />
+
+                                            <!-- Start Receipt (CONFIRMED/IN_TRANSIT/RECEIVING - for STOREKEEPER) -->
+                                            <p:button icon="pi pi-inbox"
+                                                      styleClass="ui-button-help rounded-button"
+                                                      title="Iniciar Recepción"
+                                                      outcome="/purchase-receipt-form.xhtml"
+                                                      rendered="#{(order.status.name() == 'CONFIRMED' or order.status.name() == 'IN_TRANSIT' or order.status.name() == 'RECEIVING') and userController.adminOrStorekeeper}"
+                                                      style="margin-right: .5rem">
+                                                <f:param name="orderId" value="#{order.orderId}" />
+                                            </p:button>
+
+                                            <!-- Cancel -->
+                                            <p:commandButton icon="pi pi-times"
+                                                             styleClass="ui-button-danger rounded-button"
+                                                             title="Cancelar Orden"
+                                                             actionListener="#{purchaseOrderController.prepareCancel(order)}"
+                                                             update=":cancelForm:cancelDialog"
+                                                             oncomplete="PF('cancelDialog').show()"
+                                                             rendered="#{purchaseOrderController.canCancel(order)}"
+                                                             style="margin-right: .5rem" />
+
+                                            <!-- Delete (DRAFT only) -->
+                                            <p:commandButton icon="pi pi-trash"
+                                                             styleClass="ui-button-warning rounded-button"
+                                                             title="Eliminar"
+                                                             process="@this"
+                                                             update="dt-orders,:form:messages"
+                                                             rendered="#{purchaseOrderController.canDelete(order)}"
+                                                             action="#{purchaseOrderController.delete()}">
+                                                <f:setPropertyActionListener value="#{order}"
+                                                                             target="#{purchaseOrderController.selectedOrder}" />
+                                                <p:confirm header="Confirmar Eliminación"
+                                                           message="¿Está seguro que desea eliminar esta orden?"
+                                                           icon="pi pi-exclamation-triangle" />
+                                            </p:commandButton>
+                                        </p:column>
+
+                                    </p:dataTable>
+
+                                    <!-- Confirmation Dialog -->
+                                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                        <p:commandButton value="Sí" type="button"
+                                                         styleClass="ui-confirmdialog-yes"
+                                                         icon="pi pi-check" />
+                                        <p:commandButton value="No" type="button"
+                                                         styleClass="ui-confirmdialog-no ui-button-secondary"
+                                                         icon="pi pi-times" />
+                                    </p:confirmDialog>
+
+                                </h:form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Order Dialog -->
+            <h:form id="confirmForm">
+                <p:dialog id="confirmOrderDialog"
+                          header="Confirmar Orden"
+                          widgetVar="confirmOrderDialogVar"
+                          modal="true"
+                          showEffect="fade"
+                          width="500">
+                    <div class="field">
+                        <p:outputLabel for="confirmNumber" value="Número de Confirmación del Proveedor (opcional)" />
+                        <p:inputText id="confirmNumber"
+                                     value="#{purchaseOrderController.supplierConfirmationNumber}"
+                                     maxlength="50"
+                                     styleClass="w-full" />
+                    </div>
+
+                    <f:facet name="footer">
+                        <p:commandButton value="Confirmar"
+                                         icon="pi pi-check"
+                                         styleClass="ui-button-success"
+                                         action="#{purchaseOrderController.confirmOrder()}"
+                                         update=":form:dt-orders,:form:messages"
+                                         process="@form"
+                                         oncomplete="PF('confirmOrderDialogVar').hide()" />
+                        <p:commandButton value="Cancelar"
+                                         icon="pi pi-times"
+                                         styleClass="ui-button-secondary"
+                                         onclick="PF('confirmOrderDialogVar').hide()"
+                                         type="button" />
+                    </f:facet>
+                </p:dialog>
+            </h:form>
+
+            <!-- Cancel Dialog -->
+            <h:form id="cancelForm">
+                <p:dialog id="cancelDialog"
+                          header="Cancelar Orden"
+                          widgetVar="cancelDialog"
+                          modal="true"
+                          showEffect="fade"
+                          width="500">
+                    <div class="field">
+                        <p:outputLabel for="cancelReason" value="Motivo de Cancelación *" />
+                        <p:inputTextarea id="cancelReason"
+                                         value="#{purchaseOrderController.cancellationReason}"
+                                         rows="4"
+                                         required="true"
+                                         requiredMessage="Debe proporcionar un motivo de cancelación"
+                                         styleClass="w-full" />
+                        <p:message for="cancelReason" />
+                    </div>
+
+                    <f:facet name="footer">
+                        <p:commandButton value="Cancelar Orden"
+                                         icon="pi pi-times"
+                                         styleClass="ui-button-danger"
+                                         action="#{purchaseOrderController.cancelOrder()}"
+                                         update=":form:dt-orders,:form:messages"
+                                         process="@form"
+                                         oncomplete="PF('cancelDialog').hide()" />
+                        <p:commandButton value="Cerrar"
+                                         icon="pi pi-times"
+                                         styleClass="ui-button-secondary"
+                                         onclick="PF('cancelDialog').hide()"
+                                         type="button" />
+                    </f:facet>
+                </p:dialog>
+            </h:form>
+
+        </ui:define>
+    </ui:composition>
+</html>

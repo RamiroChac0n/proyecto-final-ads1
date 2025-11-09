@@ -1,0 +1,357 @@
+/*
+ * Sales Module Styles
+ * Integrates with palette.css for consistent color scheme
+ * Uses PrimeFlex utilities as base
+ */
+
+/* ========================================
+   PANEL HEADERS
+   ======================================== */
+
+.sales-panel-header {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sales-panel-header i {
+    color: var(--color-primary, #18455C);
+}
+
+.sales-section-title {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* ========================================
+   SHOPPING CART BADGE
+   ======================================== */
+
+.cart-badge {
+    background: var(--ash-gray, #9FC1C0) !important;
+    color: var(--indigo-dye, #18455C) !important;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+/* ========================================
+   PANELS AND CARDS
+   ======================================== */
+
+.sales-card {
+    background: var(--color-bg-primary, #FFFFFF);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border-light, #e9ecef);
+    transition: var(--transition-normal, 300ms ease-in-out);
+}
+
+.sales-card:hover {
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.totals-panel {
+    background: linear-gradient(135deg, var(--color-bg-accent, #e8f4f4) 0%, var(--white, #FFFFFF) 100%);
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-primary, 0 4px 6px -1px rgba(24, 69, 92, 0.2));
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--ash-gray, #9FC1C0);
+}
+
+/* ========================================
+   TOTALS DISPLAY
+   ======================================== */
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.total-row:last-child {
+    border-bottom: none;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid var(--indigo-dye, #18455C);
+}
+
+.total-label {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.total-value {
+    color: var(--color-text-primary, #212529);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.total-row:last-child .total-label {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.total-row:last-child .total-value {
+    color: var(--color-success, #28a745);
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.sales-btn-add {
+    background: var(--indigo-dye, #18455C) !important;
+    border-color: var(--indigo-dye, #18455C) !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 600;
+    transition: var(--transition-fast, 150ms ease-in-out);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+.sales-btn-add:hover {
+    background: var(--color-primary-light, #2a5f7f) !important;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    transform: translateY(-1px);
+}
+
+.sales-btn-process {
+    background: linear-gradient(135deg, var(--color-success, #28a745) 0%, var(--color-success-dark, #1e7e34) 100%) !important;
+    border: none !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 0.875rem 2rem !important;
+    border-radius: var(--border-radius-lg, 0.5rem);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    transition: var(--transition-normal, 300ms ease-in-out);
+    width: 100%;
+}
+
+.sales-btn-process:hover {
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+}
+
+.sales-btn-danger {
+    background: var(--color-danger, #dc3545) !important;
+    border-color: var(--color-danger, #dc3545) !important;
+    transition: var(--transition-fast, 150ms ease-in-out);
+}
+
+.sales-btn-danger:hover {
+    background: var(--color-danger-dark, #bd2130) !important;
+    transform: scale(1.05);
+}
+
+/* ========================================
+   DATA TABLE CUSTOMIZATION
+   ======================================== */
+
+.sales-table .ui-datatable thead th {
+    background: var(--indigo-dye, #18455C) !important;
+    color: var(--white, #FFFFFF) !important;
+    font-weight: 600;
+    border-color: var(--color-primary-dark, #0f2e3d) !important;
+}
+
+.sales-table .ui-datatable tbody td {
+    vertical-align: middle;
+    border-color: var(--color-border-light, #e9ecef) !important;
+}
+
+.sales-table .ui-datatable tbody tr:hover {
+    background-color: var(--color-bg-accent, #e8f4f4) !important;
+    transition: var(--transition-fast, 150ms ease-in-out);
+}
+
+/* ========================================
+   FORM INPUTS
+   ======================================== */
+
+.sales-input .ui-inputfield {
+    border-color: var(--color-border, #dee2e6);
+    border-radius: var(--border-radius-md, 0.375rem);
+    transition: var(--transition-fast, 150ms ease-in-out);
+}
+
+.sales-input .ui-inputfield:focus {
+    border-color: var(--indigo-dye, #18455C);
+    box-shadow: 0 0 0 0.2rem rgba(24, 69, 92, 0.25);
+}
+
+.sales-select .ui-selectonemenu {
+    border-radius: var(--border-radius-md, 0.375rem);
+}
+
+.sales-select .ui-selectonemenu-trigger {
+    background: var(--ash-gray, #9FC1C0);
+    color: var(--indigo-dye, #18455C);
+}
+
+/* ========================================
+   STATUS BADGES
+   ======================================== */
+
+.status-badge-completed {
+    background: var(--color-success-light, #d4edda) !important;
+    color: var(--color-success-dark, #1e7e34) !important;
+    border: 1px solid var(--color-success, #28a745);
+}
+
+.status-badge-pending {
+    background: var(--color-warning-light, #fff3cd) !important;
+    color: var(--color-warning-dark, #d39e00) !important;
+    border: 1px solid var(--color-warning, #ffc107);
+}
+
+.status-badge-cancelled {
+    background: var(--color-danger-light, #f8d7da) !important;
+    color: var(--color-danger-dark, #bd2130) !important;
+    border: 1px solid var(--color-danger, #dc3545);
+}
+
+/* ========================================
+   CUSTOMER INFO SECTION
+   ======================================== */
+
+.customer-info-field {
+    margin-bottom: 1rem;
+}
+
+.customer-info-field label {
+    color: var(--paynes-gray, #546A76);
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.375rem;
+    display: block;
+}
+
+/* ========================================
+   PAYMENT SECTION
+   ======================================== */
+
+.payment-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.payment-field {
+    margin-bottom: 0.875rem;
+}
+
+.payment-field label {
+    color: var(--indigo-dye, #18455C);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.change-display {
+    background: var(--color-bg-accent, #e8f4f4);
+    padding: 1rem;
+    border-radius: var(--border-radius-md, 0.375rem);
+    border-left: 4px solid var(--color-success, #28a745);
+    margin-top: 1rem;
+}
+
+.change-amount {
+    color: var(--color-success-dark, #1e7e34);
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* ========================================
+   HISTORY TABLE
+   ======================================== */
+
+.history-filters {
+    background: var(--color-bg-secondary, #f8f9fa);
+    padding: 1.25rem;
+    border-radius: var(--border-radius-lg, 0.5rem);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border-light, #e9ecef);
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+    .sales-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .totals-panel {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .sales-panel-header {
+        font-size: 1.125rem;
+    }
+
+    .total-row:last-child .total-value {
+        font-size: 1.25rem;
+    }
+
+    .sales-btn-process {
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem !important;
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.w-6rem {
+    width: 6rem !important;
+}
+
+.w-8rem {
+    width: 8rem !important;
+}
+
+.w-10rem {
+    width: 10rem !important;
+}
+
+.w-12rem {
+    width: 12rem !important;
+}
+
+/* Empty cart state */
+.empty-cart-message {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--paynes-gray, #546A76);
+    font-size: 1.125rem;
+}
+
+.empty-cart-message i {
+    font-size: 4rem;
+    color: var(--ash-gray, #9FC1C0);
+    margin-bottom: 1rem;
+    display: block;
+}
