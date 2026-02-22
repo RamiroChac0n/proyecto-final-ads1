@@ -50,7 +50,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                sh '/usr/share/maven/bin/mvn test'
             }
             post {
                 always {
