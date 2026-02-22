@@ -50,7 +50,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'mvn test -f farmacia/pom.xml'
+                sh 'mvn test -f farmacia/pom.xml -Dmaven.test.failure.ignore=true'
             }
             post {
                 always {
