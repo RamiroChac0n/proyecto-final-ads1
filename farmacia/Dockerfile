@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 
-FROM quay.io/wildfly/wildfly:latest
+FROM quay.io/wildfly/wildfly:34.0.0.Final-jdk21
 
 ARG POSTGRES_JDBC_VERSION=42.7.4
 RUN curl -L -o /tmp/postgresql.jar \
