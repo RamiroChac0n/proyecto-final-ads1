@@ -37,7 +37,7 @@ pipeline {
                     if (!params.APP_PORT?.trim())         { error('APP_PORT es obligatorio') }
                     if (!params.DB_NAME?.trim())           { error('DB_NAME es obligatorio') }
                     if (!params.DB_USER?.trim())           { error('DB_USER es obligatorio') }
-                    if (!params.DB_PASS?.trim())           { error('DB_PASS es obligatorio') }
+                    if (!params.DB_PASS?.toString()?.trim()) { error('DB_PASS es obligatorio') }
                 }
             }
         }
