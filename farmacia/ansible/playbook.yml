@@ -139,7 +139,6 @@
             < {{ app_dir }}/data.sql
       when: >-
         compose_result.actions is defined and
-        compose_result.actions | dict2items |
-        selectattr('value.action', 'defined') |
-        selectattr('value.action', 'equalto', 'Creating') |
+        compose_result.actions |
+        selectattr('action', 'equalto', 'Creating') |
         list | length > 0
