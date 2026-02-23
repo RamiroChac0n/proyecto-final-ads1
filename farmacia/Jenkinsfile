@@ -63,7 +63,8 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'VPS_HOST', variable: 'VPS_HOST'),
-                    string(credentialsId: 'VPS_USER', variable: 'VPS_USER')
+                    string(credentialsId: 'VPS_USER', variable: 'VPS_USER'),
+                    file(credentialsId: 'data-sql', variable: 'DATA_SQL_PATH')
                 ]) {
                     sshagent(credentials: ['vps-ssh-key']) {
                         withEnv(["DB_PASS=${params.DB_PASS}"]) {
@@ -77,7 +78,8 @@ pipeline {
                                     -e "app_port=${params.APP_PORT}" \\
                                     -e "db_name=${params.DB_NAME}" \\
                                     -e "db_user=${params.DB_USER}" \\
-                                    -e "db_pass=\$DB_PASS"
+                                    -e "db_pass=\$DB_PASS" \
+                                    -e "data_sql_path=\$DATA_SQL_PATH"
                             """
                         }
                     }

@@ -129,7 +129,7 @@
       block:
         - name: Copiar data.sql al servidor
           copy:
-            src: "{{ playbook_dir }}/../data.sql"
+            src: "{{ data_sql_path }}"
             dest: "{{ app_dir }}/data.sql"
 
         - name: Ejecutar seed contra la base de datos
@@ -139,7 +139,7 @@
             < {{ app_dir }}/data.sql
       when: >-
         compose_result.actions is defined and
-        (compose_result.actions
-         | selectattr('service', 'equalto', 'db')
-         | selectattr('action', 'in', ['Creating', 'Starting'])
-         | list | length > 0)
+        compose_result.actions | dict2items |
+        selectattr('value.action', 'defined') |
+        selectattr('value.action', 'equalto', 'Creating') |
+        list | length > 0
