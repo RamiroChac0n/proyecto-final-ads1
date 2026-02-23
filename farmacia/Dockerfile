@@ -24,9 +24,11 @@ EXPOSE 8080
 RUN cat > /opt/jboss/wildfly/bin/docker-entrypoint.sh <<'SCRIPT'
 #!/bin/bash
 _CLI=$(mktemp)
-cat > "${_CLI}" <<EOF
+cat > "${_CLI}" <<'EOF'
 embed-server --server-config=standalone.xml
 /subsystem=datasources/data-source=PostgresDS:write-attribute(name=connection-url,value="jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}")
+/subsystem=datasources/data-source=PostgresDS:write-attribute(name=user-name,value="${DB_USER}")
+/subsystem=datasources/data-source=PostgresDS:write-attribute(name=password,value="${DB_PASS}")
 stop-embedded-server
 EOF
 /opt/jboss/wildfly/bin/jboss-cli.sh --file="${_CLI}"
