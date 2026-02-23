@@ -72,7 +72,7 @@ pipeline {
                                 echo "\$VPS_HOST ansible_user=\$VPS_USER ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
                                 ansible-playbook \\
                                     -i inventory.ini \\
-                                    ansible/playbook.yml \\
+                                    farmacia/ansible/playbook.yml \\
                                     -e "farmacia_nombre=${params.FARMACIA_NOMBRE}" \\
                                     -e "app_port=${params.APP_PORT}" \\
                                     -e "db_name=${params.DB_NAME}" \\
