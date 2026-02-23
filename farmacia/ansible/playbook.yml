@@ -119,6 +119,7 @@
       uri:
         url: "http://localhost:{{ app_port }}/salud+"
         status_code: [200, 302]
+        follow_redirects: none
       retries: 12
       delay: 15
       register: health
