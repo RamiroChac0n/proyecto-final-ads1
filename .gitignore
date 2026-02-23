@@ -56,3 +56,6 @@ Thumbs.db
 *.sql
 *.mp4
 *.xlsx
+
+inventory.ini
+ansible/hosts.ini

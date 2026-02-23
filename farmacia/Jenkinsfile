@@ -21,6 +21,14 @@ pipeline {
             name: 'DB_PASS',
             description: 'Contraseña de PostgreSQL (enmascarada en logs).'
         )
+        string(
+            name: 'VPS_HOST',
+            description: 'IP o dominio del VPS. Ej: 192.168.1.1'
+        )
+        string(
+            name: 'VPS_USER',
+            description: 'Usuario SSH del VPS. Ej: user'
+        )        
     }
 
     tools {
@@ -38,6 +46,8 @@ pipeline {
                     if (!params.DB_NAME?.trim())           { error('DB_NAME es obligatorio') }
                     if (!params.DB_USER?.trim())           { error('DB_USER es obligatorio') }
                     if (!params.DB_PASS?.toString()?.trim()) { error('DB_PASS es obligatorio') }
+                    if (!params.VPS_HOST?.trim()) { error('VPS_HOST es obligatorio') }
+                    if (!params.VPS_USER?.trim()) { error('VPS_USER es obligatorio') }                    
                 }
             }
         }
@@ -62,16 +72,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 sshagent(credentials: ['vps-ssh-key']) {
-                    sh """
-                        ansible-playbook \\
-                            -i ansible/hosts.ini \\
-                            ansible/playbook.yml \\
-                            -e "farmacia_nombre=${params.FARMACIA_NOMBRE}" \\
-                            -e "app_port=${params.APP_PORT}" \\
-                            -e "db_name=${params.DB_NAME}" \\
-                            -e "db_user=${params.DB_USER}" \\
-                            -e "db_pass=${params.DB_PASS}"
-                    """
+                    withEnv(["DB_PASS=${params.DB_PASS}"]) {
+                        sh """
+                            echo "[farmacia]" > inventory.ini
+                            echo "${params.VPS_HOST} ansible_user=${params.VPS_USER} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+                            ansible-playbook \\
+                                -i inventory.ini \\
+                                ansible/playbook.yml \\
+                                -e "farmacia_nombre=${params.FARMACIA_NOMBRE}" \\
+                                -e "app_port=${params.APP_PORT}" \\
+                                -e "db_name=${params.DB_NAME}" \\
+                                -e "db_user=${params.DB_USER}" \\
+                                -e "db_pass=\$DB_PASS"
+                        """
+                    }
                 }
             }
         }

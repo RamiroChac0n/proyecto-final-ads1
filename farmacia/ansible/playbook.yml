@@ -1,0 +1,144 @@
+- name: Despliegue de salud+
+  hosts: farmacia
+
+  vars:
+    app_dir: /home/{{ ansible_user }}/{{ farmacia_nombre }}
+    app_port: 8080
+    farmacia_nombre: ""
+
+    db_name: farmacia
+    db_user: user
+    db_pass: "pass"
+
+  tasks:
+    - name: Crear directorio de la aplicación
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copiar Dockerfile
+      copy:
+        src: "{{ playbook_dir }}/../Dockerfile"
+        dest: "{{ app_dir }}/Dockerfile"
+
+    - name: Copiar configure-datasource.cli
+      copy:
+        src: "{{ playbook_dir }}/../configure-datasource.cli"
+        dest: "{{ app_dir }}/configure-datasource.cli"
+
+    - name: Copiar pom.xml
+      copy:
+        src: "{{ playbook_dir }}/../pom.xml"
+        dest: "{{ app_dir }}/pom.xml"
+
+    - name: Sincronizar código fuente (src/)
+      synchronize:
+        src: "{{ playbook_dir }}/../src/"
+        dest: "{{ app_dir }}/src/"
+        delete: true
+        recursive: true
+
+    - name: Generar docker-compose.yml
+      copy:
+        dest: "{{ app_dir }}/docker-compose.yml"
+        content: |
+          version: "3.9"
+
+          services:
+            nginx:
+              image: nginx:stable-alpine
+              ports:
+                - "{{ app_port }}:80"
+              volumes:
+                - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+              depends_on:
+                - app
+              networks:
+                - app_net
+
+            app:
+              build: .
+              networks:
+                - app_net
+              depends_on:
+                db:
+                  condition: service_healthy
+              environment:
+                - DB_HOST=db
+                - DB_NAME={{ db_name }}
+                - DB_USER={{ db_user }}
+                - DB_PASS={{ db_pass }}
+
+            db:
+              image: postgres:15
+              environment:
+                POSTGRES_DB: {{ db_name }}
+                POSTGRES_USER: {{ db_user }}
+                POSTGRES_PASSWORD: {{ db_pass }}
+              volumes:
+                - pgdata-{{ farmacia_nombre }}:/var/lib/postgresql/data
+              networks:
+                - app_net
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U {{ db_user }} -d {{ db_name }}"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+
+          networks:
+            app_net:
+
+          volumes:
+            pgdata-{{ farmacia_nombre }}:
+
+    - name: Generar nginx.conf
+      copy:
+        dest: "{{ app_dir }}/nginx.conf"
+        content: |
+          server {
+              listen 80;
+
+              location / {
+                  proxy_pass         http://app:8080;
+                  proxy_set_header   Host              $host;
+                  proxy_set_header   X-Real-IP         $remote_addr;
+                  proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+                  proxy_set_header   X-Forwarded-Proto $scheme;
+              }
+          }
+
+    - name: Levantar servicios con docker compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        state: present
+        build: always
+      register: compose_result
+
+    - name: Esperar que la app responda
+      uri:
+        url: "http://localhost:{{ app_port }}/salud+"
+        status_code: [200, 302]
+      retries: 12
+      delay: 15
+      register: health
+      until: health.status in [200, 302]
+
+    - name: Aplicar seed de datos iniciales
+      block:
+        - name: Copiar data.sql al servidor
+          copy:
+            src: "{{ playbook_dir }}/../data.sql"
+            dest: "{{ app_dir }}/data.sql"
+
+        - name: Ejecutar seed contra la base de datos
+          shell: >
+            docker exec -i {{ farmacia_nombre }}-db-1
+            psql -U {{ db_user }} -d {{ db_name }}
+            < {{ app_dir }}/data.sql
+      when: >-
+        compose_result.actions is defined and
+        (compose_result.actions
+         | selectattr('service', 'equalto', 'db')
+         | selectattr('action', 'in', ['Creating', 'Starting'])
+         | list | length > 0)
