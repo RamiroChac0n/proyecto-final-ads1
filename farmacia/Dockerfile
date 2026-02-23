@@ -21,4 +21,18 @@ COPY --from=builder /app/target/*.war /opt/jboss/wildfly/standalone/deployments/
 
 EXPOSE 8080
 
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+RUN cat > /opt/jboss/wildfly/bin/docker-entrypoint.sh <<'SCRIPT'
+#!/bin/bash
+_CLI=$(mktemp)
+cat > "${_CLI}" <<EOF
+embed-server --server-config=standalone.xml
+/subsystem=datasources/data-source=PostgresDS:write-attribute(name=connection-url,value="jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}")
+stop-embedded-server
+EOF
+/opt/jboss/wildfly/bin/jboss-cli.sh --file="${_CLI}"
+rm -f "${_CLI}"
+exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0
+SCRIPT
+RUN chmod +x /opt/jboss/wildfly/bin/docker-entrypoint.sh
+
+CMD ["/opt/jboss/wildfly/bin/docker-entrypoint.sh"]
