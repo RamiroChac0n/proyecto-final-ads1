@@ -125,6 +125,10 @@
       register: health
       until: health.status in [200, 302]
 
+    - name: Debug compose_result
+      debug:
+        var: compose_result.actions
+
     - name: Aplicar seed de datos iniciales
       block:
         - name: Copiar data.sql al servidor
@@ -137,8 +141,4 @@
             docker exec -i {{ farmacia_nombre }}-db-1
             psql -U {{ db_user }} -d {{ db_name }}
             < {{ app_dir }}/data.sql
-      when: >-
-        compose_result.actions is defined and
-        compose_result.actions |
-        selectattr('action', 'equalto', 'Creating') |
-        list | length > 0
+      when: true
