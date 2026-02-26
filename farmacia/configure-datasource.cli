@@ -2,4 +2,6 @@ embed-server --server-config=standalone.xml
 module add --name=org.postgresql --resources=/tmp/postgresql.jar --dependencies=javax.api,sun.jdk
 /subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-class-name=org.postgresql.Driver)
 /subsystem=datasources/data-source=PostgresDS:add(jndi-name=java:/PostgresDS,driver-name=postgresql,connection-url="jdbc:postgresql://${env.DB_HOST:db}:5432/${env.DB_NAME:farmacia}",user-name="${env.DB_USER:user}",password="${env.DB_PASS:pass}",enabled=true,use-java-context=true,valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker,exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter)
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=proxy-address-forwarding,value=true)
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=allowed-origins,value="*")
 stop-embedded-server
