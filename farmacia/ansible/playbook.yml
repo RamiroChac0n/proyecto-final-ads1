@@ -104,6 +104,8 @@
                   proxy_pass         http://app:8080;
                   proxy_redirect     http://localhost:80/ http://localhost:{{ app_port }}/;
                   proxy_redirect     http://localhost/ http://localhost:{{ app_port }}/;
+                  proxy_redirect     http://127.0.0.1:80/ http://127.0.0.1:{{ app_port }}/;
+                  proxy_redirect     http://127.0.0.1/ http://127.0.0.1:{{ app_port }}/;
                   proxy_set_header   Host              $host:$server_port;
                   proxy_set_header   X-Real-IP         $remote_addr;
                   proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
